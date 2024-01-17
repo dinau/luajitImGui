@@ -1,0 +1,3 @@
+[submodule "anima"]
+	path = anima
+	url = https://github.com/sonoro1234/anima.git
