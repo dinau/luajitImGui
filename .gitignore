@@ -1,4 +1,5 @@
 build/
+examples/font_jp/
 # Prerequisites
 *.d
 
@@ -15,7 +16,7 @@ build/
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
+#*.dll
 
 # Fortran module files
 *.mod
