@@ -3,21 +3,26 @@ local utils = require"utils"
 --- GLFW/etc
 local glfw = require"glfw"
 local gllib = require"gl"
-gllib.set_loader(glfw)
 local gl, glc = gllib.libraries()
 local ig = require"imgui.glfw"
 require"loadimage"
+local stb = require"stb_image"
 
 --- Global valuable: app
 require"apps"
 
--- Inifile
+--- Image folder
+local ImgDir = "../img/"
+
+-- Load inifile
 loadIni()
 
+-- Call back
 glfw.setErrorCallback(function(error,description)
-    print("GLFW error:",error,ffi.string(description or ""));
+  print("GLFW error:",error,ffi.string(description or ""));
 end)
 
+-- Initialize
 glfw.init()
 
 -------------------
@@ -45,20 +50,37 @@ ig_impl:Init(window, true)
 ig.lib.ImGui_ImplOpenGL3_DestroyFontsTexture()
 ig.lib.ImGui_ImplOpenGL3_CreateFontsTexture()
 
-------------------------------
---- Get texture of font image
-------------------------------
-local atlas = pio.Fonts
-local font_tex_id = atlas.TexID
-local font_tex_w  = atlas.TexWidth
-local font_tex_h  = atlas.TexHeight
-font_tex_size = ffi.new("ImVec2",{font_tex_w, font_tex_h})
---print(font_tex_id,font_tex_w,font_tex_h)
+-------------------------
+--- Load title bar icon
+-------------------------
+local  IconName = ImgDir .. "icon_jp.png"
+if utils.fileExists(IconName) then
+  local w = ffi.new("int[1]")
+  local h = ffi.new("int[1]")
+  local channels = ffi.new("int[1]",0)
+  local stbi_RGBA = 4
+  local pixels = stb.stbi_load(IconName, w, h, channels, stbi_RGBA)
+  local img = ffi.new("GLFWimage")
+  img.width  = w[0]
+  img.height = h[0]
+  img.pixels = ffi.new("unsigned char[?]", w[0] * h[0] * 4)
+  for x=0, w[0]-1 do
+    for y=0 ,h[0]-1 do
+      for p=0 ,3 do
+        img.pixels[(x + y*w[0])*4 + p] = pixels[(x + y*w[0])*4 + p]
+      end
+    end
+  end
+  stb.stbi_image_free(pixels)
+  glfw.glfw.glfwSetWindowIcon(window, 1, img)
+else
+  glfw.glfw.glfwSetWindowIcon(window, 0, nil)
+end
 
 ---------------
 --- Load image
 ---------------
-local ImageName = "../img/" .. "space-400.jpg"
+local ImageName = ImgDir .. "fuji-400.jpg"
 pic1 = {texture = ffi.new("GLuint[1]"), width = 0,height = 0 , comp = 0}
 if nil == LoadTextureFromFile(ImageName, pic1) then
   print("Error!: Can't load image file: ",ImageName)
@@ -91,19 +113,21 @@ else
   pio.FontDefault = theFONT
 end
 
-local sBuf = ffi.new("char[?]",100)
-local somefloat = ffi.new("float[1]",0.0)
-local clearColor = ffi.new("float[3]",{0.25,0.65,0.85})
-local counter = 0
 --------------
 --- main loop
 --------------
+--- Global vars
+local sBuf       = ffi.new("char[?]",100)
+local somefloat  = ffi.new("float[1]",0.0)
+local clearColor = ffi.new("float[3]",{0.25,0.65,0.85})
+local counter = 0
+
 while not window:shouldClose() do
   glfw.pollEvents()
   gllib.gl.glClearColor(clearColor[0],clearColor[1],clearColor[2],1.0)
   gl.glClear(glc.GL_COLOR_BUFFER_BIT)
   ig_impl:NewFrame()
-  -------
+  -- Show ImGui demo
   if fShowDemo[0] then ig.ShowDemoWindow(fShowDemo) end
   -------
   local sAry = fontName:split("/")
@@ -120,7 +144,7 @@ while not window:shouldClose() do
     ig.Checkbox("デモ・ウインドウ表示", fShowDemo)
     ig.SliderFloat("浮動小数", somefloat, 0.0, 1.0, "%3f", 0)
     ig.ColorEdit3("背景色変更", clearColor)
-    ------ File open
+    -- File open dialog
     if ig.Button("ファイルを開く") then
     end
     ig.SameLine(0.0,-1.0)
@@ -133,7 +157,7 @@ while not window:shouldClose() do
       ig.EndTooltip()
     end
     ig.Text("選択ファイル名 = %s", "test.jpg")
-    --------
+    --
     ig.Text("描画フレームレート  %.3f ms/frame (%.1f FPS)"
       , 1000.0 / pio.Framerate, pio.Framerate)
     ig.Text("経過時間 = %.1f [s]", counter / pio.Framerate)
@@ -144,7 +168,6 @@ while not window:shouldClose() do
   end
   if ig.Begin("イメージ・ウインドウ") then
     ig.Image(ffi.cast("ImTextureID",pic1.texture[0]),pic1.size)
-    --ig.ImageButton("Image Buton",font_tex_id,font_tex_size)
     ig.End()
   end
   ig_impl:Render()
