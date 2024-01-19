@@ -14,8 +14,9 @@
 
 ---
 
-1. Luajit + ImGui:  Windows binary project using [anima](https://github.com/sonoro1234/anima) project
-1. Simple examples like [imguin](https://github.com/dinau/imguin) project.
+1. [Luajit](https://luajit.org/) + [ImGui](https://github.com/ocornut/imgui)  
+Windows OS binary project using [anima](https://github.com/sonoro1234/anima) project
+1. Added simple examples like [imguin](https://github.com/dinau/imguin) project.
 
 
 #### Versions
@@ -30,8 +31,9 @@
 ---
 
 - [glfw_opengl3](examples/glfw_opengl3/glfw_opengl3.lua)
+- [glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)  
+![glfw_opengl3_jp](examples/img/glfw_opengl3_jp.png)
 
-- [glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)
 
 #### Run examples
 
