@@ -117,7 +117,7 @@ local counter = 0
 
 while not window:shouldClose() do
   glfw.pollEvents()
-  gllib.gl.glClearColor(clearColor[0],clearColor[1],clearColor[2],1.0)
+  gl.glClearColor(clearColor[0],clearColor[1],clearColor[2],1.0)
   gl.glClear(glc.GL_COLOR_BUFFER_BIT)
   ig_impl:NewFrame()
   -- Show ImGui demo
