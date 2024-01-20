@@ -6,6 +6,9 @@
   - [Project](#project)
   - [Versions](#versions)
   - [Examples](#examples)
+    - [glfw_opengl3](#glfw_opengl3)
+    - [glfw_opengl3_jp](#glfw_opengl3_jp)
+    - [sdl2_opengl3](#sdl2_opengl3)
   - [Run examples](#run-examples)
   - [Regenerate binaries and libraries](#regenerate-binaries-and-libraries)
   - [Tools version](#tools-version)
@@ -39,10 +42,17 @@ Windows OS binaries project using [anima](https://github.com/sonoro1234/anima) p
 
 ---
 
-- [glfw_opengl3](examples/glfw_opengl3/glfw_opengl3.lua)  
+##### [glfw_opengl3](examples/glfw_opengl3/glfw_opengl3.lua)  
+
 ![glfw_opengl3](examples/img/glfw_opengl3.png)
-- [glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)  
+
+#####  [glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)  
+
 ![glfw_opengl3_jp](examples/img/glfw_opengl3_jp.png)
+
+#####  [sdl2_opengl3](examples/sdl2_opengl3/sdl2_opengl3.lua)  
+
+![sdl2_opengl3](examples/img/sdl2_opengl3.png)
 
 
 #### Run examples
