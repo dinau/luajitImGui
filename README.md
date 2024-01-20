@@ -2,6 +2,8 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [luajitImGui](#luajitimgui)
+  - [Notice](#notice)
+  - [Project](#project)
   - [Versions](#versions)
   - [Examples](#examples)
   - [Run examples](#run-examples)
@@ -12,12 +14,19 @@
 
 ### luajitImGui
 
+#### Notice 
+
+---
+
+This repository is under construction at this time.
+
+#### Project
+
 ---
 
 1. [Luajit](https://luajit.org/) + [ImGui](https://github.com/ocornut/imgui)  
-Windows OS binary project using [anima](https://github.com/sonoro1234/anima) project
+Windows OS binaries project using [anima](https://github.com/sonoro1234/anima) project
 1. Added simple examples like [imguin](https://github.com/dinau/imguin) project.
-
 
 #### Versions
 
@@ -30,7 +39,8 @@ Windows OS binary project using [anima](https://github.com/sonoro1234/anima) pro
 
 ---
 
-- [glfw_opengl3](examples/glfw_opengl3/glfw_opengl3.lua)
+- [glfw_opengl3](examples/glfw_opengl3/glfw_opengl3.lua)  
+![glfw_opengl3](examples/img/glfw_opengl3.png)
 - [glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)  
 ![glfw_opengl3_jp](examples/img/glfw_opengl3_jp.png)
 
@@ -39,7 +49,7 @@ Windows OS binary project using [anima](https://github.com/sonoro1234/anima) pro
 
 ---
 
-For instance, first
+For instance on Windows OS, first
 
 ```sh
 git clone https://github.com/dinau/luajitImGui
