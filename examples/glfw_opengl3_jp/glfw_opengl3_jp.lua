@@ -6,7 +6,6 @@ local gllib = require"gl"
 local gl, glc = gllib.libraries()
 local ig = require"imgui.glfw"
 require"loadimage"
-local stb = require"stb_image"
 
 --- Global valuable: app
 require"apps"
@@ -33,7 +32,7 @@ window:setPos(app.mainWindow.posx ,app.mainWindow.posy)
 
 window:makeContextCurrent()
 
-glfw.swapInterval(1) --- VSync
+glfw.swapInterval(1) --- Set VSync
 
 --------------------------
 --- Choose implementation
@@ -54,28 +53,7 @@ ig.lib.ImGui_ImplOpenGL3_CreateFontsTexture()
 --- Load title bar icon
 -------------------------
 local  IconName = ImgDir .. "icon_jp.png"
-if utils.fileExists(IconName) then
-  local w = ffi.new("int[1]")
-  local h = ffi.new("int[1]")
-  local channels = ffi.new("int[1]",0)
-  local stbi_RGBA = 4
-  local pixels = stb.stbi_load(IconName, w, h, channels, stbi_RGBA)
-  local img = ffi.new("GLFWimage")
-  img.width  = w[0]
-  img.height = h[0]
-  img.pixels = ffi.new("unsigned char[?]", w[0] * h[0] * 4)
-  for x=0, w[0]-1 do
-    for y=0 ,h[0]-1 do
-      for p=0 ,3 do
-        img.pixels[(x + y*w[0])*4 + p] = pixels[(x + y*w[0])*4 + p]
-      end
-    end
-  end
-  stb.stbi_image_free(pixels)
-  glfw.glfw.glfwSetWindowIcon(window, 1, img)
-else
-  glfw.glfw.glfwSetWindowIcon(window, 0, nil)
-end
+utils.LoadWindowIcon(window, IconName)
 
 ---------------
 --- Load image
@@ -91,6 +69,7 @@ else
 end
 pic1.size = ig.ImVec2(pic1.width, pic1.height)
 
+--- Flags
 local fShowDemo = ffi.new("bool[1]",true)
 
 --------------
@@ -99,18 +78,33 @@ local fShowDemo = ffi.new("bool[1]",true)
 local fontsAtlas = pio.Fonts
 --maximal range allowed with ImWchar16
 --local ranges = ffi.new("ImWchar[3]",{0x0001,0xFFFF,0})
-local ranges = fontsAtlas:GetGlyphRangesJapanese()
-local fontName = os.getenv("windir") .. "/fonts/meiryo.ttc"
-if not utils.fileExists(fontName) then
-  print("Error!: Can't find fontName: ", fontName)
-  os.exit()
+local fontName = ""
+local ranges = nil
+if utils.checkLang("jp") then -- Specify country ID
+  fontName = os.getenv("windir") .. "/fonts/meiryo.ttc"
+  ranges = fontsAtlas:GetGlyphRangesJapanese()
 end
-local fontsize = ffi.new("float[1]",18)
-local theFONT= fontsAtlas:AddFontFromFileTTF(fontName, fontsize[0], nil,ranges)
-if (theFONT == nil) then
+if utils.fileExists(fontName) then
+  local fontsize = ffi.new("float[1]",18)
+  local theFONT= fontsAtlas:AddFontFromFileTTF(fontName, fontsize[0], nil,ranges)
+  if (theFONT ~= nil) then
+    pio.FontDefault = theFONT -- OK, set as default font
+  end
 else
-  --- set as default
-  pio.FontDefault = theFONT
+  print("Error!: Can't find fontName: ", fontName)
+  fontName = ""
+end
+
+-- Set window title
+local sAry = ""
+local fntName = ""
+local sTitle = ""
+if "" == fontName then
+  sTitle = string.format("[ImGui: v%s]" ,ffi.string(ig.GetVersion()))
+else
+  sAry = fontName:split("/")
+  fntName = sAry[#sAry] -- Eliminated directory part
+  sTitle = string.format("[ImGui: v%s] 起動時フォント: %s)" ,ffi.string(ig.GetVersion()),fntName)
 end
 
 --------------
@@ -129,11 +123,7 @@ while not window:shouldClose() do
   ig_impl:NewFrame()
   -- Show ImGui demo
   if fShowDemo[0] then ig.ShowDemoWindow(fShowDemo) end
-  -------
-  local sAry = fontName:split("/")
-  local fntName = sAry[#sAry]
-  local sTitle = string.format("[ImGui: v%s] 起動時フォント: %s)"
-                              ,ffi.string(ig.GetVersion()),fntName)
+
   if ig.Begin(sTitle) then
     ig.Text("GLFW v" .. ffi.string(glfw.glfwVersionString()))
     local s = "OpenGL v" .. ffi.string(gl.glGetString(glc.GL_VERSION)):split(" ")[1]
@@ -166,10 +156,12 @@ while not window:shouldClose() do
     somefloat[0] = math.fmod(counter, delay) / delay
     ig.End()
   end
+
   if ig.Begin("イメージ・ウインドウ") then
     ig.Image(ffi.cast("ImTextureID",pic1.texture[0]),pic1.size)
     ig.End()
   end
+  --
   ig_impl:Render()
   window:swapBuffers()
 end

@@ -16,6 +16,7 @@ local DEFAULT_WINDOW_POSY   =   50
 
 function loadIni()
   if not utils.fileExists(IniName) then
+    print("no ini file: ", IniName)
     app.mainWindow.width  = DEFAULT_WINDOW_WIDTH
     app.mainWindow.height = DEFAULT_WINDOW_HEIGHT
     app.mainWindow.posx   = DEFAULT_WINDOW_POSX
