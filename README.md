@@ -10,8 +10,7 @@
     - [glfw_opengl3_jp](#glfw_opengl3_jp)
     - [sdl2_opengl3](#sdl2_opengl3)
   - [Run examples](#run-examples)
-  - [Regenerate binaries and libraries](#regenerate-binaries-and-libraries)
-  - [Tools version](#tools-version)
+  - [Other examples](#other-examples)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -30,8 +29,13 @@ This repository is under construction at this time.
 1. [Luajit](https://luajit.org/) + [ImGui](https://github.com/ocornut/imgui)  
 Windows OS binaries project using [anima](https://github.com/sonoro1234/anima) project
    - Differencies from [anima](https://github.com/sonoro1234/anima) project,
-      1. Added compilation option, `-DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS`
-      1. Enabled  `` in imconifg.h
+      - Added GCC/Clang compilation option in [Luajit-ImGui/CMakeLists.txt](Luajit-ImGui/CMakeLists.txt)
+         1. For IME (Imput method)  
+            `"-DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS"`
+         1. For ImPlot  
+            `"-DImDrawIdx=unsigned int"`
+
+
 1. Added simple examples below like [imguin](https://github.com/dinau/imguin) project.
 
 #### Versions
@@ -73,3 +77,9 @@ cd luajitImGui
 cd examples/glfw_opengl3
 r.bat
 ```
+
+#### Other examples 
+
+---
+
+Refer to [bin/examples](bin/examples)
