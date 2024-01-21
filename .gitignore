@@ -1,8 +1,12 @@
+bin-gcc/
 org.html
 README.html
 .nimcache/
 build/
 examples/font_jp/
+GPATH
+GRTAGS
+GTAGS
 # Prerequisites
 *.d
 

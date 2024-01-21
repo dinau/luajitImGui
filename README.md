@@ -30,7 +30,7 @@ This repository is under construction at this time.
 1. [Luajit](https://luajit.org/) + [ImGui](https://github.com/ocornut/imgui)  
 Windows OS binaries project using [anima](https://github.com/sonoro1234/anima) project
    - Differencies from [anima](https://github.com/sonoro1234/anima) project,
-      1. Added compilation option, `-D`
+      1. Added compilation option, `-DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS`
       1. Enabled  `` in imconifg.h
 1. Added simple examples below like [imguin](https://github.com/dinau/imguin) project.
 
@@ -38,7 +38,7 @@ Windows OS binaries project using [anima](https://github.com/sonoro1234/anima) p
 
 ---
 
-- ImGui v1.90.0
+- ImGui v1.90.1
 - LuaJIT 2.1.1697887905 -- Copyright (C) 2005-2023 Mike Pall. https://luajit.o
 
 #### Examples
