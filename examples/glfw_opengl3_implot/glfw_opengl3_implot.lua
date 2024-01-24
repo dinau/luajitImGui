@@ -6,9 +6,11 @@ local gllib = require"gl"
 local gl, glc = gllib.libraries()
 local ig = require"imgui.glfw"
 require"loadimage"
+require"imPlotWindow"
 
 --- Global valuable: app
 require"apps"
+local clearColor = ffi.new("float[3]",{0.25,0.65,0.85})
 
 --- Image folder
 local ImgDir = "../img/"
@@ -29,6 +31,7 @@ glfw.init()
 -------------------
 local window = glfw.Window(app.mainWindow.width,app.mainWindow.height)
 window:setPos(app.mainWindow.posx ,app.mainWindow.posy)
+ig.ImPlot_CreateContext()
 
 window:makeContextCurrent()
 
@@ -70,7 +73,8 @@ end
 pic1.size = ig.ImVec2(pic1.width, pic1.height)
 
 --- Flags
-local fShowDemo = ffi.new("bool[1]",true)
+local fShowDemo       = ffi.new("bool[1]",true)
+local fShowImPlotDemo = ffi.new("bool[1]",true)
 
 --------------
 --- Load font
@@ -94,6 +98,7 @@ else
   print("Error!: Can't find fontName: ", fontName)
   fontName = ""
 end
+
 -- Set window title
 local sAry = ""
 local fntName = ""
@@ -102,17 +107,20 @@ if "" == fontName then
   sTitle = string.format("[ImGui: v%s]" ,ffi.string(ig.GetVersion()))
 else
   sAry = fontName:split("/")
-  fntName = sAry[#sAry] -- Eliminated directory part
+  local fntName = sAry[#sAry] -- Eliminated directory part
   sTitle = string.format("[ImGui: v%s] Startup font: %s)" ,ffi.string(ig.GetVersion()),fntName)
 end
 
 --------------
 --- main loop
 --------------
+--ig.ImPlot_StyleColorsClassic()
+--ig.ImPlot_StyleColorsDark()
+ig.ImPlot_StyleColorsLight()
+
 --- Global vars
 local sBuf       = ffi.new("char[?]",100)
 local somefloat  = ffi.new("float[1]",0.0)
-local clearColor = ffi.new("float[3]",{0.25,0.65,0.85})
 local counter = 0
 
 while not window:shouldClose() do
@@ -120,8 +128,9 @@ while not window:shouldClose() do
   gl.glClearColor(clearColor[0],clearColor[1],clearColor[2],1.0)
   gl.glClear(glc.GL_COLOR_BUFFER_BIT)
   ig_impl:NewFrame()
-  -- Show ImGui demo
-  if fShowDemo[0] then ig.ShowDemoWindow(fShowDemo) end
+  -- Show ImGui/ImPlot demo
+  if fShowDemo[0]       then ig.ShowDemoWindow(fShowDemo) end
+  if fShowImPlotDemo[0] then ig.ImPlot_ShowDemoWindow(fShowImPlotDemo) end
 
   if ig.Begin(sTitle) then
     ig.Text("GLFW v" .. ffi.string(glfw.glfwVersionString()))
@@ -131,13 +140,14 @@ while not window:shouldClose() do
     ig.InputTextWithHint("Input text", "Here input text", sBuf,100)
     ig.Text("Input result: " .. ffi.string(sBuf))
     ig.Checkbox("Show ImGui demo window", fShowDemo)
+    ig.Checkbox("Show ImPlot demo window", fShowImPlotDemo)
     ig.SliderFloat("Float number", somefloat, 0.0, 1.0, "%3f", 0)
     ig.ColorEdit3("Change background", clearColor)
     -- File open dialog
     if ig.Button("Open file") then
     end
     ig.SameLine(0.0,-1.0)
-    -- ヒント表示
+    -- Show tooltip help
     if ig.IsItemHovered() and ig.BeginTooltip() then
       ig.Text("Open file")
       local ary = ffi.new("float[7]",{0.6, 0.1, 1.0, 0.5, 0.92, 0.1, 0.2})
@@ -155,11 +165,13 @@ while not window:shouldClose() do
     somefloat[0] = math.fmod(counter, delay) / delay
     ig.End()
   end
-
+  --
   if ig.Begin("Image window") then
     ig.Image(ffi.cast("ImTextureID",pic1.texture[0]),pic1.size)
     ig.End()
   end
+  --
+  imPlotWindow()
   --
   ig_impl:Render()
   window:swapBuffers()
@@ -170,5 +182,6 @@ end
 -------------
 saveIni(window)
 ig_impl:destroy()
+ig.ImPlot_DestroyContext()
 window:destroy()
 glfw.terminate()

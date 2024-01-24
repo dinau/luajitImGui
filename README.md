@@ -7,6 +7,7 @@
   - [Versions](#versions)
   - [Examples](#examples)
     - [glfw_opengl3](#glfw_opengl3)
+    - [glfw_opengl3_implot](#glfw_opengl3_implot)
     - [glfw_opengl3_jp](#glfw_opengl3_jp)
     - [sdl2_opengl3](#sdl2_opengl3)
   - [Run examples](#run-examples)
@@ -29,7 +30,7 @@ This repository is under construction at this time.
 1. [Luajit](https://luajit.org/) + [ImGui](https://github.com/ocornut/imgui)  
 Windows OS binaries project using [anima](https://github.com/sonoro1234/anima) project
    - Differencies from [anima](https://github.com/sonoro1234/anima) project,
-      - Added GCC/Clang compilation option in [Luajit-ImGui/CMakeLists.txt](Luajit-ImGui/CMakeLists.txt)
+      - Added GCC/Clang compilation option in [anima/Luajit-ImGui/CMakeLists.txt](anima/Luajit-ImGui/CMakeLists.txt)
          1. For IME (Imput method)  
             `"-DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS"`
          1. For ImPlot  
@@ -53,6 +54,11 @@ Windows OS binaries project using [anima](https://github.com/sonoro1234/anima) p
 
 ![glfw_opengl3](examples/img/glfw_opengl3.png)
 
+##### [glfw_opengl3_implot](examples/glfw_opengl3/glfw_opengl3_implot.lua)  
+
+![glfw_opengl3_implot](examples/img/glfw_opengl3_implot.png)  
+See more example: [implot_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot_sample.lua)
+
 #####  [glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)  
 
 ![glfw_opengl3_jp](examples/img/glfw_opengl3_jp.png)
@@ -66,12 +72,14 @@ Windows OS binaries project using [anima](https://github.com/sonoro1234/anima) p
 
 ---
 
-For instance on Windows OS, first
+On Windows OS first,
 
 ```sh
 git clone https://github.com/dinau/luajitImGui
 cd luajitImGui
 ```
+
+For instance,
 
 ```sh
 cd examples/glfw_opengl3
@@ -82,4 +90,4 @@ r.bat
 
 ---
 
-Refer to [bin/examples](bin/examples)
+Refer to nice exmaples: [bin/examples](bin/examples)
