@@ -1,3 +1,5 @@
+screenImage*.*
+hidden/
 bin-gcc/
 org.html
 README.html
