@@ -17,6 +17,7 @@ BUILD_DIR = build
 all: $(INSTALL_DIR) $(BUILD_DIR)
 	(cd $(BUILD_DIR); cmake ../anima $(BUILD_OPT)  ; make install)
 	cp -f dll/32bit/libgcc_s_dw2-1.dll bin/
+	cp -f dll/32bit/libsamplerate-0.dll bin/
 
 $(INSTALL_DIR):
 	-mkdir -p $@
