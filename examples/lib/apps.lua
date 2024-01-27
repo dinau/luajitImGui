@@ -1,4 +1,4 @@
-local ig = require"imgui.glfw" -- Imgui/ImPlot/ImNode etc.
+local ig = require"imgui.glfw" -- Imgui,ImPlot,ImNode etc.
 local inifile = require"inifile"
 local utils = require"utils"
 
@@ -16,7 +16,7 @@ local DEFAULT_WINDOW_POSY   =   50
 
 function loadIni()
   if not utils.fileExists(IniName) then
-    print("no ini file: ", IniName)
+    print("Not found ini file: ", IniName)
     app.mainWindow.width  = DEFAULT_WINDOW_WIDTH
     app.mainWindow.height = DEFAULT_WINDOW_HEIGHT
     app.mainWindow.posx   = DEFAULT_WINDOW_POSX
@@ -34,12 +34,16 @@ function loadIni()
   end
 end
 
+function getCurrentWindowSize(glfwWin)
+  local wsize = ig.GetMainViewport().WorkSize
+  local posx, posy = glfwWin:getPos()
+  return wsize.x, wsize.y, posx, posy
+end
+
 function saveIni(glfwWin)
-  --print("Save ini")
-  wsize = ig.GetMainViewport().WorkSize
-  app.mainWindow.width  = wsize.x
-  app.mainWindow.height = wsize.y
-  app.mainWindow.posx, app.mainWindow.posy = glfwWin:getPos()
-  --print( app.mainWindow.posx, app.mainWindow.posy)
+  local w,h,x,y = getCurrentWindowSize(glfwWin)
+  app.mainWindow.width  = w
+  app.mainWindow.height = h
+  app.mainWindow.posx, app.mainWindow.posy = x, y
   inifile.save(IniName,app)
 end

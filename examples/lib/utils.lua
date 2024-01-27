@@ -1,3 +1,4 @@
+
 local M = {}
 
 function M.fileExists(name)
@@ -33,7 +34,7 @@ end
 local ffi = require "ffi"
 local glfw = require"glfw"
 local stb = require"stb_image"
-function M.LoadWindowIcon(window,iconName)
+function M.loadWindowIcon(window,iconName)
   if not M.fileExists(iconName) then
     glfw.glfw.glfwSetWindowIcon(window, 0, nil)
     print("Error!: Can't find Icon ",iconName)
@@ -57,6 +58,49 @@ function M.LoadWindowIcon(window,iconName)
   end
   stb.stbi_image_free(pixels)
   glfw.glfw.glfwSetWindowIcon(window, 1, img)
+end
+
+---
+local ffi = require "ffi"
+local glfw = require"glfw"
+local gllib = require"gl"
+gllib.set_loader(glfw)
+local gl, glc, glu, glext = gllib.libraries()
+local im = require"imffi"
+
+M.imageExt = {JPEG=".jpg", PNG=".png", TIFF=".tif", BMP=".bmp", GIF=".gif", ICO=".ico"}
+
+--------------
+--- SaveImage
+--------------
+--- Refer to luajitImGui/anima/mirror-im/html/index.html
+function M.saveImage(filename,formato,width,height,xPos,yPos)
+  local formato = formato or "TIFF"
+  local xPos = xPos or 0
+  local yPos = yPos or 0
+  local w,h = width, height
+  print("SaveImage",w,h,formato)
+  local pixelsUserData = ffi.new("char[?]",w*h*4)
+
+  local intformat = glc.GL_RGBA --self.SRGB and glc.GL_SRGB8_ALPHA8 or glc.GL_RGBA
+  --if self.SRGB then gl.glEnable(glc.GL_FRAMEBUFFER_SRGB) end
+
+  glext.glBindBuffer(glc.GL_PIXEL_PACK_BUFFER,0)
+  gl.glPixelStorei(glc.GL_PACK_ALIGNMENT, 1)
+  gl.glReadPixels(xPos, yPos, w, h, intformat, glc.GL_UNSIGNED_BYTE, pixelsUserData)
+
+  --if self.SRGB then gl.glDisable(glc.GL_FRAMEBUFFER_SRGB) end
+  -- glext.glBindFramebuffer(glc.GL_READ_FRAMEBUFFER,oldfboread)
+
+  local image = im.ImageCreateFromOpenGLData(w, h, glc.GL_RGBA, pixelsUserData);
+  --local err = im.FileImageSave(filename,formato,image)
+  local err = image:FileSave(filename,formato)
+  if (err and err ~= im.ERR_NONE) then
+    print("saved",filename)
+    error(im.ErrorStr(err))
+  end
+  --im.ImageDestroy(image)
+  image:Destroy()
 end
 
 return M

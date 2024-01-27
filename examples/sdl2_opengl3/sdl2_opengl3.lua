@@ -1,26 +1,30 @@
 local ffi = require"ffi"
 local utils = require"utils"
-require"loadimage"
-
---- Global valuable: app
---require"apps"
-
---from https://github.com/sonoro1234/LuaJIT-SDL2
+--- SDL2/etc
 local sdl = require"sdl2_ffi"
---just to get gl functions
--- from https://github.com/sonoro1234/LuaJIT-GLFW
 local gllib = require"gl"
 gllib.set_loader(sdl)
 local gl, glc, glu, glext = gllib.libraries()
+local ig = require"imgui.sdl"
+require"loadimage"
 
--- Image folder
+--- Global var: app
+--require"apps"
+
+---
+local SaveImageName = "screenImage"
+-- Select {JPEG, PNG, TIFF, BMP}
+local SaveFormat = "JPEG"
+
+--- Global var
+local fReqImageCapture = false
+
+--- Image folder
 local ImgDir = "../img/"
 
 -- Load inifile
 --loadIni()
 
---
-local ig = require"imgui.sdl"
 if (sdl.init(sdl.INIT_VIDEO+sdl.INIT_TIMER) ~= 0) then
     print(string.format("Error: %s\n", sdl.getError()));
     return -1;
@@ -51,8 +55,8 @@ local window = sdl.createWindow("ImGui SDL2+OpenGL3 example"
 local gl_context = sdl.gL_CreateContext(window);
 sdl.gL_SetSwapInterval(1); -- Enable vsync
 
-local ig_Impl = ig.Imgui_Impl_SDL_opengl3()
-ig_Impl:Init(window, gl_context)
+local ig_impl = ig.Imgui_Impl_SDL_opengl3()
+ig_impl:Init(window, gl_context)
 
 -------------------------
 --- Load title bar icon
@@ -63,7 +67,7 @@ local  IconName = ImgDir .. "icon_qr_my_github.png"
 --- Load image
 ---------------
 local ImageName = ImgDir .. "himeji-400.jpg"
-pic1 = {texture = ffi.new("GLuint[1]"), width = 0,height = 0 , comp = 0}
+local pic1 = {texture = ffi.new("GLuint[1]"), width = 0, height = 0, comp = 0}
 if nil == LoadTextureFromFile(ImageName, pic1) then
   print("Error!: Can't load image file: ",ImageName)
 else
@@ -79,7 +83,8 @@ pic1.size = ig.ImVec2(pic1.width, pic1.height)
 --- Global vars
 local pio = ig.GetIO()
 local fShowDemo  = ffi.new("bool[1]",true)
-local sBuf       = ffi.new("char[?]",100)
+local sBufLen= 100
+local sBuf       = ffi.new("char[?]",sBufLen)
 local somefloat  = ffi.new("float[1]",0.0)
 local clearColor = ffi.new("float[3]",{0.25,0.65,0.85})
 local counter = 0
@@ -108,8 +113,10 @@ while (not done) do
   gl.glViewport(0, 0, pio.DisplaySize.x, pio.DisplaySize.y);
   gl.glClear(glc.GL_COLOR_BUFFER_BIT)
 
-  ig_Impl:NewFrame()
-  ---
+  ig_impl:NewFrame()
+  -- Show ImGui demo
+  if fShowDemo[0] then ig.ShowDemoWindow(fShowDemo) end
+  local svName
   if ig.Begin(sTitle) then
     ig.Text(string.format("SDL2 v%d.%d.%d",sdlVer.major,sdlVer.minor,sdlVer.patch))
     local s = "OpenGL v" .. ffi.string(gl.glGetString(glc.GL_VERSION)):split(" ")[1]
@@ -124,7 +131,7 @@ while (not done) do
     if ig.Button("Open file") then
     end
     ig.SameLine(0.0,-1.0)
-    ---- show tooltip hint
+    -- Show tooltip help
     if ig.IsItemHovered() and ig.BeginTooltip() then
       ig.Text("Open file")
       local ary = ffi.new("float[7]",{0.6, 0.1, 1.0, 0.5, 0.92, 0.1, 0.2})
@@ -140,24 +147,52 @@ while (not done) do
     counter = counter + 1
     local delay = 600 * 3
     somefloat[0] = math.fmod(counter, delay) / delay
+
+    -- Save button of screen image
+    ig.PushID(0)
+    ig.PushStyleColor(ig.lib.ImGuiCol_Button,        ig.ImVec4(0.7, 0.7, 0.0, 1.0))
+    ig.PushStyleColor(ig.lib.ImGuiCol_ButtonHovered, ig.ImVec4(0.8, 0.8, 0.0, 1.0))
+    ig.PushStyleColor(ig.lib.ImGuiCol_ButtonActive,  ig.ImVec4(0.9, 0.9, 0.0, 1.0))
+    ig.PushStyleColor(ig.lib.ImGuiCol_Text, ig.ImVec4(0.0, 0.0, 0.0,1.0))
+    if ig.Button("Save screeen image") then
+      fReqImageCapture = true
+    end
+    ig.PopStyleColor(4)
+    ig.PopID()
+    --
+    ig.SameLine(0.0,-1.0)
+    -- Show tooltip help
+    svName = SaveImageName .. "_" .. counter .. utils.imageExt[SaveFormat]
+    if ig.IsItemHovered() and ig.BeginTooltip() then
+      ig.Text(string.format("[Unimplement]: Save to \"%s\"", svName))
+      ig.EndTooltip()
+    end
+    -- End Save button of screen image
+
     ig.End()
   end
-  ---
+  --
   if ig.Begin("Image window") then
     ig.Image(ffi.cast("ImTextureID",pic1.texture[0]),pic1.size)
     ig.End()
   end
-  if fShowDemo[0] then
-    ig.ShowDemoWindow(fShowDemo)
-  end
+
   ---
-  ig_Impl:Render()
-  sdl.gL_SwapWindow(window);
+  ig_impl:Render()
+  -- Save screen image to file
+  if fReqImageCapture then
+    fReqImageCapture = false
+    -- TODO
+    --local w,h,x,y = getCurrentWindowSize(window)
+    --utils.saveImage(svName, SaveFormat, w , h)
+  end
+  --
+  sdl.gL_SwapWindow(window)
 end
 
 -- Cleanup
 --saveIni(window)
-ig_Impl:destroy()
+ig_impl:destroy()
 
 sdl.gL_DeleteContext(gl_context);
 sdl.destroyWindow(window);
