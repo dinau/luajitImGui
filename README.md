@@ -5,6 +5,7 @@
   - [Notice](#notice)
   - [Project](#project)
   - [Versions](#versions)
+  - [History](#history)
   - [Examples](#examples)
     - [glfw_opengl3](#glfw_opengl3)
     - [glfw_opengl3_implot](#glfw_opengl3_implot)
@@ -45,6 +46,13 @@ Windows OS binaries project using [anima](https://github.com/sonoro1234/anima) p
 
 - ImGui v1.90.1
 - LuaJIT 2.1.1697887905 -- Copyright (C) 2005-2023 Mike Pall. https://luajit.o
+
+#### History
+
+---
+
+- 2024/01: Added: Button "Save screen image", can be saved as JPEG, PNG, TIFF, BMP file format, except sdl2_opengl3 demo.
+
 
 #### Examples
 
