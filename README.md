@@ -51,6 +51,7 @@ Windows OS binaries project using [anima](https://github.com/sonoro1234/anima) p
 
 ---
 
+- 2024/01: Added: Icon font demo
 - 2024/01: Added: Button "Save screen image", can be saved as JPEG, PNG, TIFF, BMP file format, except sdl2_opengl3 demo.
 
 

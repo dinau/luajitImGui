@@ -1,12 +1,14 @@
-local ffi = require"ffi"
+local ffi   = require"ffi"
 local utils = require"utils"
 --- SDL2/etc
-local sdl = require"sdl2_ffi"
+local sdl   = require"sdl2_ffi"
 local gllib = require"gl"
 gllib.set_loader(sdl)
 local gl, glc, glu, glext = gllib.libraries()
-local ig = require"imgui.sdl"
+local ig    = require"imgui.sdl"
 require"loadimage"
+require"setupFonts"
+local IFA   = require"fonticon.IconsFontAwesome6"
 
 --- Global var: app
 --require"apps"
@@ -77,11 +79,29 @@ else
 end
 pic1.size = ig.ImVec2(pic1.width, pic1.height)
 
+local pio = ig.GetIO()
+
+--------------
+--- Load font
+--------------
+local  fExistMultibytesFonts, sActiveFontName, sActiveFontTitle = setupFonts(pio)
+
+-- Set window title
+local sTitle
+local imGuiVersion = ffi.string(ig.GetVersion())
+if "" == sActiveFontName then
+  sTitle = string.format("[ImGui: v%s]" ,imGuiVersion)
+else
+  print("Loaded font: ", sActiveFontName)
+  local sAry = sActiveFontName:split("/")
+  local fntName = sAry[#sAry] -- Eliminated directory part
+  sTitle = string.format("[ImGui: v%s] Start up font: %s)"
+                          , imGuiVersion,fntName)
+end
 --------------
 --- main loop
 --------------
 --- Global vars
-local pio = ig.GetIO()
 local fShowDemo  = ffi.new("bool[1]",true)
 local sBufLen= 100
 local sBuf       = ffi.new("char[?]",sBufLen)
@@ -93,7 +113,7 @@ local done = false;
 local sdlVer = ffi.new("SDL_version")
 sdl.GetVersion(sdlVer)
 
-local sTitle = string.format("[ImGui: v%s]" ,ffi.string(ig.GetVersion()))
+--local sTitle = string.format("[ImGui: v%s]" ,ffi.string(ig.GetVersion()))
 
 while (not done) do
   --SDL_Event
@@ -160,7 +180,7 @@ while (not done) do
     ig.PopStyleColor(4)
     ig.PopID()
     --
-    ig.SameLine(0.0,-1.0)
+    --ig.SameLine(0.0,-1.0)
     -- Show tooltip help
     svName = SaveImageName .. "_" .. counter .. utils.imageExt[SaveFormat]
     if ig.IsItemHovered() and ig.BeginTooltip() then
@@ -168,6 +188,19 @@ while (not done) do
       ig.EndTooltip()
     end
     -- End Save button of screen image
+
+    -- Icon font test
+    ig.SeparatorText(IFA.ICON_FA_WRENCH .. " Icon font test ")
+    ig.Text(IFA.ICON_FA_TRASH_CAN .. " Trash")
+    ig.Text(IFA.ICON_FA_MAGNIFYING_GLASS_PLUS ..
+      " " .. IFA.ICON_FA_POWER_OFF ..
+      " " .. IFA.ICON_FA_MICROPHONE ..
+      " " .. IFA.ICON_FA_MICROCHIP ..
+      " " .. IFA.ICON_FA_VOLUME_HIGH ..
+      " " .. IFA.ICON_FA_SCISSORS ..
+      " " .. IFA.ICON_FA_SCREWDRIVER_WRENCH ..
+      " " .. IFA.ICON_FA_BLOG)
+      --
 
     ig.End()
   end

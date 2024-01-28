@@ -1,20 +1,22 @@
-local ffi = require "ffi"
+local ffi   = require"ffi"
 local utils = require"utils"
 --- GLFW/etc
 local glfw = require"glfw"
 local gllib = require"gl"
+local ig    = require"imgui.glfw"
 gllib.set_loader(glfw)
 local gl, glc, glu, glext = gllib.libraries()
-local ig = require"imgui.glfw"
 require"loadimage"
 require"setupFonts"
+local IFA   = require"fonticon.IconsFontAwesome6"
 
 --- Global var: app
 require"apps"
 
 ---
 local SaveImageName = "screenImage"
-local SaveFormat = "JPEG" -- {JPEG=".jpg", PNG=".png", TIFF=".tif", BMP=".bmp", GIF=".gif", ICO=".ico"}
+-- Select {JPEG, PNG, TIFF, BMP}
+local SaveFormat = "JPEG"
 
 --- Global var
 local fReqImageCapture = false
@@ -85,7 +87,7 @@ local fShowDemo = ffi.new("bool[1]",true)
 --- Load font
 --------------
 -- 日本語フォントを追加
-local  fExistMultibytesFonts, sActiveFontName, sActiveFontTitle = setupFonts()
+local  fExistMultibytesFonts, sActiveFontName, sActiveFontTitle = setupFonts(pio)
 
 -- Set window title
 local sTitle = ""
@@ -149,7 +151,7 @@ while not window:shouldClose() do
     local delay = 600 * 3
     somefloat[0] = math.fmod(counter, delay) / delay
 
-    -- Save button of screen image 
+    -- Save button of screen image
     ig.PushID(0)
     ig.PushStyleColor(ig.lib.ImGuiCol_Button,        ig.ImVec4(0.7, 0.7, 0.0, 1.0))
     ig.PushStyleColor(ig.lib.ImGuiCol_ButtonHovered, ig.ImVec4(0.8, 0.8, 0.0, 1.0))
@@ -161,14 +163,27 @@ while not window:shouldClose() do
     ig.PopStyleColor(4)
     ig.PopID()
     --
-    ig.SameLine(0.0,-1.0)
+    --ig.SameLine(0.0,-1.0)
     -- Show tooltip help
     svName = SaveImageName .. "_" .. counter .. utils.imageExt[SaveFormat]
     if ig.IsItemHovered() and ig.BeginTooltip() then
       ig.Text(string.format("Save to \"%s\"", svName))
       ig.EndTooltip()
   end
-    -- End Save button of screen image 
+    -- End Save button of screen image
+
+    -- Icon font test
+    ig.SeparatorText(IFA.ICON_FA_WRENCH .. " Icon font test ")
+    ig.Text(IFA.ICON_FA_TRASH_CAN .. " Trash")
+    ig.Text(IFA.ICON_FA_MAGNIFYING_GLASS_PLUS ..
+      " " .. IFA.ICON_FA_POWER_OFF ..
+      " " .. IFA.ICON_FA_MICROPHONE ..
+      " " .. IFA.ICON_FA_MICROCHIP ..
+      " " .. IFA.ICON_FA_VOLUME_HIGH ..
+      " " .. IFA.ICON_FA_SCISSORS ..
+      " " .. IFA.ICON_FA_SCREWDRIVER_WRENCH ..
+      " " .. IFA.ICON_FA_BLOG)
+      --
 
     ig.End()
   end

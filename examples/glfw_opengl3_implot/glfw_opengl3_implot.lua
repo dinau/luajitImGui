@@ -1,14 +1,15 @@
-local ffi = require "ffi"
+local ffi   = require"ffi"
 local utils = require"utils"
 --- GLFW/etc
 local glfw = require"glfw"
 local gllib = require"gl"
+local ig    = require"imgui.glfw"
 gllib.set_loader(glfw)
 local gl, glc, glu, glext = gllib.libraries()
-local ig = require"imgui.glfw"
 require"loadimage"
 require"setupFonts"
 require"imPlotWindow"
+local IFA   = require"fonticon.IconsFontAwesome6"
 
 --- Global var: app
 require"apps"
@@ -86,7 +87,7 @@ local fShowImPlotDemo = ffi.new("bool[1]",true)
 --------------
 --- Load font
 --------------
-local  fExistMultibytesFonts, sActiveFontName, sActiveFontTitle = setupFonts()
+local  fExistMultibytesFonts, sActiveFontName, sActiveFontTitle = setupFonts(pio)
 
 -- Set window title
 local sTitle
@@ -169,7 +170,7 @@ while not window:shouldClose() do
     ig.PopStyleColor(4)
     ig.PopID()
     --
-    ig.SameLine(0.0,-1.0)
+    --ig.SameLine(0.0,-1.0)
     -- Show tooltip help
     svName = SaveImageName .. "_" .. counter .. utils.imageExt[SaveFormat]
     if ig.IsItemHovered() and ig.BeginTooltip() then
@@ -178,6 +179,18 @@ while not window:shouldClose() do
     end
     -- End Save button of screen image
 
+    -- Icon font test
+    ig.SeparatorText(IFA.ICON_FA_WRENCH .. " Icon font test ")
+    ig.Text(IFA.ICON_FA_TRASH_CAN .. " Trash")
+    ig.Text(IFA.ICON_FA_MAGNIFYING_GLASS_PLUS ..
+      " " .. IFA.ICON_FA_POWER_OFF ..
+      " " .. IFA.ICON_FA_MICROPHONE ..
+      " " .. IFA.ICON_FA_MICROCHIP ..
+      " " .. IFA.ICON_FA_VOLUME_HIGH ..
+      " " .. IFA.ICON_FA_SCISSORS ..
+      " " .. IFA.ICON_FA_SCREWDRIVER_WRENCH ..
+      " " .. IFA.ICON_FA_BLOG)
+      --
     ig.End()
   end
   --
