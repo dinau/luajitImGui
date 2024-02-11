@@ -14,9 +14,7 @@ local IFA   = require"fonticon.IconsFontAwesome6"
 --- Global var: app
 require"apps"
 ---
-local SaveImageName = "screenImage"
--- Select {JPEG, PNG, TIFF, BMP}
-local SaveFormat = "JPEG"
+local SaveImageName = "windowImage"
 
 --- Global var
 local fReqImageCapture = false
@@ -98,8 +96,21 @@ else
   print("Loaded font: ", sActiveFontName)
   local sAry = sActiveFontName:split("/")
   local fntName = sAry[#sAry] -- Eliminated directory part
-  sTitle = string.format("[ImGui: v%s] Start up font: %s)"
-                          , imGuiVersion,fntName)
+  sTitle = string.format("[ImGui: v%s] Start up font: %s)" , imGuiVersion,fntName)
+end
+
+--ig.StyleColorsClassic()
+
+---------------
+--- setTooltip
+---------------
+function setTooltip(str)
+  if ig.IsItemHovered(ig.ImguiHoveredFlags_DelayNormal) then
+    if ig.BeginTooltip() then
+      ig.Text(str)
+      ig.EndTooltip()
+    end
+  end
 end
 
 --------------
@@ -110,11 +121,13 @@ end
 ig.ImPlot_StyleColorsLight()
 
 --- Global vars
-local sBufLen= 100
+local sBufLen    = 100
 local sBuf       = ffi.new("char[?]",sBufLen)
 local somefloat  = ffi.new("float[1]",0.0)
 local clearColor = ffi.new("float[3]",{0.25,0.65,0.85})
-local counter = 0
+local counter    = 0
+local imageFormatTbl = {"JPEG", "PNG", "TIFF", "BMP"}
+local cmbItemIndex   = app.image.imageSaveFormatIndex
 
 while not window:shouldClose() do
   glfw.pollEvents()
@@ -141,6 +154,7 @@ while not window:shouldClose() do
     if ig.Button("Open file") then
     end
     ig.SameLine(0.0,-1.0)
+
     -- Show tooltip help
     if ig.IsItemHovered() and ig.BeginTooltip() then
       ig.Text("Open file")
@@ -158,39 +172,54 @@ while not window:shouldClose() do
     local delay = 600 * 3
     somefloat[0] = math.fmod(counter, delay) / delay
 
-    -- Save button of screen image
+    -- Save button for capturing window image
     ig.PushID(0)
     ig.PushStyleColor(ig.lib.ImGuiCol_Button,        ig.ImVec4(0.7, 0.7, 0.0, 1.0))
     ig.PushStyleColor(ig.lib.ImGuiCol_ButtonHovered, ig.ImVec4(0.8, 0.8, 0.0, 1.0))
     ig.PushStyleColor(ig.lib.ImGuiCol_ButtonActive,  ig.ImVec4(0.9, 0.9, 0.0, 1.0))
     ig.PushStyleColor(ig.lib.ImGuiCol_Text, ig.ImVec4(0.0, 0.0, 0.0,1.0))
-    if ig.Button("Save screeen image") then
+    if ig.Button("Save window image") then
       fReqImageCapture = true
     end
     ig.PopStyleColor(4)
     ig.PopID()
-    --
-    --ig.SameLine(0.0,-1.0)
+
     -- Show tooltip help
-    svName = SaveImageName .. "_" .. counter .. utils.imageExt[SaveFormat]
-    if ig.IsItemHovered() and ig.BeginTooltip() then
-      ig.Text(string.format("Save to \"%s\"", svName))
-      ig.EndTooltip()
+    local imgSaveFormatStr = imageFormatTbl[cmbItemIndex]
+    svName = SaveImageName .. "_" .. counter .. utils.imageExt[imgSaveFormatStr]
+    setTooltip(string.format("Save to \"%s\"", svName))
+    -- End Save button of window image
+    ig.SameLine(0.0,-1.0)
+
+    -- Combobox
+    ig.SetNextItemWidth(70)
+    if ig.BeginCombo("##", imgSaveFormatStr, 0) then
+      for n,val in ipairs(imageFormatTbl) do
+        local is_selected = (cmbItemIndex == n)
+        if ig.Selectable(val, is_selected , 0)then
+          if is_selected then
+            ig.SetItemDefaultFocus()
+          end
+          cmbItemIndex = n
+        end
+      end
+      app.image.imageSaveFormatIndex = cmbItemIndex
+      ig.EndCombo()
     end
-    -- End Save button of screen image
+    setTooltip("Select image format")
 
     -- Icon font test
     ig.SeparatorText(IFA.ICON_FA_WRENCH .. " Icon font test ")
     ig.Text(IFA.ICON_FA_TRASH_CAN .. " Trash")
     ig.Text(IFA.ICON_FA_MAGNIFYING_GLASS_PLUS ..
-      " " .. IFA.ICON_FA_POWER_OFF ..
-      " " .. IFA.ICON_FA_MICROPHONE ..
-      " " .. IFA.ICON_FA_MICROCHIP ..
-      " " .. IFA.ICON_FA_VOLUME_HIGH ..
-      " " .. IFA.ICON_FA_SCISSORS ..
-      " " .. IFA.ICON_FA_SCREWDRIVER_WRENCH ..
-      " " .. IFA.ICON_FA_BLOG)
-      --
+     " " .. IFA.ICON_FA_POWER_OFF ..
+     " " .. IFA.ICON_FA_MICROPHONE ..
+     " " .. IFA.ICON_FA_MICROCHIP ..
+     " " .. IFA.ICON_FA_VOLUME_HIGH ..
+     " " .. IFA.ICON_FA_SCISSORS ..
+     " " .. IFA.ICON_FA_SCREWDRIVER_WRENCH ..
+     " " .. IFA.ICON_FA_BLOG)
+     --
     ig.End()
   end
   --
@@ -202,11 +231,12 @@ while not window:shouldClose() do
   imPlotWindow()
   --
   ig_impl:Render()
-    -- Save screen image to file
+
+  -- Save window image to file
   if fReqImageCapture then
     fReqImageCapture = false
     local w,h,x,y = getCurrentWindowSize(window)
-    utils.saveImage(svName, SaveFormat, w , h)
+    utils.saveImage(svName, imageFormatTbl[cmbItemIndex], w , h)
   end
   --
   window:swapBuffers()

@@ -68,7 +68,7 @@ gllib.set_loader(glfw)
 local gl, glc, glu, glext = gllib.libraries()
 local im = require"imffi"
 
-M.imageExt = {JPEG=".jpg", PNG=".png", TIFF=".tif", BMP=".bmp", GIF=".gif", ICO=".ico"}
+M.imageExt = {JPEG=".jpg", PNG=".png", TIFF=".tif", BMP=".bmp"}
 
 --------------
 --- SaveImage

@@ -31,7 +31,7 @@ This repository is under construction at this time.
 1. [Luajit](https://luajit.org/) + [ImGui](https://github.com/ocornut/imgui)  
 Windows OS binaries project using [anima](https://github.com/sonoro1234/anima) project
    - Differencies from [anima](https://github.com/sonoro1234/anima) project,
-      - Added GCC/Clang compilation option in [anima/Luajit-ImGui/CMakeLists.txt](anima/Luajit-ImGui/CMakeLists.txt)
+      - Added GCC compilation option in [anima/Luajit-ImGui/CMakeLists.txt](anima/Luajit-ImGui/CMakeLists.txt)
          1. For IME (Imput method)  
             `"-DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS"`
          1. For ImPlot  
@@ -51,8 +51,9 @@ Windows OS binaries project using [anima](https://github.com/sonoro1234/anima) p
 
 ---
 
+- 2024/02: Added: Button "Save window image" and combo box,  
+it can be saved as JPEG, PNG, TIFF, BMP file format
 - 2024/01: Added: Icon font demo
-- 2024/01: Added: Button "Save screen image", can be saved as JPEG, PNG, TIFF, BMP file format, except sdl2_opengl3 demo.
 
 
 #### Examples

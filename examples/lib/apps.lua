@@ -8,6 +8,7 @@ local IniName = (arg[0]:split("."))[1] .. ".ini"
 -- Global var
 app = {}
 app.mainWindow = {}
+app.image = {}
 
 local DEFAULT_WINDOW_WIDTH  = 1080
 local DEFAULT_WINDOW_HEIGHT =  800
@@ -21,6 +22,7 @@ function loadIni()
     app.mainWindow.height = DEFAULT_WINDOW_HEIGHT
     app.mainWindow.posx   = DEFAULT_WINDOW_POSX
     app.mainWindow.posy   = DEFAULT_WINDOW_POSY
+    app.image.imageSaveFormatIndex = 1 -- "JPEG"
     inifile.save(IniName,app)
   else -- Load ini file
     print("Load ini file: ",IniName)
