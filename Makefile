@@ -1,8 +1,9 @@
 TC = gcc
 
+#TC = msvc
+
 # Can't compile
 #TC = clang
-#TC = msvc
 
 # Must be abusolute path
 INSTALL_DIR = $(abspath $(CURDIR))/bin
@@ -17,17 +18,22 @@ BUILD_OPT += -DCMAKE_BUILD_TYPE=Release
 #BUILD_OPT += -DANIMA_BUILD_RTAUDIO=no
 #BUILD_OPT += -DANIMA_BUILD_IM=no
 
-ifeq ($(TC),gcc)
-	BUILD_OPT += -G"MSYS Makefiles"
-  COPY_DLL1 = ( cp -f dll/32bit/libgcc_s_dw2-1.dll bin/  )
-  COPY_DLL2 = (	cp -f dll/32bit/libsamplerate-0.dll bin/ )
-	BUILD_INSTALL_CMD = ( make install )
-endif
-
 ifeq ($(TC),msvc)
 	BUILD_INSTALL_CMD =  (msbuild.exe /m /p:Configuration=Release /p:Platform="Win32" anima.sln)
+else
+	BUILD_OPT += -G"MSYS Makefiles"
+	BUILD_OPT += -DCMAKE_CXX_STANDARD=11
+	BUILD_INSTALL_CMD = ( make install )
+	ifeq ($(TC),clang)
+	  # It has to be installed 'openmp' on MSys/MinGW.
+		BUILD_OPT += -C ../clang.cmake
+    BUILD_OPT += -Wno-error
+    BUILD_OPT += --compile-no-warning-as-error
+	else
+		COPY_DLL1 = ( cp -f dll/32bit/libgcc_s_dw2-1.dll bin/  )
+		COPY_DLL2 = (	cp -f dll/32bit/libsamplerate-0.dll bin/ )
+	endif
 endif
-
 
 BUILD_DIR = build
 

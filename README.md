@@ -1,11 +1,8 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [luajitImGui](#luajitimgui)
-  - [Notice](#notice)
-  - [Project](#project)
+- [LuajitImGui](#luajitimgui)
   - [Versions](#versions)
-  - [History](#history)
   - [Examples](#examples)
     - [glfw_opengl3](#glfw_opengl3)
     - [glfw_opengl3_implot](#glfw_opengl3_implot)
@@ -13,47 +10,31 @@
     - [sdl2_opengl3](#sdl2_opengl3)
   - [Run examples](#run-examples)
   - [Other examples](#other-examples)
+  - [History](#history)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-### luajitImGui
-
-#### Notice 
+### LuajitImGui
 
 ---
 
-This repository is under construction at this time.
-
-#### Project
-
----
-
-1. [Luajit](https://luajit.org/) + [ImGui](https://github.com/ocornut/imgui)  
-Windows OS binaries project using [anima](https://github.com/sonoro1234/anima) project
-   - Differencies from [anima](https://github.com/sonoro1234/anima) project,
-      - Added GCC compilation option in [anima/Luajit-ImGui/CMakeLists.txt](anima/Luajit-ImGui/CMakeLists.txt)
-         1. For IME (Imput method)  
+- [Luajit](https://luajit.org/) + [ImGui](https://github.com/ocornut/imgui) : The binaries project on Windows OS using [anima](https://github.com/sonoro1234/anima) project  
+Differencies from [anima](https://github.com/sonoro1234/anima) project are as follows,
+   - Added GCC compilation options in [anima/Luajit-ImGui/CMakeLists.txt](anima/Luajit-ImGui/CMakeLists.txt)  
+      1. For IME (Imput method)  
             `"-DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS"`
-         1. For ImPlot  
+      1. For ImPlot  
             `"-DImDrawIdx=unsigned int"`
 
 
-1. Added simple examples below like [imguin](https://github.com/dinau/imguin) project.
+- Added simple examples below like [imguin](https://github.com/dinau/imguin) project.
 
 #### Versions
 
 ---
 
-- ImGui v1.90.1
+- ImGui v1.90.4 (2024/02)
 - LuaJIT 2.1.1697887905 -- Copyright (C) 2005-2023 Mike Pall. https://luajit.o
-
-#### History
-
----
-
-- 2024/02: Added: Button "Save window image" and combo box,  
-it can be saved as JPEG, PNG, TIFF, BMP file format
-- 2024/01: Added: Icon font demo
 
 
 #### Examples
@@ -78,7 +59,7 @@ See more example: [implot_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot_
 ![sdl2_opengl3](examples/img/sdl2_opengl3.png)
 
 
-#### Run examples
+#### Running examples
 
 ---
 
@@ -101,3 +82,11 @@ r.bat
 ---
 
 Refer to nice exmaples: [bin/examples](bin/examples)
+
+#### History
+
+---
+- 2024/03: Updated to ImGui v1.90.4
+- 2024/02: Added: Button "Save window image" and combo box,  
+it can be saved as JPEG, PNG, TIFF, BMP file format
+- 2024/01: Added: Icon font demo
