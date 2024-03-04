@@ -50,7 +50,7 @@ local ig_impl = ig.Imgui_Impl_glfw_opengl3() --standard imgui opengl3 example
 --local ig_impl = ig.ImplGlfwGL3() --multicontext
 --local ig_impl = ig.Imgui_Impl_glfw_opengl2() --standard imgui opengl2 example
 
-local pio= ig.GetIO()
+local pio = ig.GetIO()
 pio.ConfigFlags = ig.lib.ImGuiConfigFlags_NavEnableKeyboard + pio.ConfigFlags
 
 ig_impl:Init(window, true)
@@ -173,7 +173,7 @@ while not window:shouldClose() do
     ig.PushStyleColor(ig.lib.ImGuiCol_ButtonHovered, ig.ImVec4(0.8, 0.8, 0.0, 1.0))
     ig.PushStyleColor(ig.lib.ImGuiCol_ButtonActive,  ig.ImVec4(0.9, 0.9, 0.0, 1.0))
     ig.PushStyleColor(ig.lib.ImGuiCol_Text, ig.ImVec4(0.0, 0.0, 0.0,1.0))
-    if ig.Button("Save window image") then
+    if ig.Button("画面を保存") then
       fReqImageCapture = true
     end
     ig.PopStyleColor(4)

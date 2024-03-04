@@ -28,13 +28,21 @@ function M.checkLang(countryID)
   return false
 end
 
+function M.loadWindowIcon(window,iconName)
+  if true then
+    M.loadWindowIconIm(window,iconName)  -- OK for gcc and msvc compiler
+  else
+    M.loadWindowIconSTB(window,iconName) -- Only for gcc compiler at this moment
+  end
+end
+
+local ffi = require"ffi"
+local glfw = require"glfw"
 -------------------------
 --- Load title bar icon
 -------------------------
-local ffi = require "ffi"
-local glfw = require"glfw"
 local stb = require"stb_image"
-function M.loadWindowIcon(window,iconName)
+function M.loadWindowIconSTB(window,iconName)
   if not M.fileExists(iconName) then
     glfw.glfw.glfwSetWindowIcon(window, 0, nil)
     print("Error!: Can't find Icon ",iconName)
@@ -48,25 +56,76 @@ function M.loadWindowIcon(window,iconName)
   local img = ffi.new("GLFWimage")
   img.width  = w[0]
   img.height = h[0]
-  img.pixels = ffi.new("unsigned char[?]", w[0] * h[0] * 4)
-  for x=0, w[0]-1 do
-    for y=0 ,h[0]-1 do
-      for p=0 ,3 do
-        img.pixels[(x + y*w[0])*4 + p] = pixels[(x + y*w[0])*4 + p]
+  if true then
+    img.pixels = pixels
+    glfw.glfw.glfwSetWindowIcon(window, 1, img)
+    stb.stbi_image_free(pixels)
+  else
+    img.pixels = ffi.new("unsigned char[?]", w[0] * h[0] * 4)
+    for x=0, w[0]-1 do
+      for y=0 ,h[0]-1 do
+        for p=0 ,3 do
+          img.pixels[(x + y*w[0])*4 + p] = pixels[(x + y*w[0])*4 + p]
+        end
       end
     end
+    stb.stbi_image_free(pixels)
+    glfw.glfw.glfwSetWindowIcon(window, 1, img)
   end
-  stb.stbi_image_free(pixels)
+end
+
+local im = require"imffi"
+local imffi = im.imffi
+ffi.cdef[[
+  int imFileReadImageData (imFile* ifile, void* data, int convert2bitmap, int color_mode_flags);
+]]
+----------------------
+-- loadWindowIconGLFW
+----------------------
+function M.loadWindowIconIm(window,iconName)
+  function checkError(err)
+    if (err and err ~= imffi.IM_ERR_NONE) then
+      print("Error load: ",iconName,err)
+      error(im.ErrorStr(err))
+    end
+  end
+  if not M.fileExists(iconName) then
+    glfw.glfw.glfwSetWindowIcon(window, 0, nil)
+    print("Error!: Can't find Icon ",iconName)
+    return
+  end
+  local err = ffi.new("int[1]",imffi.IM_ERR_NONE)
+  local width = ffi.new("int[1]")
+  local height = ffi.new("int[1]")
+  local colorMode = ffi.new("int[1]",imffi.IM_ALPHA)
+  local dataType = ffi.new("int[1]")
+  local ifile = imffi.imFileOpen(iconName, err)
+  checkError(err[0])
+  imffi.imFileReadImageInfo(ifile, 0, width, height, colorMode, dataType)
+  local data = ffi.new("unsigned char[?]",width[0] * height[0] * 4)
+  --IM_ALPHA    = 0x100,  /**< adds an Alpha channel */
+  --IM_PACKED   = 0x200,  /**< packed components (rgbrgbrgb...) */
+  --IM_TOPDOWN  = 0x400   /**< orientation from top down to bottom */
+  --print("width,height: ",width[0],height[0])
+  --print("dataType: ",dataType[0])
+  --print(string.format("colorMode: 0x%X",colorMode[0]))
+
+  -- Convert to packed alpha topdown image
+  local errRead = imffi.imFileReadImageData(ifile, data, 0
+                      ,imffi.IM_ALPHA + imffi.IM_PACKED + imffi.IM_TOPDOWN)
+  checkError(errRead)
+  local img = ffi.new("GLFWimage")
+  img.width  = width[0]
+  img.height = height[0]
+  img.pixels = data
   glfw.glfw.glfwSetWindowIcon(window, 1, img)
+  imffi.imFileClose(ifile)
 end
 
 ---
-local ffi = require "ffi"
-local glfw = require"glfw"
 local gllib = require"gl"
 gllib.set_loader(glfw)
 local gl, glc, glu, glext = gllib.libraries()
-local im = require"imffi"
 
 M.imageExt = {JPEG=".jpg", PNG=".png", TIFF=".tif", BMP=".bmp"}
 
