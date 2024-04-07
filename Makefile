@@ -1,6 +1,6 @@
-TC = gcc
+TC ?= gcc
 
-#TC = msvc
+#TC ?= msvc
 
 # Can't compile
 #TC = clang
