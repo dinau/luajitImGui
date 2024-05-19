@@ -633,18 +633,19 @@ function ImDrawList:AddCircleFilled(center,radius,col,num_segments)
     num_segments = num_segments or 0
     return lib.ImDrawList_AddCircleFilled(self,center,radius,col,num_segments)
 end
+ImDrawList.AddConcavePolyFilled = lib.ImDrawList_AddConcavePolyFilled
 ImDrawList.AddConvexPolyFilled = lib.ImDrawList_AddConvexPolyFilled
 ImDrawList.AddDrawCmd = lib.ImDrawList_AddDrawCmd
-function ImDrawList:AddEllipse(center,radius_x,radius_y,col,rot,num_segments,thickness)
+function ImDrawList:AddEllipse(center,radius,col,rot,num_segments,thickness)
     num_segments = num_segments or 0
     rot = rot or 0.0
     thickness = thickness or 1.0
-    return lib.ImDrawList_AddEllipse(self,center,radius_x,radius_y,col,rot,num_segments,thickness)
+    return lib.ImDrawList_AddEllipse(self,center,radius,col,rot,num_segments,thickness)
 end
-function ImDrawList:AddEllipseFilled(center,radius_x,radius_y,col,rot,num_segments)
+function ImDrawList:AddEllipseFilled(center,radius,col,rot,num_segments)
     num_segments = num_segments or 0
     rot = rot or 0.0
-    return lib.ImDrawList_AddEllipseFilled(self,center,radius_x,radius_y,col,rot,num_segments)
+    return lib.ImDrawList_AddEllipseFilled(self,center,radius,col,rot,num_segments)
 end
 function ImDrawList:AddImage(user_texture_id,p_min,p_max,uv_min,uv_max,col)
     col = col or 4294967295
@@ -744,10 +745,11 @@ function ImDrawList:PathBezierQuadraticCurveTo(p2,p3,num_segments)
     return lib.ImDrawList_PathBezierQuadraticCurveTo(self,p2,p3,num_segments)
 end
 ImDrawList.PathClear = lib.ImDrawList_PathClear
-function ImDrawList:PathEllipticalArcTo(center,radius_x,radius_y,rot,a_min,a_max,num_segments)
+function ImDrawList:PathEllipticalArcTo(center,radius,rot,a_min,a_max,num_segments)
     num_segments = num_segments or 0
-    return lib.ImDrawList_PathEllipticalArcTo(self,center,radius_x,radius_y,rot,a_min,a_max,num_segments)
+    return lib.ImDrawList_PathEllipticalArcTo(self,center,radius,rot,a_min,a_max,num_segments)
 end
+ImDrawList.PathFillConcave = lib.ImDrawList_PathFillConcave
 ImDrawList.PathFillConvex = lib.ImDrawList_PathFillConvex
 ImDrawList.PathLineTo = lib.ImDrawList_PathLineTo
 ImDrawList.PathLineToMergeDuplicate = lib.ImDrawList_PathLineToMergeDuplicate
@@ -6028,7 +6030,6 @@ function M.GetKeyData(a1,a2) -- generic version
     print(a1,a2)
     error'M.GetKeyData could not find overloaded'
 end
-M.GetKeyIndex = lib.igGetKeyIndex
 function M.GetKeyMagnitude2d(key_left,key_right,key_up,key_down)
     local nonUDT_out = ffi.new("ImVec2")
     lib.igGetKeyMagnitude2d(nonUDT_out,key_left,key_right,key_up,key_down)
@@ -6337,6 +6338,7 @@ M.ImStrnicmp = lib.igImStrnicmp
 M.ImTextCharFromUtf8 = lib.igImTextCharFromUtf8
 M.ImTextCharToUtf8 = lib.igImTextCharToUtf8
 M.ImTextCountCharsFromUtf8 = lib.igImTextCountCharsFromUtf8
+M.ImTextCountLines = lib.igImTextCountLines
 M.ImTextCountUtf8BytesFromChar = lib.igImTextCountUtf8BytesFromChar
 M.ImTextCountUtf8BytesFromStr = lib.igImTextCountUtf8BytesFromStr
 M.ImTextFindPreviousUtf8Codepoint = lib.igImTextFindPreviousUtf8Codepoint
@@ -6354,6 +6356,7 @@ function M.ImTriangleClosestPoint(a,b,c,p)
     return nonUDT_out
 end
 M.ImTriangleContainsPoint = lib.igImTriangleContainsPoint
+M.ImTriangleIsClockwise = lib.igImTriangleIsClockwise
 M.ImTrunc_Float = lib.igImTrunc_Float
 function M.ImTrunc_Vec2(v)
     local nonUDT_out = ffi.new("ImVec2")
@@ -7097,6 +7100,7 @@ function M.SetNextWindowPos(pos,cond,pivot)
     pivot = pivot or ImVec2(0,0)
     return lib.igSetNextWindowPos(pos,cond,pivot)
 end
+M.SetNextWindowRefreshPolicy = lib.igSetNextWindowRefreshPolicy
 M.SetNextWindowScroll = lib.igSetNextWindowScroll
 function M.SetNextWindowSize(size,cond)
     cond = cond or 0
@@ -7389,10 +7393,7 @@ end
 M.TabItemEx = lib.igTabItemEx
 M.TabItemLabelAndCloseButton = lib.igTabItemLabelAndCloseButton
 M.TableAngledHeadersRow = lib.igTableAngledHeadersRow
-function M.TableAngledHeadersRowEx(angle,max_label_width)
-    max_label_width = max_label_width or 0.0
-    return lib.igTableAngledHeadersRowEx(angle,max_label_width)
-end
+M.TableAngledHeadersRowEx = lib.igTableAngledHeadersRowEx
 M.TableBeginApplyRequests = lib.igTableBeginApplyRequests
 M.TableBeginCell = lib.igTableBeginCell
 M.TableBeginContextMenuPopup = lib.igTableBeginContextMenuPopup
@@ -7592,6 +7593,7 @@ M.UpdateMouseMovingWindowEndFrame = lib.igUpdateMouseMovingWindowEndFrame
 M.UpdateMouseMovingWindowNewFrame = lib.igUpdateMouseMovingWindowNewFrame
 M.UpdatePlatformWindows = lib.igUpdatePlatformWindows
 M.UpdateWindowParentAndRootLinks = lib.igUpdateWindowParentAndRootLinks
+M.UpdateWindowSkipRefresh = lib.igUpdateWindowSkipRefresh
 function M.VSliderFloat(label,size,v,v_min,v_max,format,flags)
     flags = flags or 0
     format = format or "%.3f"
