@@ -28,19 +28,15 @@ ifeq ($(TC),msvc)
 else
 	BUILD_OPT += -G"MSYS Makefiles"
 	BUILD_OPT += -DCMAKE_CXX_STANDARD=11
+	BUILD_OPT += -DCMAKE_C_FLAGS_RELEASE="-O2"
 	BUILD_OPT += -DCMAKE_CXX_FLAGS_RELEASE="-O2"
-	BUILD_OPT += -DCMAKE_C_FLAGS_RELEASE="  -O2"
 	BUILD_INSTALL_CMD = ( make install )
 	ifeq ($(TC),clang)
 		BUILD_OPT += -C ../clang.cmake
 	  # It has to be installed 'openmp' on MSys/MinGW.
-    BUILD_OPT += -DCMAKE_C_FLAGS_RELEASE="-Wno-error"
-    BUILD_OPT += -DCMAKE_C_FLAGS_RELEASE="--compile-no-warning-as-error"
-		BUILD_OPT += -DCMAKE_C_FLAGS_RELEASE="-Wno-error=implicit-function-declaration"
+    BUILD_OPT += -DCMAKE_C_FLAGS_RELEASE="-Wno-error   -Wno-error=implicit-function-declaration  -O2"
 	  # for c++
-    BUILD_OPT += -DCMAKE_CXX_FLAGS_RELEASE="-Wno-error"
-    BUILD_OPT += -DCMAKE_CXX_FLAGS_RELEASE="--compile-no-warning-as-error"
-		BUILD_OPT += -DCMAKE_CXX_FLAGS_RELEASE="-Wno-error=implicit-function-declaration"
+    BUILD_OPT += -DCMAKE_CXX_FLAGS_RELEASE="-Wno-error  -Wno-error=implicit-function-declaration -O2"
 	else
 		COPY_DLL1 = ( cp -f dll/32bit/libgcc_s_dw2-1.dll bin/  )
 	endif
