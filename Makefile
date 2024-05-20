@@ -24,7 +24,8 @@ BUILD_OPT += -DCMAKE_BUILD_TYPE=Release
 #BUILD_OPT += -DANIMA_BUILD_IM=no
 
 ifeq ($(TC),msvc)
-	BUILD_INSTALL_CMD =  (msbuild.exe /m /p:Configuration=Release /p:Platform="Win32" anima.sln)
+	# Compile using build/anima.sln on Visual Studio 2019 IDE.
+	#BUILD_INSTALL_CMD =  (msbuild.exe /m  build/anima.sln)
 else
 	BUILD_OPT += -G"MSYS Makefiles"
 	BUILD_OPT += -DCMAKE_CXX_STANDARD=11
