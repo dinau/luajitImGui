@@ -4,6 +4,7 @@
 - [LuajitImGui](#luajitimgui)
   - [Versions](#versions)
   - [Examples](#examples)
+    - [glfw_opengl3_simple](#glfw_opengl3_simple)
     - [glfw_opengl3](#glfw_opengl3)
     - [glfw_opengl3_implot](#glfw_opengl3_implot)
     - [glfw_opengl3_jp](#glfw_opengl3_jp)
@@ -29,6 +30,7 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
 
 - Added simple examples below like [imguin](https://github.com/dinau/imguin) project.
+- Support OS: Windows10
 
 #### Versions
 
@@ -39,6 +41,10 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 #### Examples
 
 ---
+
+##### [glfw_opengl3_simple](examples/glfw_opengl3_simple/glfw_opengl3_simple.lua)  
+
+![glfw_opengl3_simple](examples/img/glfw_opengl3_simple.png)
 
 ##### [glfw_opengl3](examples/glfw_opengl3/glfw_opengl3.lua)  
 
@@ -94,12 +100,13 @@ Refer to nice exmaples: [bin/examples](bin/examples)
    - git version 2.41.0.windows.3
    - make: GNU Make 4.2.1
    - Libraries: openmp ? etc
+- Build
 
-```sh
-git clone --recursive https://github.com/dinau/luajitImGui
-cd luajitImGui
-make
-```
+   ```sh
+   git clone --recurse-submodules https://github.com/dinau/luajitImGui
+   cd luajitImGui
+   make
+   ```
 
 #### History
 
