@@ -22,11 +22,17 @@
 
 - [Luajit](https://luajit.org/) + [ImGui](https://github.com/ocornut/imgui) : The binaries project on Windows OS using [anima](https://github.com/sonoro1234/anima) project  
 Differencies from [anima](https://github.com/sonoro1234/anima) project are as follows,
-   - Added compilation options in [anima/Luajit-ImGui/CMakeLists.txt](anima/Luajit-ImGui/CMakeLists.txt)  
-      1. For IME (Imput method)  
-            `"-DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS"`
-      1. For ImPlot  
-            `"-DImDrawIdx=unsigned int"`
+   1. Added compilation option for **IME (Imput method)**
+
+      ```sh
+      -DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS
+      ```
+
+   1. Added compilation option for **ImPlot**
+
+      ```sh
+      -DImDrawIdx="unsigned int"
+      ```
 
 
 - Added simple examples below like [imguin](https://github.com/dinau/imguin) project.
@@ -99,6 +105,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
    - cmake version 3.28.0-rc2
    - git version 2.41.0.windows.3
    - make: GNU Make 4.2.1
+   - MSys/MinGW tools
    - Libraries: openmp ? etc
 - Build
 
@@ -117,3 +124,16 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 - 2024/02: Added: Button "Save window image" and combo box,  
 it can be saved as JPEG, PNG, TIFF, BMP file format
 - 2024/01: Added: Icon font demo
+
+
+#### Similar project
+
+---
+
+[imguin](https://github.com/dinau/imguin)
+
+[nimgl_test](https://github.com/dinau/nimgl_test)
+
+[nim_implot](https://github.com/dinau/nim_implot)
+
+[DearPyGui for 32bit WinodwsOS Binary](https://github.com/dinau/DearPyGui32/tree/win32)
