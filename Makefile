@@ -36,13 +36,12 @@ else
 		BUILD_OPT += -C ../clang.cmake
 	  # It has to be installed 'openmp' on MSys/MinGW.
     BUILD_OPT += -DCMAKE_C_FLAGS_RELEASE="-Wno-error  \
-								 -Wno-error=implicit-function-declaration
-		             -
+								 -Wno-error=implicit-function-declaration \
 		             -O2"
 	  # for c++
     BUILD_OPT += -DCMAKE_CXX_FLAGS_RELEASE="-Wno-error  \
 								 -Wno-error=implicit-function-declaration \
-								 -DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS
+								 -DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS \
                  -DImDrawIdx=\"unsigned int\" \
 								 -O2"
 	else
