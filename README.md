@@ -13,6 +13,7 @@
   - [Other examples](#other-examples)
   - [Build from source](#build-from-source)
   - [History](#history)
+  - [Similar project](#similar-project)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -42,7 +43,7 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
 ---
 
-- ImGui v1.90.6 (2024/05)
+- ImGui v1.90.7 (2024/05)
 
 #### Examples
 
@@ -99,7 +100,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 ---
 
 - Prerequisite
-   - Clang 18.1.5 (Current compiler)
+   - Clang 18.1.6 (Current compiler)
    - (gcc.exe (Rev2, Built by MSYS2 project) 13.2.0)
    - (Visual Studio 2019 C/C++)
    - cmake version 3.28.0-rc2
@@ -119,6 +120,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 
 ---
 
+- 2024/05: Updated to ImGui v1.90.7
 - 2024/05: Updated to ImGui v1.90.6
 - 2024/03: Updated to ImGui v1.90.4
 - 2024/02: Added: Button "Save window image" and combo box,  

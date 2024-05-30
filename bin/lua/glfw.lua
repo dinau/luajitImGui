@@ -4,6 +4,9 @@ typedef void (*GLFWvkproc)(void);
 typedef struct GLFWmonitor GLFWmonitor;
 typedef struct GLFWwindow GLFWwindow;
 typedef struct GLFWcursor GLFWcursor;
+typedef void* (* GLFWallocatefun)(size_t size, void* user);
+typedef void* (* GLFWreallocatefun)(void* block, size_t size, void* user);
+typedef void (* GLFWdeallocatefun)(void* block, void* user);
 typedef void (* GLFWerrorfun)(int error_code, const char* description);
 typedef void (* GLFWwindowposfun)(GLFWwindow* window, int xpos, int ypos);
 typedef void (* GLFWwindowsizefun)(GLFWwindow* window, int width, int height);
@@ -51,13 +54,23 @@ typedef struct GLFWgamepadstate
 unsigned char buttons[15];
 float axes[6];
 } GLFWgamepadstate;
+typedef struct GLFWallocator
+{
+GLFWallocatefun allocate;
+GLFWreallocatefun reallocate;
+GLFWdeallocatefun deallocate;
+void* user;
+} GLFWallocator;
 int glfwInit(void);
 void glfwTerminate(void);
 void glfwInitHint(int hint, int value);
+void glfwInitAllocator(const GLFWallocator* allocator);
 void glfwGetVersion(int* major, int* minor, int* rev);
 const char* glfwGetVersionString(void);
 int glfwGetError(const char** description);
 GLFWerrorfun glfwSetErrorCallback(GLFWerrorfun callback);
+int glfwGetPlatform(void);
+int glfwPlatformSupported(int platform);
 GLFWmonitor** glfwGetMonitors(int* count);
 GLFWmonitor* glfwGetPrimaryMonitor(void);
 void glfwGetMonitorPos(GLFWmonitor* monitor, int* xpos, int* ypos);
@@ -80,6 +93,7 @@ GLFWwindow* glfwCreateWindow(int width, int height, const char* title, GLFWmonit
 void glfwDestroyWindow(GLFWwindow* window);
 int glfwWindowShouldClose(GLFWwindow* window);
 void glfwSetWindowShouldClose(GLFWwindow* window, int value);
+const char* glfwGetWindowTitle(GLFWwindow* window);
 void glfwSetWindowTitle(GLFWwindow* window, const char* title);
 void glfwSetWindowIcon(GLFWwindow* window, int count, const GLFWimage* images);
 void glfwGetWindowPos(GLFWwindow* window, int* xpos, int* ypos);
@@ -173,6 +187,16 @@ local glfwc= {
 	['GLFW_ACCUM_GREEN_BITS'] = 0x00021008,
 	['GLFW_ACCUM_RED_BITS'] = 0x00021007,
 	['GLFW_ALPHA_BITS'] = 0x00021004,
+	['GLFW_ANGLE_PLATFORM_TYPE'] = 0x00050002,
+	['GLFW_ANGLE_PLATFORM_TYPE_D3D11'] = 0x00037005,
+	['GLFW_ANGLE_PLATFORM_TYPE_D3D9'] = 0x00037004,
+	['GLFW_ANGLE_PLATFORM_TYPE_METAL'] = 0x00037008,
+	['GLFW_ANGLE_PLATFORM_TYPE_NONE'] = 0x00037001,
+	['GLFW_ANGLE_PLATFORM_TYPE_OPENGL'] = 0x00037002,
+	['GLFW_ANGLE_PLATFORM_TYPE_OPENGLES'] = 0x00037003,
+	['GLFW_ANGLE_PLATFORM_TYPE_VULKAN'] = 0x00037007,
+	['GLFW_ANY_PLATFORM'] = 0x00060000,
+	['GLFW_ANY_POSITION'] = 0x80000000,
 	['GLFW_ANY_RELEASE_BEHAVIOR'] = 0,
 	['GLFW_API_UNAVAILABLE'] = 0x00010006,
 	['GLFW_ARROW_CURSOR'] = 0x00036001,
@@ -188,6 +212,7 @@ local glfwc= {
 	['GLFW_COCOA_RETINA_FRAMEBUFFER'] = 0x00023001,
 	['GLFW_CONNECTED'] = 0x00040001,
 	['GLFW_CONTEXT_CREATION_API'] = 0x0002200B,
+	['GLFW_CONTEXT_DEBUG'] = 0x00022007,
 	['GLFW_CONTEXT_NO_ERROR'] = 0x0002200A,
 	['GLFW_CONTEXT_RELEASE_BEHAVIOR'] = 0x00022009,
 	['GLFW_CONTEXT_REVISION'] = 0x00022004,
@@ -196,9 +221,11 @@ local glfwc= {
 	['GLFW_CONTEXT_VERSION_MINOR'] = 0x00022003,
 	['GLFW_CROSSHAIR_CURSOR'] = 0x00036003,
 	['GLFW_CURSOR'] = 0x00033001,
+	['GLFW_CURSOR_CAPTURED'] = 0x00034004,
 	['GLFW_CURSOR_DISABLED'] = 0x00034003,
 	['GLFW_CURSOR_HIDDEN'] = 0x00034002,
 	['GLFW_CURSOR_NORMAL'] = 0x00034001,
+	['GLFW_CURSOR_UNAVAILABLE'] = 0x0001000B,
 	['GLFW_DECORATED'] = 0x00020005,
 	['GLFW_DEPTH_BITS'] = 0x00021005,
 	['GLFW_DISCONNECTED'] = 0x00040002,
@@ -206,6 +233,8 @@ local glfwc= {
 	['GLFW_DOUBLEBUFFER'] = 0x00021010,
 	['GLFW_EGL_CONTEXT_API'] = 0x00036002,
 	['GLFW_FALSE'] = 0,
+	['GLFW_FEATURE_UNAVAILABLE'] = 0x0001000C,
+	['GLFW_FEATURE_UNIMPLEMENTED'] = 0x0001000D,
 	['GLFW_FLOATING'] = 0x00020007,
 	['GLFW_FOCUSED'] = 0x00020001,
 	['GLFW_FOCUS_ON_SHOW'] = 0x0002000C,
@@ -411,7 +440,9 @@ local glfwc= {
 	['GLFW_MOUSE_BUTTON_LEFT'] = 0,
 	['GLFW_MOUSE_BUTTON_MIDDLE'] = 2,
 	['GLFW_MOUSE_BUTTON_RIGHT'] = 1,
+	['GLFW_MOUSE_PASSTHROUGH'] = 0x0002000D,
 	['GLFW_NATIVE_CONTEXT_API'] = 0x00036001,
+	['GLFW_NOT_ALLOWED_CURSOR'] = 0x0003600A,
 	['GLFW_NOT_INITIALIZED'] = 0x00010001,
 	['GLFW_NO_API'] = 0,
 	['GLFW_NO_CURRENT_CONTEXT'] = 0x00010002,
@@ -429,7 +460,17 @@ local glfwc= {
 	['GLFW_OPENGL_PROFILE'] = 0x00022008,
 	['GLFW_OSMESA_CONTEXT_API'] = 0x00036003,
 	['GLFW_OUT_OF_MEMORY'] = 0x00010005,
+	['GLFW_PLATFORM'] = 0x00050003,
+	['GLFW_PLATFORM_COCOA'] = 0x00060002,
 	['GLFW_PLATFORM_ERROR'] = 0x00010008,
+	['GLFW_PLATFORM_NULL'] = 0x00060005,
+	['GLFW_PLATFORM_UNAVAILABLE'] = 0x0001000E,
+	['GLFW_PLATFORM_WAYLAND'] = 0x00060003,
+	['GLFW_PLATFORM_WIN32'] = 0x00060001,
+	['GLFW_PLATFORM_X11'] = 0x00060004,
+	['GLFW_POINTING_HAND_CURSOR'] = 0x00036004,
+	['GLFW_POSITION_X'] = 0x0002000E,
+	['GLFW_POSITION_Y'] = 0x0002000F,
 	['GLFW_PRESS'] = 1,
 	['GLFW_RAW_MOUSE_MOTION'] = 0x00033005,
 	['GLFW_RED_BITS'] = 0x00021001,
@@ -439,7 +480,13 @@ local glfwc= {
 	['GLFW_RELEASE_BEHAVIOR_NONE'] = 0x00035002,
 	['GLFW_REPEAT'] = 2,
 	['GLFW_RESIZABLE'] = 0x00020003,
+	['GLFW_RESIZE_ALL_CURSOR'] = 0x00036009,
+	['GLFW_RESIZE_EW_CURSOR'] = 0x00036005,
+	['GLFW_RESIZE_NESW_CURSOR'] = 0x00036008,
+	['GLFW_RESIZE_NS_CURSOR'] = 0x00036006,
+	['GLFW_RESIZE_NWSE_CURSOR'] = 0x00036007,
 	['GLFW_SAMPLES'] = 0x0002100D,
+	['GLFW_SCALE_FRAMEBUFFER'] = 0x0002200D,
 	['GLFW_SCALE_TO_MONITOR'] = 0x0002200C,
 	['GLFW_SRGB_CAPABLE'] = 0x0002100E,
 	['GLFW_STENCIL_BITS'] = 0x00021006,
@@ -449,16 +496,20 @@ local glfwc= {
 	['GLFW_TRANSPARENT_FRAMEBUFFER'] = 0x0002000A,
 	['GLFW_TRUE'] = 1,
 	['GLFW_VERSION_MAJOR'] = 3,
-	['GLFW_VERSION_MINOR'] = 3,
-	['GLFW_VERSION_REVISION'] = 9,
+	['GLFW_VERSION_MINOR'] = 4,
+	['GLFW_VERSION_REVISION'] = 0,
 	['GLFW_VERSION_UNAVAILABLE'] = 0x00010007,
 	['GLFW_VISIBLE'] = 0x00020004,
 	['GLFW_VRESIZE_CURSOR'] = 0x00036006,
+	['GLFW_WAYLAND_APP_ID'] = 0x00026001,
 	['GLFW_WAYLAND_DISABLE_LIBDECOR'] = 0x00038002,
 	['GLFW_WAYLAND_LIBDECOR'] = 0x00053001,
 	['GLFW_WAYLAND_PREFER_LIBDECOR'] = 0x00038001,
+	['GLFW_WIN32_KEYBOARD_MENU'] = 0x00025001,
+	['GLFW_WIN32_SHOWDEFAULT'] = 0x00025002,
 	['GLFW_X11_CLASS_NAME'] = 0x00024001,
 	['GLFW_X11_INSTANCE_NAME'] = 0x00024002,
+	['GLFW_X11_XCB_VULKAN_SURFACE'] = 0x00052001,
 }
 
 local ffi = require "ffi"
