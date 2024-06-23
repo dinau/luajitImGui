@@ -5,7 +5,7 @@
 # Visual studio 2019 C/C++
 #TC ?= msvc
 
-# Compile ok  Clang version 18.1.5 MinGW
+# Compile ok  Clang version 18.1.6 MinGW
 TC = clang
 
 # Must be abusolute path
@@ -13,7 +13,7 @@ INSTALL_DIR = $(abspath $(CURDIR))/bin
 #
 BUILD_OPT += -DLUAJIT_BIN=$(INSTALL_DIR)  # Install folder
 
-# Selsct main options
+# Select main options
 #BUILD_OPT += -DCMAKE_BUILD_TYPE=RelWithDebInfo
 BUILD_OPT += -DCMAKE_BUILD_TYPE=Release
 
@@ -52,7 +52,7 @@ endif
 
 BUILD_DIR = build
 
-.PHONY: copy_dll build clean $(INSTALL_DIR)
+.PHONY: copy_dll build clean $(INSTALL_DIR) update zip
 
 all: $(INSTALL_DIR) $(BUILD_DIR) copy_dll
 	(cd $(BUILD_DIR); cmake ../anima $(BUILD_OPT) )
@@ -74,7 +74,7 @@ clean:
 	-rm -fr $(INSTALL_DIR)
 
 
-VER ?= 1.90.6.3
+VER ?= 1.90.8.0
 #VER ?= 1.89.9.8
 GIT_DIR = .
 
@@ -83,6 +83,8 @@ REPO_NAME = $(CURDIR)
 #OPT += --dry-run
 OPT += --force-submodules
 
+update:
+	(cd anima;git pull --recurse-submodules)
 
 zip:
 	#(cd $(GIT_DIR);git checkout $(VER))

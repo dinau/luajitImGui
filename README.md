@@ -43,7 +43,7 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
 ---
 
-- ImGui v1.90.7 (2024/05)
+- ImGui v1.90.8 (2024/06)
 
 #### Examples
 
@@ -103,9 +103,9 @@ Refer to nice exmaples: [bin/examples](bin/examples)
    - Clang 18.1.6 (Current compiler)
    - (gcc.exe (Rev2, Built by MSYS2 project) 13.2.0)
    - (Visual Studio 2019 C/C++)
-   - cmake version 3.28.0-rc2
-   - git version 2.41.0.windows.3
-   - make: GNU Make 4.2.1
+   - Cmake version 3.30.0-rc3
+   - Git version 2.45.2.windows.1
+   - Make: GNU Make 4.3
    - MSys/MinGW tools
    - Libraries: openmp ? etc
 - Build
@@ -120,6 +120,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 
 ---
 
+- 2024/06: Updated to ImGui v1.90.8
 - 2024/05: Updated to ImGui v1.90.7
 - 2024/05: Updated to ImGui v1.90.6
 - 2024/03: Updated to ImGui v1.90.4
