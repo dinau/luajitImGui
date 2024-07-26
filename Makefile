@@ -5,7 +5,7 @@
 # Visual studio 2019 C/C++
 #TC ?= msvc
 
-# Compile ok  Clang version 18.1.6 MinGW
+# Compile ok  Clang version 18.1.8 MinGW
 TC = clang
 
 # Must be abusolute path
@@ -44,9 +44,8 @@ else
 								 -DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS \
                  -DImDrawIdx=\"unsigned int\" \
 								 -O2"
-	else
-		COPY_DLL1 = ( cp -f dll/32bit/libgcc_s_dw2-1.dll bin/  )
 	endif
+	COPY_DLL1 = ( cp -f dll/32bit/libgcc_s_dw2-1.dll bin/  )
 	COPY_DLL2 = (	cp -f dll/32bit/libsamplerate-0.dll bin/ )
 endif
 
@@ -57,7 +56,7 @@ BUILD_DIR = build
 all: $(INSTALL_DIR) $(BUILD_DIR) copy_dll
 	(cd $(BUILD_DIR); cmake ../anima $(BUILD_OPT) )
 	(cd $(BUILD_DIR); $(BUILD_INSTALL_CMD) )
-	-strip bin/*
+	@-strip bin/*
 
 copy_dll:
 	$(COPY_DLL1)

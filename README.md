@@ -2,7 +2,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [LuajitImGui](#luajitimgui)
-  - [Versions](#versions)
+  - [ImGui / CImGui Version](#imgui--cimgui-version)
   - [Examples](#examples)
     - [glfw_opengl3_simple](#glfw_opengl3_simple)
     - [glfw_opengl3](#glfw_opengl3)
@@ -35,15 +35,15 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
       -DImDrawIdx="unsigned int"
       ```
 
-
-- Added simple examples below like [imguin](https://github.com/dinau/imguin) project.
+   1. Included newer [Font Awesome](https://fontawesome.com/search?m=free&o=r) Icon fonts.
+   1. Added simple examples like [imguin](https://github.com/dinau/imguin) project.
 - Support OS: Windows10
 
-#### Versions
+#### ImGui / CImGui Version
 
 ---
 
-- ImGui v1.90.8 (2024/06)
+- ImGui v1.90.9dock (2024/07)
 
 #### Examples
 
@@ -100,14 +100,14 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 ---
 
 - Prerequisite
-   - Clang 18.1.6 (Current compiler)
-   - (gcc.exe (Rev2, Built by MSYS2 project) 13.2.0)
+   - Clang 18.1.8 (Current compiler)
+   - (Gcc.exe (Rev2, Built by MSYS2 project) 14.1.0)
    - (Visual Studio 2019 C/C++)
    - Cmake version 3.30.0-rc3
    - Git version 2.45.2.windows.1
-   - Make: GNU Make 4.3
+   - Make: GNU Make 4.4.1
    - MSys/MinGW tools
-   - Libraries: openmp ? etc
+   - Libraries: openMP ? etc
 - Build
 
    ```sh
@@ -120,6 +120,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 
 ---
 
+- 2024/07: Updated to ImGui v1.90.9
 - 2024/06: Updated to ImGui v1.90.8
 - 2024/05: Updated to ImGui v1.90.7
 - 2024/05: Updated to ImGui v1.90.6
@@ -133,10 +134,10 @@ it can be saved as JPEG, PNG, TIFF, BMP file format
 
 ---
 
-[imguin](https://github.com/dinau/imguin)
-
-[nimgl_test](https://github.com/dinau/nimgl_test)
-
-[nim_implot](https://github.com/dinau/nim_implot)
-
-[DearPyGui for 32bit WinodwsOS Binary](https://github.com/dinau/DearPyGui32/tree/win32)
+| Language             | Project                                                                                                                                         |
+| -------------------: | :----------------------------------------------------------------:                                                                              |
+| **Nim**              | [ImGuin](https://github.com/dinau/imguin), [Nimgl_test](https://github.com/dinau/nimgl_test), [Nim_implot](https://github.com/dinau/nim_implot) |
+| **Lua**              | [LuaJITImGui](https://github.com/dinau/luajitimgui)                                                                                             |
+| **Python**           | [DearPyGui for 32bit WindowsOS Binary](https://github.com/dinau/DearPyGui32/tree/win32)                                                         |
+| **Zig**, C lang.     | [Dear_Bindings_Build](https://github.com/dinau/dear_bindings_build)                                                                             |
+| **Zig**              | [ImGuinZ](https://github.com/dinau/imguinz)                                                                                         |
