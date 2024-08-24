@@ -1,25 +1,27 @@
 local ffi   = require"ffi"
-local utils = require"utils"
+local utils = require"mylib.utils"
 --- GLFW/etc
 local glfw = require"glfw"
 local gllib = require"gl"
 local ig    = require"imgui.glfw"
 gllib.set_loader(glfw)
 local gl, glc, glu, glext = gllib.libraries()
-require"loadimage"
-require"setupFonts"
+require"mylib.loadimage"
+require"mylib.setupFonts"
 require"imPlotWindow"
-local IFA   = require"fonticon.IconsFontAwesome6"
+local IFA   = require"mylib.fonticon.IconsFontAwesome6"
 
 --- Global var: app
-require"apps"
+require"mylib.apps"
 ---
 local SaveImageName = "windowImage"
 
 --- Global var
 local fReqImageCapture = false
---- Image folder
-local ImgDir = "../img/"
+
+--- Image / Icon folder
+local ImgDir = "img/"
+local IconDir = "res/img/"
 
 -- Load inifile
 loadIni()
@@ -35,8 +37,11 @@ glfw.init()
 -------------------
 --- Get GLFWWindow
 -------------------
-local window = glfw.Window(app.mainWindow.width,app.mainWindow.height)
-window:setPos(app.mainWindow.posx ,app.mainWindow.posy)
+--- ### First set attribute to hide main window for avoiding flickering
+glfw.hint(glfw.glfwc.GLFW_VISIBLE,false)
+local window = glfw.Window(app.mainWindow.width,app.mainWindow.height) --- ### Create main window
+window:setPos(app.mainWindow.posx ,app.mainWindow.posy) --- ### Move main window to previous position
+window:show() --- Show main window
 ig.ImPlot_CreateContext()
 
 window:makeContextCurrent()
@@ -61,7 +66,7 @@ ig.lib.ImGui_ImplOpenGL3_CreateFontsTexture()
 -------------------------
 --- Load title bar icon
 -------------------------
-local  IconName = ImgDir .. "icon_qr_my_github.png"
+local  IconName = IconDir .. "z.png"
 utils.loadWindowIcon(window, IconName)
 
 ---------------

@@ -3623,7 +3623,7 @@ typedef void (__cdecl *pfnSDL_CurrentEndThread)(unsigned code);
 
  uintptr_t __cdecl _beginthreadex(void *_Security,unsigned _StackSize,unsigned (__stdcall *_StartAddress) (void *),void *_ArgList,unsigned _InitFlag,unsigned *_ThrdAddr);
    void __cdecl _endthreadex(unsigned _Retval);
-  
+
 static const int SDL_WINDOWPOS_CENTERED = SDL_WINDOWPOS_CENTERED_MASK;
 SDL_Thread * SDL_CreateThread(SDL_ThreadFunction fn, const char *name, void *data,pfnSDL_CurrentBeginThread bf,pfnSDL_CurrentEndThread ef);
 SDL_Thread * SDL_CreateThreadWithStackSize(int ( * fn) (void *),const char *name, const size_t stacksize, void *data,pfnSDL_CurrentBeginThread bf,pfnSDL_CurrentEndThread ef);
@@ -3644,7 +3644,7 @@ if ffi.os == "Windows" then
    function M.createThread(a,b,c)
    	return lib.SDL_CreateThread(a,b,c,ffi.C._beginthreadex, ffi.C._endthreadex)
    end
-   
+
    function M.createThreadWithStackSize(a,b,c,d)
    	return lib.SDL_CreateThreadWithStackSize(a,b,c,d,ffi.C._beginthreadex, ffi.C._endthreadex)
    end
@@ -3715,7 +3715,7 @@ __index = function(t,k)
 	if not ok then ok,ptr = pcall(function(str) return lib[str] end,k) end --some defines without SDL_
 	if not ok then --torch sdl2 calling
 		local str2 = "SDL_"..string.upper(k:sub(1,1))..k:sub(2)
-		ok,ptr = pcall(function(str) return lib[str] end,str2) 
+		ok,ptr = pcall(function(str) return lib[str] end,str2)
 	end
 	if not ok then error(k.." not found") end
 	rawset(M, k, ptr)

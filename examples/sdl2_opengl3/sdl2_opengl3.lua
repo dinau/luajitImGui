@@ -1,17 +1,17 @@
 local ffi   = require"ffi"
-local utils = require"utils"
+local utils = require"mylib.utils"
 --- SDL2/etc
 local sdl   = require"sdl2_ffi"
 local gllib = require"gl"
 gllib.set_loader(sdl)
 local gl, glc, glu, glext = gllib.libraries()
 local ig    = require"imgui.sdl"
-require"loadimage"
-require"setupFonts"
-local IFA   = require"fonticon.IconsFontAwesome6"
+require"mylib.loadimage"
+require"mylib.setupFonts"
+local IFA   = require"mylib.fonticon.IconsFontAwesome6"
 
 --- Global var: app
---require"apps"
+--require"mylib.apps"
 
 ---
 local SaveImageName = "screenImage"
@@ -21,8 +21,9 @@ local SaveFormat = "JPEG"
 --- Global var
 local fReqImageCapture = false
 
---- Image folder
-local ImgDir = "../img/"
+--- Image / Icon folder
+local ImgDir = "img/"
+local IconDir = "res/img/"
 
 -- Load inifile
 --loadIni()
@@ -63,7 +64,7 @@ ig_impl:Init(window, gl_context)
 -------------------------
 --- Load title bar icon
 -------------------------
-local  IconName = ImgDir .. "icon_qr_my_github.png"
+local  IconName = IconDir .. "lua.png"
 
 ---------------
 --- Load image

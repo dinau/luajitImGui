@@ -1,7 +1,7 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [LuajitImGui](#luajitimgui)
+- [LuaJITImGui](#luajitimgui)
   - [ImGui / CImGui Version](#imgui--cimgui-version)
   - [Examples](#examples)
     - [glfw_opengl3_simple](#glfw_opengl3_simple)
@@ -9,6 +9,7 @@
     - [glfw_opengl3_implot](#glfw_opengl3_implot)
     - [glfw_opengl3_jp](#glfw_opengl3_jp)
     - [sdl2_opengl3](#sdl2_opengl3)
+    - [ImGuizmo_sample.lua](#imguizmo_samplelua)
   - [Running examples](#running-examples)
   - [Other examples](#other-examples)
   - [Build from source](#build-from-source)
@@ -17,11 +18,11 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-### LuajitImGui
+### LuaJITImGui
 
 ---
 
-- [Luajit](https://luajit.org/) + [ImGui](https://github.com/ocornut/imgui) : The binaries project on Windows OS using [anima](https://github.com/sonoro1234/anima) project  
+- [LuaJIT](https://luajit.org/) + [ImGui](https://github.com/ocornut/imgui) : The binaries project on Windows OS using [anima](https://github.com/sonoro1234/anima) project  
 Differencies from [anima](https://github.com/sonoro1234/anima) project are as follows,
    1. Added compilation option for **IME (Imput method)**
 
@@ -36,14 +37,14 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
       ```
 
    1. Included newer [Font Awesome](https://fontawesome.com/search?m=free&o=r) Icon fonts.
-   1. Added simple examples like [imguin](https://github.com/dinau/imguin) project.
+   1. Added simple examples like [ImGuin](https://github.com/dinau/imguin) / [ImGuinZ](https://github.com/dinau/imguinz)  project.
 - Support OS: Windows10
 
 #### ImGui / CImGui Version
 
 ---
 
-- ImGui v1.90.9dock (2024/07)
+- ImGui v1.91.0dock (2024/08)
 
 #### Examples
 
@@ -62,14 +63,31 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 ![glfw_opengl3_implot](examples/img/glfw_opengl3_implot.png)  
 See more example: [implot_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot_sample.lua)
 
-#####  [glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)  
+##### [glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)  
 
 ![glfw_opengl3_jp](examples/img/glfw_opengl3_jp.png)
 
-#####  [sdl2_opengl3](examples/sdl2_opengl3/sdl2_opengl3.lua)  
+##### [sdl2_opengl3](examples/sdl2_opengl3/sdl2_opengl3.lua)  
 
 ![sdl2_opengl3](examples/img/sdl2_opengl3.png)
 
+##### [ImGuizmo_sample.lua](bin/examples/LuaJIT-ImGui/examples/ImGuizmo_sample.lua)
+
+This sample is attached by [anima](https://github.com/sonoro1234/anima) project.  
+You can execute this sample using
+[ImGuizmo_sample.bat](bin/examples/LuaJIT-ImGui/examples/ImGuizmo_sample.bat)
+in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) folder.
+
+![ImGuizmo_sample](examples/img/ImGuizmo_sample.png)
+
+##### [imnodes_graph_sample.lua](bin/examples/LuaJIT-ImGui/examples/imnodes_graph_sample.lua)
+
+This sample is attached by [anima](https://github.com/sonoro1234/anima) project.  
+You can execute this sample using
+[imnodes_graph_sample.bat](bin/examples/LuaJIT-ImGui/examples/imnodes_graph_sample.bat)
+in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) folder.
+
+![imnodes_graph_sample](examples/img/imnodes_graph_sample.png)
 
 #### Running examples
 
@@ -120,6 +138,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 
 ---
 
+- 2024/08: Updated to ImGui v1.91.0
 - 2024/07: Updated to ImGui v1.90.9
 - 2024/06: Updated to ImGui v1.90.8
 - 2024/05: Updated to ImGui v1.90.7

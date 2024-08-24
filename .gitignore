@@ -1,3 +1,15 @@
+zigcc.*
+zigcpp.*
+setenv.bat
+.vscode/
+*.org
+*.lnk
+.ccache/
+libold/
+*.org
+*.lnk
+.ccache/
+libold/
 screenImage*.*
 hidden/
 bin-gcc/
@@ -38,6 +50,6 @@ GTAGS
 *.lib
 
 # Executables
-*.exe
+#*.exe
 *.out
 *.app

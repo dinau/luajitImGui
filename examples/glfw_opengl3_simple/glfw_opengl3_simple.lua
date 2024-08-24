@@ -1,16 +1,17 @@
 local ffi   = require"ffi"
-local utils = require"utils"
+local utils = require"mylib.utils"
 --- GLFW/etc
 local glfw  = require"glfw"
 local gllib = require"gl"
 local ig    = require"imgui.glfw"
 gllib.set_loader(glfw)
 local gl, glc, glu, glext = gllib.libraries()
-require"setupFonts"
-local IFA   = require"fonticon.IconsFontAwesome6"
+require"mylib.setupFonts"
+local IFA   = require"mylib.fonticon.IconsFontAwesome6"
 
---- Image folder
-local ImgDir = "../img/"
+--- Image / Icon folder
+local ImgDir = "img/"
+local IconDir = "res/img/"
 
 -- Call back
 glfw.setErrorCallback(function(error,description)
@@ -45,8 +46,8 @@ ig.lib.ImGui_ImplOpenGL3_CreateFontsTexture()
 
 ------------------------
 --- Load title bar icon
-------------------------
-local  IconName = ImgDir .. "icon_qr_my_github.png"
+-------------------------
+local  IconName = IconDir .. "lua.png"
 utils.loadWindowIcon(window, IconName)
 
 --- Flags
@@ -54,7 +55,7 @@ local fShowDemo = ffi.new("bool[1]",true)
 
 --- Defalut window title
 local sTitle = IFA.ICON_FA_THUMBS_UP .. " Simple window" ..
-               "               4G " ..
+               "               5G " ..
                IFA.ICON_FA_SIGNAL     .. " " ..
                IFA.ICON_FA_WIFI     .. " " ..
                IFA.ICON_FA_PHONE    .. " " ..
@@ -66,7 +67,6 @@ local sTitle = IFA.ICON_FA_THUMBS_UP .. " Simple window" ..
 --- Load font
 --------------
 local  _, sActiveFontName, _ = setupFonts(pio) --- Setup font and font Icon
-
 
 ------------------------
 --- Set GUI theme color
