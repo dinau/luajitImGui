@@ -10,9 +10,12 @@
     - [glfw_opengl3_jp](#glfw_opengl3_jp)
     - [sdl2_opengl3](#sdl2_opengl3)
     - [ImGuizmo_sample.lua](#imguizmo_samplelua)
+    - [imnodes_graph_sample.lua](#imnodes_graph_samplelua)
+    - [delaunay_particles.lua](#delaunay_particleslua)
+  - [Download Zip binary](#download-zip-binary)
   - [Running examples](#running-examples)
   - [Other examples](#other-examples)
-  - [Build from source](#build-from-source)
+  - [Build binaries from source](#build-binaries-from-source)
   - [History](#history)
   - [Similar project](#similar-project)
 
@@ -37,7 +40,9 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
       ```
 
    1. Included newer [Font Awesome](https://fontawesome.com/search?m=free&o=r) Icon fonts.
-   1. Added simple examples like [ImGuin](https://github.com/dinau/imguin) / [ImGuinZ](https://github.com/dinau/imguinz)  project.
+   1. Added `*.bat` files to easily execute [example programs](bin/examples/LuaJIT-ImGui/examples). 
+   1. Added `luajitw.exe` to hide console window.
+   1. Added [simple examples](examples/) like [ImGuin](https://github.com/dinau/imguin) / [ImGuinZ](https://github.com/dinau/imguinz)  project.
 - Support OS: Windows10
 
 #### ImGui / CImGui Version
@@ -58,7 +63,7 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
 ![glfw_opengl3](examples/img/glfw_opengl3.png)
 
-##### [glfw_opengl3_implot](examples/glfw_opengl3/glfw_opengl3_implot.lua)  
+##### [glfw_opengl3_implot](examples/glfw_opengl3_implot/glfw_opengl3_implot.lua)  
 
 ![glfw_opengl3_implot](examples/img/glfw_opengl3_implot.png)  
 See more example: [implot_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot_sample.lua)
@@ -73,8 +78,7 @@ See more example: [implot_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot_
 
 ##### [ImGuizmo_sample.lua](bin/examples/LuaJIT-ImGui/examples/ImGuizmo_sample.lua)
 
-This sample is attached by [anima](https://github.com/sonoro1234/anima) project.  
-You can execute this sample using
+This sample is attached by [anima](https://github.com/sonoro1234/anima) project. You can execute this sample using
 [ImGuizmo_sample.bat](bin/examples/LuaJIT-ImGui/examples/ImGuizmo_sample.bat)
 in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) folder.
 
@@ -82,29 +86,41 @@ in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) fold
 
 ##### [imnodes_graph_sample.lua](bin/examples/LuaJIT-ImGui/examples/imnodes_graph_sample.lua)
 
-This sample is attached by [anima](https://github.com/sonoro1234/anima) project.  
-You can execute this sample using
+This sample is attached by [anima](https://github.com/sonoro1234/anima) project. You can execute this sample using
 [imnodes_graph_sample.bat](bin/examples/LuaJIT-ImGui/examples/imnodes_graph_sample.bat)
 in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) folder.
 
 ![imnodes_graph_sample](examples/img/imnodes_graph_sample.png)
 
+
+##### [delaunay_particles.lua](bin/examples/delaunay_particles.lua)
+
+This sample is attached by [anima](https://github.com/sonoro1234/anima) project. You can execute this sample,
+
+```sh
+pwd
+luajitImGui-1.91.0.0
+cd bin/examples
+../luajit.exe delaunay_particles.lua
+```
+
+![delaunay_particles](examples/img/delaunay_particles.png)
+
+#### Download Zip binary
+
+[luajitImGui-1.91.0.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.0.0.zip)  
+
 #### Running examples
 
 ---
 
-On Windows OS first,
+First on WindowsOS extract zip file downloaded then  
+for instance,
 
 ```sh
-git clone https://github.com/dinau/luajitImGui
-cd luajitImGui
-```
-
-For instance,
-
-```sh
+cd luajitImGui-1.91.0.0
 cd examples/glfw_opengl3
-r.bat
+glfw_opengl3.exe         # Double click on Windows file explore
 ```
 
 #### Other examples 
@@ -113,15 +129,15 @@ r.bat
 
 Refer to nice exmaples: [bin/examples](bin/examples)
 
-#### Build from source
+#### Build binaries from source
 
 ---
 
 - Prerequisite
    - Clang 18.1.8 (Current compiler)
    - (Gcc.exe (Rev2, Built by MSYS2 project) 14.1.0)
-   - (Visual Studio 2019 C/C++)
-   - Cmake version 3.30.0-rc3
+   - (Microsoft Visual Studio 2019 C/C++)
+   - CMake version 3.30.0-rc3
    - Git version 2.45.2.windows.1
    - Make: GNU Make 4.4.1
    - MSys/MinGW tools
@@ -156,7 +172,7 @@ it can be saved as JPEG, PNG, TIFF, BMP file format
 | Language             | Project                                                                                                                                         |
 | -------------------: | :----------------------------------------------------------------:                                                                              |
 | **Nim**              | [ImGuin](https://github.com/dinau/imguin), [Nimgl_test](https://github.com/dinau/nimgl_test), [Nim_implot](https://github.com/dinau/nim_implot) |
-| **Lua**              | [LuaJITImGui](https://github.com/dinau/luajitimgui)                                                                                             |
+| **Lua**              | [LuaJITImGui](https://github.com/dinau/luajitImGui)                                                                                             |
 | **Python**           | [DearPyGui for 32bit WindowsOS Binary](https://github.com/dinau/DearPyGui32/tree/win32)                                                         |
 | **Zig**, C lang.     | [Dear_Bindings_Build](https://github.com/dinau/dear_bindings_build)                                                                             |
 | **Zig**              | [ImGuinZ](https://github.com/dinau/imguinz)                                                                                         |
