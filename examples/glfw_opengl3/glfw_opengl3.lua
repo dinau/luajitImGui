@@ -232,7 +232,7 @@ while not window:shouldClose() do
   -- Save window image to file
   if fReqImageCapture then
     fReqImageCapture = false
-    local w,h,x,y = app.getCurrentWindowSize(window)
+    local w,h,x,y = getCurrentWindowSize(window)
     utils.saveImage(svName, imageFormatTbl[cmbItemIndex], w , h)
   end
   --
