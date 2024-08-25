@@ -12,24 +12,6 @@ include res/resource
 
 let GUI_SRC =  getAppFilename().lastPathPart().changeFileExt(".lua")
 
-when true:
-  import std/[osproc]
-  const LUAJIT_EXE = r"..\..\bin\luajitw.exe"
-  quit execCmd( LUAJIT_EXE & " " & GUI_SRC)
-
-else:
-  import std/[os, osproc ,envvars, strtabs]
-  const LUAJIT_EXE = r"..\..\bin\luajitw.exe"
-  const LUA_PATH = r";;..\lib\?.lua;"
-
-
-  discard execCmdEx( LUAJIT_EXE & " " & GUI_SRC
-                    ,workingDir = "."
-                    ,env = newStringTable({"LUA_PATH":  LUA_PATH
-                                          ,"PATH" :     getEnv("PATH") & r";..\lib"
-                                          ,"LANG" :     getEnv("LANG")
-                                          ,"LC_ALL" :   getEnv("LC_ALL")
-                                          ,"LC_CTYPE" : getEnv("LC_CTYPE")
-                                          ,"windir" :   getEnv("windir")
-                                          })
-                    )
+import std/[osproc]
+const LUAJIT_EXE = r"..\..\bin\luajitw.exe"
+quit execCmd( LUAJIT_EXE & " " & GUI_SRC)
