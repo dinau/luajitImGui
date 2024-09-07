@@ -1,4 +1,5 @@
-
+local lfs = require"lfs_ffi"
+local ffi   = require "ffi"
 local M = {}
 
 function M.fileExists(name)
@@ -16,14 +17,27 @@ function string:split(sep)
    return result
 end
 
-local lgTable = {"LANG","LC_ALL","LC_CTYPE"}
+ffi.cdef[[
+int GetLocaleInfoEx(
+   const wchar_t *lpLocaleName, /* LPCWSTR */
+   unsigned long LCType, /* LCTYPE */
+   wchar_t* lpLCData, /* LPWSTR */
+   int     cchData
+);
+uint32_t  GetLastError();
+]]
+
 function M.checkLang(countryID)
-  for i=1,#lgTable do
-    local envValue = os.getenv( lgTable[i] ):lower()
-    print(lgTable[i],envValue,countryID:lower())
-    if nil ~= envValue:match(countryID:lower()) then
-      return true -- match ok
-    end
+  local LOCALE_SISO639LANGNAME = 0x00000059
+  local buf = ffi.new("wchar_t[?]",100)
+  local res= ffi.C.GetLocaleInfoEx(
+                       ffi.NULL
+                       ,LOCALE_SISO639LANGNAME
+                       ,buf
+                       ,100)
+  local locale = ffi.string(lfs.win_unicode_to_utf8(buf))
+  if nil ~= locale:match(countryID:lower()) then
+    return true -- match ok
   end
   return false
 end

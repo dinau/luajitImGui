@@ -37,7 +37,7 @@ function setupFonts(pio)
   --
   --
   local fontJP = "meiryo"
-  if utils.checkLang("jp") then -- Specify country ID
+  if utils.checkLang("ja") then -- Specify country ID
     if fontJP == "meiryo" then
       sActiveFontName  = os.getenv("windir") .. "/fonts/meiryo.ttc" -- Windows7, 8.1
       sActiveFontTitle = "メイリオ"
