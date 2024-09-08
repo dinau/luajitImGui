@@ -1,12 +1,14 @@
+CPU_CORE_BITS = 64bit
+
 # Compile ok MinGW gcc 13.2.0
-#TC ?= gcc
+TC ?= gcc
 
 # Compile ok.
 # Visual studio 2019 C/C++
 #TC ?= msvc
 
 # Compile ok  Clang version 18.1.8 MinGW
-TC = clang
+#TC ?= clang
 
 # Must be abusolute path
 INSTALL_DIR = $(abspath $(CURDIR))/bin
@@ -34,26 +36,26 @@ else
 	BUILD_INSTALL_CMD = ( make install )
 	ifeq ($(TC),clang)
 		BUILD_OPT += -C ../clang.cmake
-	  # It has to be installed 'openmp' on MSys/MinGW.
-    BUILD_OPT += -DCMAKE_C_FLAGS_RELEASE="-Wno-error  \
-								 -Wno-error=implicit-function-declaration \
-		             -O2"
-	  # for C++
-    BUILD_OPT += -DCMAKE_CXX_FLAGS_RELEASE="-Wno-error  \
-								 -Wno-error=implicit-function-declaration \
-								 -DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS \
-                 -DImDrawIdx=\"unsigned int\" \
-								 -O2"
 	endif
-	COPY_DLL1 = (cp -f dll/32bit/*.dll bin/)
-	COPY_DLL2 = (cp -f dll/luajitw/{lua51.dll,luajitw.exe} bin/)
+	  # It has to be installed 'openmp' on MSys/MinGW.
+	BUILD_OPT += -DCMAKE_C_FLAGS_RELEASE="-Wno-error  \
+							 -Wno-error=implicit-function-declaration \
+							 -O2"
+	# for C++
+	BUILD_OPT += -DCMAKE_CXX_FLAGS_RELEASE="-Wno-error  \
+							 -Wno-error=implicit-function-declaration \
+							 -DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS \
+							 -DImDrawIdx=\"unsigned int\" \
+							 -O2"
+	COPY_DLL1 = (cp -f dll/$(CPU_CORE_BITS)/*.dll bin/)
+	COPY_DLL2 = (cp -f dll/$(CPU_CORE_BITS)/luajitw/{lua51.dll,luajitw.exe} bin/)
 endif
 
 BUILD_DIR = build
 
 .PHONY: copy_dll build clean $(INSTALL_DIR) update zip
 
-all: $(INSTALL_DIR) $(BUILD_DIR)
+all: clean $(INSTALL_DIR) $(BUILD_DIR)
 	(cd $(BUILD_DIR); cmake ../anima $(BUILD_OPT) )
 	(cd $(BUILD_DIR); $(BUILD_INSTALL_CMD) )
 	$(COPY_DLL1)

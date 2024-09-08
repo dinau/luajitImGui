@@ -43,7 +43,7 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
    1. Added `*.bat` files to easily execute [example programs](bin/examples/LuaJIT-ImGui/examples). 
    1. Added `luajitw.exe` to hide console window.
    1. Added [simple examples](examples/) like [ImGuin](https://github.com/dinau/imguin) / [ImGuinZ](https://github.com/dinau/imguinz)  project.
-- Support OS: Windows10
+- Support OS: Windows10 or later
 
 #### ImGui / CImGui Version
 
@@ -108,7 +108,10 @@ cd bin/examples
 
 #### Download Zip binary
 
-[luajitImGui-1.91.0.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.0.0.zip)  
+- WindowsOS 64bit  
+[luajitImGui-1.91.0.3.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.0.3.zip)  
+- WindowsOS 32bit  
+[luajitImGui-1.91.0.2.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.0.2.zip)  
 
 #### Running examples
 
@@ -134,11 +137,11 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 ---
 
 - Prerequisite
-   - Clang 18.1.8 (Current compiler)
-   - (Gcc.exe (Rev2, Built by MSYS2 project) 14.1.0)
+   - Gcc.exe (Rev1, Built by MSYS2 project) 14.2.0)
+   - (Clang 18.1.8 (Current compiler))
    - (Microsoft Visual Studio 2019 C/C++)
-   - CMake version 3.30.0-rc3
-   - Git version 2.45.2.windows.1
+   - CMake version 3.30.3
+   - Git version 2.46.0.windows.1
    - Make: GNU Make 4.4.1
    - MSys/MinGW tools
    - Libraries: openMP ? etc
@@ -154,15 +157,18 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 
 ---
 
-- 2024/08: Updated to ImGui v1.91.0
-- 2024/07: Updated to ImGui v1.90.9
-- 2024/06: Updated to ImGui v1.90.8
-- 2024/05: Updated to ImGui v1.90.7
-- 2024/05: Updated to ImGui v1.90.6
-- 2024/03: Updated to ImGui v1.90.4
-- 2024/02: Added: Button "Save window image" and combo box,  
-it can be saved as JPEG, PNG, TIFF, BMP file format
-- 2024/01: Added: Icon font demo
+- WindowsOS 64bit versions
+   - 2024/09: Updated to ImGui v1.91.0 / LuaJITImGui v1.91.0.3
+- WindowsOS 32bit versions
+   - 2024/08: Updated to ImGui v1.91.0 / LuaJITImGui v1.91.0.2
+   - 2024/07: Updated to ImGui v1.90.9
+   - 2024/06: Updated to ImGui v1.90.8
+   - 2024/05: Updated to ImGui v1.90.7
+   - 2024/05: Updated to ImGui v1.90.6
+   - 2024/03: Updated to ImGui v1.90.4
+   - 2024/02: Added: Button "Save window image" and combo box,  
+   it can be saved as JPEG, PNG, TIFF, BMP file format
+   - 2024/01: Added: Icon font demo
 
 
 #### Similar project
