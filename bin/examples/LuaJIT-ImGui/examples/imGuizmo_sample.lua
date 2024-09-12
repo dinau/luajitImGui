@@ -34,8 +34,7 @@ function win:draw(ig)
 	ig.ImGuizmo_SetOrthographic(false)
 	ig.ImGuizmo_DrawGrid(MVmo,MPmo,Mident,10)
 	ig.ImGuizmo_DrawCubes(MVmo,MPmo,MOmo,1)
-	ig.ImGuizmo_Manipulate(MVmo,MPmo,zmoOP[0],zmoMODE[0],MOmo,nil,nil
-  ,zmoOP[0]==imgui.BOUNDS and zmobounds or nil,nil)
+	ig.ImGuizmo_Manipulate(MVmo,MPmo,zmoOP[0],zmoMODE[0],MOmo,nil,nil,zmoOP[0]==imgui.BOUNDS and zmobounds or nil,nil)
 	ig.ImGuizmo_ViewManipulate(MVmo,7,ig.ImVec2(0,0),ig.ImVec2(128,128),0x01010101)
 
 

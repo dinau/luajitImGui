@@ -49,7 +49,7 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
 ---
 
-- ImGui v1.91.0dock (2024/08)
+- ImGui v1.91.1dock (2024/09)
 
 #### Examples
 
@@ -136,7 +136,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 
 ---
 
-- Prerequisite
+- Prerequisites
    - Gcc.exe (Rev1, Built by MSYS2 project) 14.2.0)
    - (Clang 18.1.8 (Current compiler))
    - (Microsoft Visual Studio 2019 C/C++)
@@ -158,17 +158,20 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 ---
 
 - WindowsOS 64bit versions
-   - 2024/09: Updated to ImGui v1.91.0 / LuaJITImGui v1.91.0.3
+   - Updated to
+      - 2024/09: ImGui v1.91.1 / LuaJITImGui v1.91.1.0
+      - 2024/09: ImGui v1.91.0 / LuaJITImGui v1.91.0.3
 - WindowsOS 32bit versions
-   - 2024/08: Updated to ImGui v1.91.0 / LuaJITImGui v1.91.0.2
-   - 2024/07: Updated to ImGui v1.90.9
-   - 2024/06: Updated to ImGui v1.90.8
-   - 2024/05: Updated to ImGui v1.90.7
-   - 2024/05: Updated to ImGui v1.90.6
-   - 2024/03: Updated to ImGui v1.90.4
-   - 2024/02: Added: Button "Save window image" and combo box,  
-   it can be saved as JPEG, PNG, TIFF, BMP file format
-   - 2024/01: Added: Icon font demo
+   - Updated to
+      - 2024/08: ImGui v1.91.0 / LuaJITImGui v1.91.0.2 last version
+      - 2024/07: ImGui v1.90.9
+      - 2024/06: ImGui v1.90.8
+      - 2024/05: ImGui v1.90.7
+      - 2024/05: ImGui v1.90.6
+      - 2024/03: ImGui v1.90.4
+      - 2024/02: Added: Button "Save window image" and combo box,  
+      it can be saved as JPEG, PNG, TIFF, BMP file format
+      - 2024/01: Added: Icon font demo
 
 
 #### Similar project

@@ -1,6 +1,6 @@
 CPU_CORE_BITS = 64bit
 
-# Compile ok MinGW gcc 13.2.0
+# Compile ok MinGW gcc 14.2.0
 TC ?= gcc
 
 # Compile ok.
@@ -26,7 +26,7 @@ BUILD_OPT += -DCMAKE_BUILD_TYPE=Release
 #BUILD_OPT += -DANIMA_BUILD_IM=no
 
 ifeq ($(TC),msvc)
-	# Compile using build/anima.sln on MicroSoft Visual Studio 2019 C/C++ IDE.
+	# Compile using build/anima.sln on Microsoft Visual Studio 2022 C/C++ IDE.
 	#BUILD_INSTALL_CMD =  (msbuild.exe /m  build/anima.sln)
 else
 	BUILD_OPT += -G"MSYS Makefiles"

@@ -14,7 +14,7 @@ function win:draw(ig)
         fb.open()
     end
     fb.draw()
-
+    
     if ig.SmallButton("save") then
         fbs.open()
     end

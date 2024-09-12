@@ -1,0 +1,9 @@
+Generate:  libsamplerate-0.dll
+
+
+pwd
+  luajitImGui\anima\luajit-libsndfile\libsamplerate
+mkdir build
+cd build
+cmake .. -G"MSYS Makefiles" -DBUILD_SHARED_LIBS=true
+make
