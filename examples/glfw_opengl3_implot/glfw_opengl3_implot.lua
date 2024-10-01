@@ -41,7 +41,6 @@ glfw.init()
 glfw.hint(glfw.glfwc.GLFW_VISIBLE,false)
 local window = glfw.Window(app.mainWindow.width,app.mainWindow.height) --- ### Create main window
 window:setPos(app.mainWindow.posx ,app.mainWindow.posy) --- ### Move main window to previous position
-window:show() --- Show main window
 ig.ImPlot_CreateContext()
 
 window:makeContextCurrent()
@@ -133,6 +132,7 @@ local clearColor = ffi.new("float[3]",{0.25,0.65,0.85})
 local counter    = 0
 local imageFormatTbl = {"JPEG", "PNG", "TIFF", "BMP"}
 local cmbItemIndex   = app.image.imageSaveFormatIndex
+local avoid_flicker = true
 
 while not window:shouldClose() do
   glfw.pollEvents()
@@ -237,6 +237,12 @@ while not window:shouldClose() do
   imPlotWindowSecond()
   --
   ig_impl:Render()
+  window:swapBuffers()
+
+  if avoid_flicker then -- Avoid flickering window at startup.
+    avoid_flicker = false
+    window:show() --- Show main window
+  end
 
   -- Save window image to file
   if fReqImageCapture then
@@ -245,7 +251,6 @@ while not window:shouldClose() do
     utils.saveImage(svName, imageFormatTbl[cmbItemIndex], w , h)
   end
   --
-  window:swapBuffers()
 end
 
 -------------
@@ -253,6 +258,5 @@ end
 -------------
 saveIni(window)
 ig_impl:destroy()
-ig.ImPlot_DestroyContext()
 window:destroy()
 glfw.terminate()

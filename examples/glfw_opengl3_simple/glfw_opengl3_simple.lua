@@ -24,6 +24,8 @@ glfw.init()
 -------------------
 --- Get GLFWWindow
 -------------------
+--- ### First set attribute to hide main window for avoiding flickering
+glfw.hint(glfw.glfwc.GLFW_VISIBLE,false)
 local window = glfw.Window(1080,760)
 window:setPos(50,50)
 
@@ -80,6 +82,7 @@ local  _, sActiveFontName, _ = setupFonts(pio) --- Setup font and font Icon
 --------------
 --- Global vars
 local clearColor = ffi.new("float[3]",{0.00,0.68,0.75}) -- Background color
+local avoid_flicker = true
 
 while not window:shouldClose() do
   glfw.pollEvents()
@@ -117,6 +120,10 @@ while not window:shouldClose() do
   --
   ig_impl:Render()
   window:swapBuffers()
+if avoid_flicker then -- Avoid flickering window at startup.
+    avoid_flicker = false
+    window:show() --- Show main window
+  end
 end
 
 -------------
