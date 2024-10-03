@@ -1,0 +1,2 @@
+local ffi = require"ffi"
+        return {nodes = {},name='editor4_r',current_id = 0}

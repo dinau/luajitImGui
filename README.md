@@ -49,7 +49,7 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
 ---
 
-- ImGui v1.91.1dock (2024/09)
+- v1.91.2dock (2024/10)
 
 #### Examples
 
@@ -109,7 +109,10 @@ cd bin/examples
 #### Download Zip binary
 
 - WindowsOS 64bit  
+[luajitImGui-1.91.2.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.2.0.zip)  
+[luajitImGui-1.91.1.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.1.0.zip)  
 [luajitImGui-1.91.0.3.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.0.3.zip)  
+
 - WindowsOS 32bit  
 [luajitImGui-1.91.0.2.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.0.2.zip)  
 
@@ -137,15 +140,16 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 ---
 
 - Prerequisites
+   - Installed MSys/MinGW tools
+   - Clang 18.1.8 (Current compiler)
+       - Libraries: OpenMP 
    - Gcc.exe (Rev1, Built by MSYS2 project) 14.2.0)
-   - (Clang 18.1.8 (Current compiler))
    - (Microsoft Visual Studio 2019 C/C++)
    - CMake version 3.30.3
    - Git version 2.46.0.windows.1
    - Make: GNU Make 4.4.1
-   - MSys/MinGW tools
-   - Libraries: openMP ? etc
-- Build
+- Build  
+   Open MSys console and
 
    ```sh
    git clone --recurse-submodules https://github.com/dinau/luajitImGui
@@ -153,22 +157,21 @@ Refer to nice exmaples: [bin/examples](bin/examples)
    make
    ```
 
+   That's all :-)
+
 #### History
 
 ---
 
 - WindowsOS 64bit versions
    - Updated to
-      - 2024/09: ImGui v1.91.1 / LuaJITImGui v1.91.1.0
-      - 2024/09: ImGui v1.91.0 / LuaJITImGui v1.91.0.3
+      - 2024/10: ImGui / CImGui v1.91.2 / LuaJITImGui v1.91.2.0
+      - 2024/09: ImGui / CImGui v1.91.1 / LuaJITImGui v1.91.1.0
+      - 2024/09: ImGui / CImGui v1.91.0 / LuaJITImGui v1.91.0.3
 - WindowsOS 32bit versions
    - Updated to
       - 2024/08: ImGui v1.91.0 / LuaJITImGui v1.91.0.2 last version
-      - 2024/07: ImGui v1.90.9
-      - 2024/06: ImGui v1.90.8
-      - 2024/05: ImGui v1.90.7
-      - 2024/05: ImGui v1.90.6
-      - 2024/03: ImGui v1.90.4
+      - 2024/07: ImGui v1.90.9 , 2024/06: ImGui v1.90.8 , 2024/05: ImGui v1.90.7 , 2024/05: ImGui v1.90.6 , 2024/03: ImGui v1.90.4
       - 2024/02: Added: Button "Save window image" and combo box,  
       it can be saved as JPEG, PNG, TIFF, BMP file format
       - 2024/01: Added: Icon font demo

@@ -36,35 +36,36 @@ function setupFonts(pio)
   local sActiveFontName = ""
   --
   --
-  local fontJP = "meiryo"
-  if utils.checkLang("ja") then -- Specify country ID
+  if true then -- For Japanese fonts
+    local fontJP = "meiryo"
+   -- local fontJP = "YuGothM"
     if fontJP == "meiryo" then
       sActiveFontName  = os.getenv("windir") .. "/fonts/meiryo.ttc" -- Windows7, 8.1
       sActiveFontTitle = "メイリオ"
       fontSize = 14 -- point
       fontNo   = 0
-    else
+    elseif fontJP == "YuGothM" then
       sActiveFontName = os.getenv("windir") .. "/fonts/YuGothM.ttc" -- Windows10, 11
       sActiveFontTitle = "ゆうゴシック"
-      fontSize = 12 -- point
+      fontSize = 11.5 -- point
       fontNo   = 0
     end
-    ranges = fontsAtlas:GetGlyphRangesJapanese()
-  end
-  --
-  if utils.fileExists(sActiveFontName) then
-    local theFONT= fontsAtlas:AddFontFromFileTTF(sActiveFontName
-                                                 ,point2px(fontSize)
-                                                 ,imFontConfig
-                                                 ,ranges)
-    if (theFONT ~= nil) then
-      pio.FontDefault = theFONT -- OK, set as default font
+    --
+    if utils.fileExists(sActiveFontName) then
+      ranges = fontsAtlas:GetGlyphRangesJapanese()
+      local theFONT= fontsAtlas:AddFontFromFileTTF(sActiveFontName
+                                                   ,point2px(fontSize)
+                                                   ,imFontConfig
+                                                   ,ranges)
+      if (theFONT ~= nil) then
+        pio.FontDefault = theFONT -- OK, set as default font
+      else
+        print("Error!: Font load error", sActiveFontName)
+      end
     else
-      print("Error!: Font load error", sActiveFontName)
+      print("Error!: Can't find fontName: ", sActivefontName)
+      sActiveFontName = ""
     end
-  else
-    print("Error!: Can't find fontName: ", sActivefontName)
-    sActiveFontName = ""
   end
 
   -- Add Icon font

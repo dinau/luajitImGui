@@ -1,14 +1,15 @@
 CPU_CORE_BITS = 64bit
 
 # Compile ok MinGW gcc 14.2.0
-TC ?= gcc
+#TC ?= gcc
 
 # Compile ok.
 # Visual studio 2019 C/C++
 #TC ?= msvc
 
 # Compile ok  Clang version 18.1.8 MinGW
-#TC ?= clang
+# Install ex.: pacman -S mingw-w64-ucrt-x86_64-llvm-openmp
+TC ?= clang
 
 # Must be abusolute path
 INSTALL_DIR = $(abspath $(CURDIR))/bin
@@ -30,14 +31,14 @@ ifeq ($(TC),msvc)
 	#BUILD_INSTALL_CMD =  (msbuild.exe /m  build/anima.sln)
 else
 	BUILD_OPT += -G"MSYS Makefiles"
-	BUILD_OPT += -DCMAKE_CXX_STANDARD=11
+ 	#BUILD_OPT += -DCMAKE_CXX_STANDARD=11
 	BUILD_OPT += -DCMAKE_C_FLAGS_RELEASE="-O2"
 	BUILD_OPT += -DCMAKE_CXX_FLAGS_RELEASE="-O2"
 	BUILD_INSTALL_CMD = ( make install )
 	ifeq ($(TC),clang)
 		BUILD_OPT += -C ../clang.cmake
 	endif
-	  # It has to be installed 'openmp' on MSys/MinGW.
+	# It has to be installed 'openmp' on MinGW.
 	BUILD_OPT += -DCMAKE_C_FLAGS_RELEASE="-Wno-error  \
 							 -Wno-error=implicit-function-declaration \
 							 -O2"
@@ -46,31 +47,54 @@ else
 							 -Wno-error=implicit-function-declaration \
 							 -DIMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS \
 							 -DImDrawIdx=\"unsigned int\" \
+							 -Wno-register \
 							 -O2"
-	COPY_DLL1 = (cp -f dll/$(CPU_CORE_BITS)/*.dll bin/)
-	COPY_DLL2 = (cp -f dll/$(CPU_CORE_BITS)/luajitw/{lua51.dll,luajitw.exe} bin/)
+	COPY_DLL1 = cp -f dll/$(CPU_CORE_BITS)/*.dll bin/
+	COPY_DLL2 = cp -f dll/$(CPU_CORE_BITS)/luajitw/{lua51.dll,luajitw.exe} bin/
 endif
 
 BUILD_DIR = build
 
-.PHONY: copy_dll build clean $(INSTALL_DIR) update zip
+.PHONY: main_build tools_build copy_dll build clean $(INSTALL_DIR) update zip patch rpatch luajiw
 
-all: clean $(INSTALL_DIR) $(BUILD_DIR)
+all: $(INSTALL_DIR) $(BUILD_DIR) main_build tools_build copy_dll
+
+main_build:
 	(cd $(BUILD_DIR); cmake ../anima $(BUILD_OPT) )
 	(cd $(BUILD_DIR); $(BUILD_INSTALL_CMD) )
-	$(COPY_DLL1)
-	$(COPY_DLL2)
-	-(cd examples/tools; nim make_bat.nims)
-	@-strip bin/*
+	@-strip bin/*.dll bin/*.exe
 
-copy_dll:
+TOOLS_DIR = examples/tools
+
+tools_build:
+	@$(MAKE) -C $(TOOLS_DIR) TC=$(TC)
+	(cd $(TOOLS_DIR); nim make_bat.nims)
+
+LUAJIT_DIR = anima/LuaJIT/LuaJIT
+
+make_luajitw: patch luajitw rpatch
+
+patch:
+	-patch --unified --forward -d $(LUAJIT_DIR)  src/luajit.c  ../../../dll/make_luajitw.patch
+
+rpatch:
+	-patch --unified --reverse -d $(LUAJIT_DIR)  src/luajit.c  ../../../dll/make_luajitw.patch
+
+luajitw:
+	$(MAKE) -C $(LUAJIT_DIR) clean
+	$(MAKE) -C $(LUAJIT_DIR) TARGET_LDFLAGS="-mwindows" TARGET_CFLAGS="-O2 -DLUAJIT_ENABLE_LUA52COMPAT"
+
+copy_dll: make_luajitw
 	$(COPY_DLL1)
+	# Copy with rename to luajiw.exe
+	cp -f $(LUAJIT_DIR)/src/luajit.exe dll/$(CPU_CORE_BITS)/luajitw/luajitw.exe
+	cp -f $(LUAJIT_DIR)/src/lua51.dll dll/$(CPU_CORE_BITS)/luajitw/lua51.dll
 	$(COPY_DLL2)
 
 $(INSTALL_DIR):
 	-mkdir -p $@
 
-build:
+$(BUILD_DIR):
 	-mkdir -p $@
 
 clean:

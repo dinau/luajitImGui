@@ -114,6 +114,7 @@ typedef struct ImGuiWindow ImGuiWindow;
 typedef struct ImGuiWindowDockStyle ImGuiWindowDockStyle;
 typedef struct ImGuiWindowTempData ImGuiWindowTempData;
 typedef struct ImGuiWindowSettings ImGuiWindowSettings;
+typedef struct STB_TexteditState STB_TexteditState;
 typedef struct ImVector_const_charPtr {int Size;int Capacity;const char** Data;} ImVector_const_charPtr;
 typedef unsigned int ImGuiID;
 typedef signed char ImS8;
@@ -269,6 +270,7 @@ typedef enum {
     ImGuiItemFlags_NoNavDefaultFocus = 1 << 2,
     ImGuiItemFlags_ButtonRepeat = 1 << 3,
     ImGuiItemFlags_AutoClosePopups = 1 << 4,
+    ImGuiItemFlags_AllowDuplicateId = 1 << 5,
 }ImGuiItemFlags_;
 typedef enum {
     ImGuiInputTextFlags_None = 0,
@@ -1042,6 +1044,7 @@ struct ImGuiIO
     float KeyRepeatDelay;
     float KeyRepeatRate;
    _Bool         ConfigDebugIsDebuggerPresent;
+   _Bool         ConfigDebugHighlightIdConflicts;
    _Bool         ConfigDebugBeginReturnValueOnce;
    _Bool         ConfigDebugBeginReturnValueLoop;
    _Bool         ConfigDebugIgnoreFocusLoss;
@@ -1609,46 +1612,6 @@ typedef int ImGuiTypingSelectFlags;
 typedef int ImGuiWindowRefreshFlags;
 typedef void (*ImGuiErrorLogCallback)(void* user_data, const char* fmt, ...);
 extern ImGuiContext* GImGui;
-typedef struct StbUndoRecord StbUndoRecord;
-struct StbUndoRecord
-{
-   int where;
-   int insert_length;
-   int delete_length;
-   int char_storage;
-};
-typedef struct StbUndoState StbUndoState;
-struct StbUndoState
-{
-   StbUndoRecord undo_rec [99];
-   ImWchar undo_char[999];
-   short undo_point, redo_point;
-   int undo_char_point, redo_char_point;
-};
-typedef struct STB_TexteditState STB_TexteditState;
-struct STB_TexteditState
-{
-   int cursor;
-   int select_start;
-   int select_end;
-   unsigned char insert_mode;
-   int row_count_per_page;
-   unsigned char cursor_at_end_of_line;
-   unsigned char initialized;
-   unsigned char has_preferred_x;
-   unsigned char single_line;
-   unsigned char padding1, padding2, padding3;
-   float preferred_x;
-   StbUndoState undostate;
-};
-typedef struct StbTexteditRow StbTexteditRow;
-struct StbTexteditRow
-{
-   float x0,x1;
-   float baseline_y_delta;
-   float ymin,ymax;
-   int num_chars;
-};
 typedef FILE* ImFileHandle;
 typedef struct ImVec1 ImVec1;
 struct ImVec1
@@ -1892,19 +1855,19 @@ struct ImGuiInputTextDeactivatedState
 {
     ImGuiID ID;
     ImVector_char TextA;
-};
+}; struct STB_TexteditState;
+typedef STB_TexteditState ImStbTexteditState;
 struct ImGuiInputTextState
 {
     ImGuiContext* Ctx;
+    ImStbTexteditState* Stb;
     ImGuiID ID;
-    int CurLenW, CurLenA;
-    ImVector_ImWchar TextW;
+    int CurLenA;
     ImVector_char TextA;
     ImVector_char InitialTextA;
-   _Bool         TextAIsValid;
+    ImVector_char CallbackTextBackup;
     int BufCapacityA;
     ImVec2 Scroll;
-    STB_TexteditState Stb;
     float CursorAnim;
    _Bool         CursorFollow;
    _Bool         SelectedAllMouseLock;
@@ -2473,6 +2436,7 @@ struct ImGuiViewportP
     int LastFocusedStampCount;
     ImGuiID LastNameHash;
     ImVec2 LastPos;
+    ImVec2 LastSize;
     float Alpha;
     float LastAlpha;
    _Bool         LastFocusedHadNavWindow;
@@ -2525,11 +2489,12 @@ ImGuiLocKey_TableResetOrder=4,
 ImGuiLocKey_WindowingMainMenuBar=5,
 ImGuiLocKey_WindowingPopup=6,
 ImGuiLocKey_WindowingUntitled=7,
-ImGuiLocKey_CopyLink=8,
-ImGuiLocKey_DockingHideTabBar=9,
-ImGuiLocKey_DockingHoldShiftToDock=10,
-ImGuiLocKey_DockingDragToUndockOrMoveNode=11,
-ImGuiLocKey_COUNT=12,
+ImGuiLocKey_OpenLink_s=8,
+ImGuiLocKey_CopyLink=9,
+ImGuiLocKey_DockingHideTabBar=10,
+ImGuiLocKey_DockingHoldShiftToDock=11,
+ImGuiLocKey_DockingDragToUndockOrMoveNode=12,
+ImGuiLocKey_COUNT=13,
 }ImGuiLocKey;
 struct ImGuiLocEntry
 {
@@ -2692,9 +2657,11 @@ struct ImGuiContext
     float WheelingWindowReleaseTimer;
     ImVec2 WheelingWindowWheelRemainder;
     ImVec2 WheelingAxisAvg;
+    ImGuiID DebugDrawIdConflicts;
     ImGuiID DebugHookIdInfo;
     ImGuiID HoveredId;
     ImGuiID HoveredIdPreviousFrame;
+    int HoveredIdPreviousFrameItemCount;
     float HoveredIdTimer;
     float HoveredIdNotActiveTimer;
    _Bool         HoveredIdAllowOverlap;
@@ -4104,7 +4071,7 @@ const char* igImStristr(const char* haystack,const char* haystack_end,const char
 void igImStrTrimBlanks(char* str);
 const char* igImStrSkipBlank(const char* str);
 int igImStrlenW(const ImWchar* str);
-const ImWchar* igImStrbolW(const ImWchar* buf_mid_line,const ImWchar* buf_begin);
+const char* igImStrbol(const char* buf_mid_line,const char* buf_begin);
 char igImToUpper(char c);
 _Bool                igImCharIsBlankA(char c);
 _Bool                igImCharIsBlankW(unsigned int c);
@@ -4255,9 +4222,8 @@ ImGuiInputTextState* ImGuiInputTextState_ImGuiInputTextState(void);
 void ImGuiInputTextState_destroy(ImGuiInputTextState* self);
 void ImGuiInputTextState_ClearText(ImGuiInputTextState* self);
 void ImGuiInputTextState_ClearFreeMemory(ImGuiInputTextState* self);
-int ImGuiInputTextState_GetUndoAvailCount(ImGuiInputTextState* self);
-int ImGuiInputTextState_GetRedoAvailCount(ImGuiInputTextState* self);
 void ImGuiInputTextState_OnKeyPressed(ImGuiInputTextState* self,int key);
+void ImGuiInputTextState_OnCharPressed(ImGuiInputTextState* self,unsigned int c);
 void ImGuiInputTextState_CursorAnimReset(ImGuiInputTextState* self);
 void ImGuiInputTextState_CursorClamp(ImGuiInputTextState* self);
 _Bool                ImGuiInputTextState_HasSelection(ImGuiInputTextState* self);
@@ -4432,7 +4398,7 @@ void igUpdateMouseMovingWindowEndFrame(void);
 ImGuiID igAddContextHook(ImGuiContext* context,const ImGuiContextHook* hook);
 void igRemoveContextHook(ImGuiContext* context,ImGuiID hook_to_remove);
 void igCallContextHooks(ImGuiContext* context,ImGuiContextHookType type);
-void igTranslateWindowsInViewport(ImGuiViewportP* viewport,const ImVec2 old_pos,const ImVec2 new_pos);
+void igTranslateWindowsInViewport(ImGuiViewportP* viewport,const ImVec2 old_pos,const ImVec2 new_pos,const ImVec2 old_size,const ImVec2 new_size);
 void igScaleWindowsInViewport(ImGuiViewportP* viewport,float scale);
 void igDestroyPlatformWindow(ImGuiViewportP* viewport);
 void igSetWindowViewport(ImGuiWindow* window,ImGuiViewportP* viewport);
@@ -6851,6 +6817,71 @@ void ImNodes_Ez_PopStyleVar(int count);
 void ImNodes_Ez_PushStyleColor_U32(ImNodesStyleCol idx,ImU32 col);
 void ImNodes_Ez_PushStyleColor_Vec4(ImNodesStyleCol idx,const ImVec4 col);
 void ImNodes_Ez_PopStyleColor(int count);
+typedef struct TextEditor TextEditor;
+struct TextEditor
+{
+};
+typedef enum {
+  Dark, Light, Mariana, RetroBlue
+ }PaletteId;
+typedef enum {
+  None, Cpp, C, Cs, Python, Lua, Json, Sql, AngelScript, Glsl, Hlsl
+ }LanguageDefinitionId;
+typedef enum {
+  FirstVisibleLine, Centered, LastVisibleLine
+ }SetViewAtLineMode;
+TextEditor* TextEditor_TextEditor(void);
+void TextEditor_destroy(TextEditor* self);
+void TextEditor_SetReadOnlyEnabled(TextEditor* self,                                                              _Bool                                                                    aValue);
+_Bool                TextEditor_IsReadOnlyEnabled(TextEditor* self);
+void TextEditor_SetAutoIndentEnabled(TextEditor* self,                                                                _Bool                                                                      aValue);
+_Bool                TextEditor_IsAutoIndentEnabled(TextEditor* self);
+void TextEditor_SetShowWhitespacesEnabled(TextEditor* self,                                                                     _Bool                                                                           aValue);
+_Bool                TextEditor_IsShowWhitespacesEnabled(TextEditor* self);
+void TextEditor_SetShowLineNumbersEnabled(TextEditor* self,                                                                     _Bool                                                                           aValue);
+_Bool                TextEditor_IsShowLineNumbersEnabled(TextEditor* self);
+void TextEditor_SetShortTabsEnabled(TextEditor* self,                                                               _Bool                                                                     aValue);
+_Bool                TextEditor_IsShortTabsEnabled(TextEditor* self);
+int TextEditor_GetLineCount(TextEditor* self);
+_Bool                TextEditor_IsOverwriteEnabled(TextEditor* self);
+void TextEditor_SetPalette(TextEditor* self,PaletteId aValue);
+PaletteId TextEditor_GetPalette(TextEditor* self);
+void TextEditor_SetLanguageDefinition(TextEditor* self,LanguageDefinitionId aValue);
+LanguageDefinitionId TextEditor_GetLanguageDefinition(TextEditor* self);
+const char* TextEditor_GetLanguageDefinitionName(TextEditor* self);
+void TextEditor_SetTabSize(TextEditor* self,int aValue);
+int TextEditor_GetTabSize(TextEditor* self);
+void TextEditor_SetLineSpacing(TextEditor* self,float aValue);
+float TextEditor_GetLineSpacing(TextEditor* self);
+void TextEditor_SetDefaultPalette(PaletteId aValue);
+PaletteId TextEditor_GetDefaultPalette(void);
+void TextEditor_SelectAll(TextEditor* self);
+void TextEditor_SelectLine(TextEditor* self,int aLine);
+void TextEditor_SelectRegion(TextEditor* self,int aStartLine,int aStartChar,int aEndLine,int aEndChar);
+void TextEditor_SelectNextOccurrenceOf(TextEditor* self,const char* aText,int aTextSize,                                                                                                  _Bool                                                                                                        aCaseSensitive);
+void TextEditor_SelectAllOccurrencesOf(TextEditor* self,const char* aText,int aTextSize,                                                                                                  _Bool                                                                                                        aCaseSensitive);
+_Bool                TextEditor_AnyCursorHasSelection(TextEditor* self);
+_Bool                TextEditor_AllCursorsHaveSelection(TextEditor* self);
+void TextEditor_ClearExtraCursors(TextEditor* self);
+void TextEditor_ClearSelections(TextEditor* self);
+void TextEditor_SetCursorPosition(TextEditor* self,int aLine,int aCharIndex);
+void TextEditor_GetCursorPosition(TextEditor* self,int* outLine,int* outColumn);
+int TextEditor_GetFirstVisibleLine(TextEditor* self);
+int TextEditor_GetLastVisibleLine(TextEditor* self);
+void TextEditor_SetViewAtLine(TextEditor* self,int aLine,SetViewAtLineMode aMode);
+void TextEditor_Copy(TextEditor* self);
+void TextEditor_Cut(TextEditor* self);
+void TextEditor_Paste(TextEditor* self);
+void TextEditor_Undo(TextEditor* self,int aSteps);
+void TextEditor_Redo(TextEditor* self,int aSteps);
+_Bool                TextEditor_CanUndo(TextEditor* self);
+_Bool                TextEditor_CanRedo(TextEditor* self);
+int TextEditor_GetUndoIndex(TextEditor* self);
+_Bool                TextEditor_Render(TextEditor* self,const char* aTitle,                                                                     _Bool                                                                           aParentIsFocused,const ImVec2 aSize,                                                                                                              _Bool                                                                                                                    aBorder);
+void TextEditor_UnitTests(TextEditor* self);
+void TextEditor_SetText(TextEditor* self,const char* aText);
+const char* TextEditor_GetText(TextEditor* self);
+void TextEditor_ImGuiDebugPanel(TextEditor* self,const char* panelName);
 typedef struct GLFWwindow GLFWwindow;
 typedef struct GLFWmonitor GLFWmonitor;
 struct GLFWwindow;
@@ -6959,7 +6990,7 @@ typedef struct Log Log;
 Log* Log_new();
 void Log_Add(Log* log,const char* fmt, ...);
 void Log_Draw(Log* log, const char* title); //, bool* p_open = NULL
-void Log_delete(Log* log);  
+void Log_delete(Log* log); 
 
 ]]
 

@@ -1,7 +1,10 @@
 import strutils
 
 const exampleNameTbl = [
-  "cimnodes_r_graph_sample"
+   "CTE_Objects_sample"
+  ,"CTE_sample"
+  ,"CTE_windows"
+  ,"cimnodes_r_graph_sample"
   ,"cimnodes_r_sample"
   ,"dock"
   ,"fb_sample"

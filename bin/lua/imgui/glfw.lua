@@ -304,6 +304,7 @@ function Log:Draw(title)
     lib.Log_Draw(self,title)
 end
 M.Log = ffi.metatype("Log",Log)
+
 ------------convenience function
 function M.U32(a,b,c,d) return lib.igGetColorU32_Vec4(ImVec4(a,b,c,d or 1)) end
 
@@ -1104,15 +1105,14 @@ ImGuiInputTextState.ClearText = lib.ImGuiInputTextState_ClearText
 ImGuiInputTextState.CursorAnimReset = lib.ImGuiInputTextState_CursorAnimReset
 ImGuiInputTextState.CursorClamp = lib.ImGuiInputTextState_CursorClamp
 ImGuiInputTextState.GetCursorPos = lib.ImGuiInputTextState_GetCursorPos
-ImGuiInputTextState.GetRedoAvailCount = lib.ImGuiInputTextState_GetRedoAvailCount
 ImGuiInputTextState.GetSelectionEnd = lib.ImGuiInputTextState_GetSelectionEnd
 ImGuiInputTextState.GetSelectionStart = lib.ImGuiInputTextState_GetSelectionStart
-ImGuiInputTextState.GetUndoAvailCount = lib.ImGuiInputTextState_GetUndoAvailCount
 ImGuiInputTextState.HasSelection = lib.ImGuiInputTextState_HasSelection
 function ImGuiInputTextState.__new(ctype)
     local ptr = lib.ImGuiInputTextState_ImGuiInputTextState()
     return ffi.gc(ptr,lib.ImGuiInputTextState_destroy)
 end
+ImGuiInputTextState.OnCharPressed = lib.ImGuiInputTextState_OnCharPressed
 ImGuiInputTextState.OnKeyPressed = lib.ImGuiInputTextState_OnKeyPressed
 ImGuiInputTextState.ReloadUserBufAndKeepSelection = lib.ImGuiInputTextState_ReloadUserBufAndKeepSelection
 ImGuiInputTextState.ReloadUserBufAndMoveToEnd = lib.ImGuiInputTextState_ReloadUserBufAndMoveToEnd
@@ -2348,6 +2348,86 @@ function Style.__new(ctype)
     return ffi.gc(ptr,lib.Style_destroy)
 end
 M.Style = ffi.metatype("Style",Style)
+--------------------------TextEditor----------------------------
+local TextEditor= {}
+TextEditor.__index = TextEditor
+TextEditor.AllCursorsHaveSelection = lib.TextEditor_AllCursorsHaveSelection
+TextEditor.AnyCursorHasSelection = lib.TextEditor_AnyCursorHasSelection
+TextEditor.CanRedo = lib.TextEditor_CanRedo
+TextEditor.CanUndo = lib.TextEditor_CanUndo
+TextEditor.ClearExtraCursors = lib.TextEditor_ClearExtraCursors
+TextEditor.ClearSelections = lib.TextEditor_ClearSelections
+TextEditor.Copy = lib.TextEditor_Copy
+TextEditor.Cut = lib.TextEditor_Cut
+TextEditor.GetCursorPosition = lib.TextEditor_GetCursorPosition
+M.TextEditor_GetDefaultPalette = lib.TextEditor_GetDefaultPalette
+TextEditor.GetFirstVisibleLine = lib.TextEditor_GetFirstVisibleLine
+TextEditor.GetLanguageDefinition = lib.TextEditor_GetLanguageDefinition
+TextEditor.GetLanguageDefinitionName = lib.TextEditor_GetLanguageDefinitionName
+TextEditor.GetLastVisibleLine = lib.TextEditor_GetLastVisibleLine
+TextEditor.GetLineCount = lib.TextEditor_GetLineCount
+TextEditor.GetLineSpacing = lib.TextEditor_GetLineSpacing
+TextEditor.GetPalette = lib.TextEditor_GetPalette
+TextEditor.GetTabSize = lib.TextEditor_GetTabSize
+TextEditor.GetText = lib.TextEditor_GetText
+
+TextEditor.GetUndoIndex = lib.TextEditor_GetUndoIndex
+function TextEditor:ImGuiDebugPanel(panelName)
+    panelName = panelName or "Debug"
+    return lib.TextEditor_ImGuiDebugPanel(self,panelName)
+end
+TextEditor.IsAutoIndentEnabled = lib.TextEditor_IsAutoIndentEnabled
+TextEditor.IsOverwriteEnabled = lib.TextEditor_IsOverwriteEnabled
+TextEditor.IsReadOnlyEnabled = lib.TextEditor_IsReadOnlyEnabled
+TextEditor.IsShortTabsEnabled = lib.TextEditor_IsShortTabsEnabled
+TextEditor.IsShowLineNumbersEnabled = lib.TextEditor_IsShowLineNumbersEnabled
+TextEditor.IsShowWhitespacesEnabled = lib.TextEditor_IsShowWhitespacesEnabled
+TextEditor.Paste = lib.TextEditor_Paste
+function TextEditor:Redo(aSteps)
+    aSteps = aSteps or 1
+    return lib.TextEditor_Redo(self,aSteps)
+end
+function TextEditor:Render(aTitle,aParentIsFocused,aSize,aBorder)
+    aBorder = aBorder or false
+    aParentIsFocused = aParentIsFocused or false
+    aSize = aSize or ImVec2()
+    return lib.TextEditor_Render(self,aTitle,aParentIsFocused,aSize,aBorder)
+end
+TextEditor.SelectAll = lib.TextEditor_SelectAll
+function TextEditor:SelectAllOccurrencesOf(aText,aTextSize,aCaseSensitive)
+    if aCaseSensitive == nil then aCaseSensitive = true end
+    return lib.TextEditor_SelectAllOccurrencesOf(self,aText,aTextSize,aCaseSensitive)
+end
+TextEditor.SelectLine = lib.TextEditor_SelectLine
+function TextEditor:SelectNextOccurrenceOf(aText,aTextSize,aCaseSensitive)
+    if aCaseSensitive == nil then aCaseSensitive = true end
+    return lib.TextEditor_SelectNextOccurrenceOf(self,aText,aTextSize,aCaseSensitive)
+end
+TextEditor.SelectRegion = lib.TextEditor_SelectRegion
+TextEditor.SetAutoIndentEnabled = lib.TextEditor_SetAutoIndentEnabled
+TextEditor.SetCursorPosition = lib.TextEditor_SetCursorPosition
+M.TextEditor_SetDefaultPalette = lib.TextEditor_SetDefaultPalette
+TextEditor.SetLanguageDefinition = lib.TextEditor_SetLanguageDefinition
+TextEditor.SetLineSpacing = lib.TextEditor_SetLineSpacing
+TextEditor.SetPalette = lib.TextEditor_SetPalette
+TextEditor.SetReadOnlyEnabled = lib.TextEditor_SetReadOnlyEnabled
+TextEditor.SetShortTabsEnabled = lib.TextEditor_SetShortTabsEnabled
+TextEditor.SetShowLineNumbersEnabled = lib.TextEditor_SetShowLineNumbersEnabled
+TextEditor.SetShowWhitespacesEnabled = lib.TextEditor_SetShowWhitespacesEnabled
+TextEditor.SetTabSize = lib.TextEditor_SetTabSize
+TextEditor.SetText = lib.TextEditor_SetText
+
+TextEditor.SetViewAtLine = lib.TextEditor_SetViewAtLine
+function TextEditor.__new(ctype)
+    local ptr = lib.TextEditor_TextEditor()
+    return ffi.gc(ptr,lib.TextEditor_destroy)
+end
+function TextEditor:Undo(aSteps)
+    aSteps = aSteps or 1
+    return lib.TextEditor_Undo(self,aSteps)
+end
+TextEditor.UnitTests = lib.TextEditor_UnitTests
+M.TextEditor = ffi.metatype("TextEditor",TextEditor)
 --------------------------imguiGizmo----------------------------
 local imguiGizmo= {}
 imguiGizmo.__index = imguiGizmo
@@ -6379,7 +6459,7 @@ function M.ImSign(a1) -- generic version
 end
 M.ImStrSkipBlank = lib.igImStrSkipBlank
 M.ImStrTrimBlanks = lib.igImStrTrimBlanks
-M.ImStrbolW = lib.igImStrbolW
+M.ImStrbol = lib.igImStrbol
 M.ImStrchrRange = lib.igImStrchrRange
 M.ImStrdup = lib.igImStrdup
 M.ImStrdupcpy = lib.igImStrdupcpy
