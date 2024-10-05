@@ -1,20 +1,72 @@
-NIM_SRC = execLuaSource.nim
+ifeq ($(TC),)
+	TC = gcc
+endif
 
-EXAMPLES_DIR = "../../bin/examples/LuaJIT-ImGui/examples/"
+C_SRC = execLuaSource
 
-OPT = --verbosity:0
+EXAMPLES_DIR = ../../bin/examples/LuaJIT-ImGui/examples
 
-all:
-	cp -f r.bat $(EXAMPLES_DIR)
-	nim $(OPT) make_bat.nims
-	@cp -f $(NIM_SRC) ../glfw_opengl3/
-	@cp -f $(NIM_SRC) ../glfw_opengl3_implot/
-	@cp -f $(NIM_SRC) ../glfw_opengl3_jp/
-	@cp -f $(NIM_SRC) ../glfw_opengl3_simple/
-	@cp -f $(NIM_SRC) ../sdl2_opengl3/
-	nim $(OPT) make_exe.nims $(TC)
-	@rm  -f ../glfw_opengl3/$(NIM_SRC)
-	@rm  -f ../glfw_opengl3_implot/$(NIM_SRC)
-	@rm  -f ../glfw_opengl3_jp/$(NIM_SRC)
-	@rm  -f ../glfw_opengl3_simple/$(NIM_SRC)
-	@rm  -f ../sdl2_opengl3/$(NIM_SRC)
+CFLAGS += -mwindows
+
+EXAMPLE_DIRS := glfw_opengl3 \
+							  glfw_opengl3_jp \
+							  glfw_opengl3_implot \
+							  glfw_opengl3_simple \
+							  sdl2_opengl3
+
+EXAMPLE_NAMES := \
+ CTE_Objects_sample\
+ CTE_sample\
+ CTE_windows\
+ cimnodes_r_graph_sample\
+ cimnodes_r_sample\
+ dock\
+ fb_sample\
+ folder_sizes_gui\
+ font_loader_sample\
+ imGuizmo_sample\
+ imnodes_graph_sample\
+ imnodes_sample\
+ implot_sample\
+ listclipper\
+ minimal_main\
+ minimal_main_viewport\
+ minimal_sdl\
+ minimal_sdl_opengl2\
+ piemenu\
+ plotter_sample\
+ rotateText\
+ sdl_audio\
+ timeline_example\
+ widgets_sample\
+ window_drag_drop
+
+.PHONY: gen_bat show_cc
+
+all:  gen_bat
+	@echo =
+	@echo === $(TC) === Generating Launcher files ===
+	@echo =
+	$(foreach exdir,$(EXAMPLE_DIRS), $(call def_gen_exe,$(exdir)))
+
+
+gen_bat:
+	@echo =
+	@echo === Generating Batch files ===
+	@echo =
+	cp -f r.bat $(EXAMPLES_DIR)/
+	$(foreach expName,$(EXAMPLE_NAMES), $(call def_gen_bat,$(expName)))
+
+define def_gen_bat
+	@echo @echo off >          $(EXAMPLES_DIR)/$(1).bat
+	@echo call r.bat $1.lua >> $(EXAMPLES_DIR)/$(1).bat
+	@echo $(EXAMPLES_DIR)/$(1).bat
+
+endef
+
+define def_gen_exe
+	@(cd ../$(1); \
+	  $(TC) -O2 -Wl,-s $(CFLAGS) -o $(1).exe res/rsc64.res  ../tools/$(C_SRC).c)
+	@echo ../$(1)/$(1).exe
+
+endef

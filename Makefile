@@ -55,7 +55,7 @@ endif
 
 BUILD_DIR = build
 
-.PHONY: main_build tools_build copy_dll build clean $(INSTALL_DIR) update zip patch rpatch luajiw
+.PHONY: main_build tools_build copy_dll build clean $(INSTALL_DIR) update zip patch rpatch luajitw
 
 all: $(INSTALL_DIR) $(BUILD_DIR) main_build tools_build copy_dll
 
@@ -68,7 +68,6 @@ TOOLS_DIR = examples/tools
 
 tools_build:
 	@$(MAKE) -C $(TOOLS_DIR) TC=$(TC)
-	(cd $(TOOLS_DIR); nim make_bat.nims)
 
 LUAJIT_DIR = anima/LuaJIT/LuaJIT
 

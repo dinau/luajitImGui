@@ -16,6 +16,7 @@
   - [Running examples](#running-examples)
   - [Other examples](#other-examples)
   - [Build binaries from source](#build-binaries-from-source)
+  - [My tools version](#my-tools-version)
   - [History](#history)
   - [Similar project](#similar-project)
 
@@ -25,7 +26,7 @@
 
 ---
 
-- [LuaJIT](https://luajit.org/) + [ImGui](https://github.com/ocornut/imgui) : The binaries project on Windows OS using [anima](https://github.com/sonoro1234/anima) project  
+- [LuaJIT](https://luajit.org/) + [ImGui](https://github.com/ocornut/imgui) : The binaries project on WindowsOS using [anima](https://github.com/sonoro1234/anima) project  
 Differencies from [anima](https://github.com/sonoro1234/anima) project are as follows,
    1. Added compilation option for **IME (Imput method)**
 
@@ -41,7 +42,7 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
    1. Included newer [Font Awesome](https://fontawesome.com/search?m=free&o=r) Icon fonts.
    1. Added `*.bat` files to easily execute [example programs](bin/examples/LuaJIT-ImGui/examples). 
-   1. Added `luajitw.exe` to hide console window.
+   1. Added `luajitw.exe` to hide console window on background.
    1. Added [simple examples](examples/) like [ImGuin](https://github.com/dinau/imguin) / [ImGuinZ](https://github.com/dinau/imguinz)  project.
 - Support OS: Windows10 or later
 
@@ -61,6 +62,8 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
 ##### [glfw_opengl3](examples/glfw_opengl3/glfw_opengl3.lua)  
 
+This can image load and save.
+
 ![glfw_opengl3](examples/img/glfw_opengl3.png)
 
 ##### [glfw_opengl3_implot](examples/glfw_opengl3_implot/glfw_opengl3_implot.lua)  
@@ -69,6 +72,8 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 See more example: [implot_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot_sample.lua)
 
 ##### [glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)  
+
+Showing font of local language.
 
 ![glfw_opengl3_jp](examples/img/glfw_opengl3_jp.png)
 
@@ -109,8 +114,8 @@ cd bin/examples
 #### Download Zip binary
 
 - WindowsOS 64bit  
-[luajitImGui-1.91.2.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.2.0.zip)  
-[luajitImGui-1.91.1.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.1.0.zip)  
+[luajitImGui-1.91.2.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.2.0.zip) 2024/10  
+[luajitImGui-1.91.1.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.1.0.zip) 2024/09  
 [luajitImGui-1.91.0.3.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.0.3.zip)  
 
 - WindowsOS 32bit  
@@ -139,25 +144,35 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 
 ---
 
-- Prerequisites
-   - Installed MSys/MinGW tools
-   - Clang 18.1.8 (Current compiler)
-       - Libraries: OpenMP 
-   - Gcc.exe (Rev1, Built by MSYS2 project) 14.2.0)
-   - (Microsoft Visual Studio 2019 C/C++)
-   - CMake version 3.30.3
-   - Git version 2.46.0.windows.1
-   - Make: GNU Make 4.4.1
-- Build  
-   Open MSys console and
+- Prerequisites  
+   Installed MSys2/MinGW tools, at least install,
+
+   ```sh
+   pacman -S mingw-w64-ucrt-x86_64-{cmake,gcc,clang,llvm-openmp,patch}
+  ```
+
+- Build **on MSys2 console**,
 
    ```sh
    git clone --recurse-submodules https://github.com/dinau/luajitImGui
    cd luajitImGui
+   make clean
    make
    ```
 
    That's all :-)
+
+#### My tools version
+
+---
+
+- Clang 18.1.8 (Current compiler)
+   - Libraries: OpenMP 
+- Gcc.exe (Rev1, Built by MSYS2 project) 14.2.0)
+- (Microsoft Visual Studio 2022 C/C++)
+- CMake version 3.30.3
+- Git version 2.46.0.windows.1
+- Make: GNU Make 4.4.1
 
 #### History
 
