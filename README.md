@@ -50,7 +50,7 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
 ---
 
-- v1.91.2dock (2024/10)
+- v1.91.4dock (2024/10)
 
 #### Examples
 
@@ -114,10 +114,12 @@ cd bin/examples
 #### Download Zip binary
 
 - WindowsOS 64bit  
+- Latest  
+[luajitImGui-1.91.4.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.4.0.zip) 2024/10  
+- Old  
 [luajitImGui-1.91.2.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.2.0.zip) 2024/10  
 [luajitImGui-1.91.1.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.1.0.zip) 2024/09  
 [luajitImGui-1.91.0.3.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.0.3.zip)  
-
 - WindowsOS 32bit  
 [luajitImGui-1.91.0.2.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.0.2.zip)  
 
@@ -180,6 +182,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 
 - WindowsOS 64bit versions
    - Updated to
+      - 2024/10: ImGui / CImGui v1.91.4 / LuaJITImGui v1.91.4.0
       - 2024/10: ImGui / CImGui v1.91.2 / LuaJITImGui v1.91.2.0
       - 2024/09: ImGui / CImGui v1.91.1 / LuaJITImGui v1.91.1.0
       - 2024/09: ImGui / CImGui v1.91.0 / LuaJITImGui v1.91.0.3
