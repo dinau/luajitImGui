@@ -48,7 +48,8 @@ local langNames = {"None", "Cpp", "C", "Cs", "Python", "Lua", "Json", "Sql", "An
 local function toint(x) return ffi.new("int",x) end
 local mLine = ffi.new("int[?]",1)
 local mColumn = ffi.new("int[?]",1)
-
+local openfind = false
+local findbuf = ffi.new("char[?]",256)
 local function Render(self)
 	local editor = self.editor
 	editor:GetCursorPosition(mLine, mColumn)
@@ -83,6 +84,10 @@ local function Render(self)
 
 				if (ig.MenuItem("Select all", nil, nil)) then
 					editor:SelectAll();
+				end
+				
+				if (ig.MenuItem("Find")) then
+					openfind = true
 				end
 				ig.EndMenu();
 			end
@@ -124,9 +129,36 @@ local function Render(self)
 		editor:Render("texteditor"..self.ID)
 		--ig.lib.TextEditor_ImGuiDebugPanel(editor,"deb##"..self.ID)
 	--ig.EndChild()
+		
+		if openfind then
+			ig.SetNextWindowSize(ig.ImVec2(300,200));
+			ig.Begin("Find dialog")
+				ig.InputText("search",findbuf,256)
+				if ig.Button("Find") then
+					findstr = ffi.string(findbuf)
+					if #findstr > 0 then
+						editor:SelectAllOccurrencesOf(findstr,#findstr)
+					end
+					openfind = false
+				end
+				ig.SameLine()
+				if ig.Button("Cancel") then
+					openfind = false
+				end
+			ig.End()
+		end
 
 end
-
+local function Save(self,fname)
+	local editor = self.editor
+	if fname then
+		local file,err = io.open(fname,"w")
+		assert(file,err)
+		local str = ffi.string(editor:GetText())
+		file:write(str)
+		file:close()
+	end
+end
 local function CTEwindow(file_name)
 	local strtext = ""
 	local ext = ""
@@ -145,7 +177,6 @@ local function CTEwindow(file_name)
 
 	W.lang_combo = LuaCombo("Lang",langNames,
 				function(name,ind) 
-					--print(name,ind)
 					editor:SetLanguageDefinition(ind)
 				end)
 	if ext == "cpp" or ext == "hpp" then
@@ -161,6 +192,7 @@ local function CTEwindow(file_name)
 	W.window_scale = ffi.new("float[?]",1,1)
 	W.Render = Render
 	W.ID = "CTE##"..tostring(W)
+	W.Save = Save
 	return W
 end
 

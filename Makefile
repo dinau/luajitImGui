@@ -21,10 +21,13 @@ BUILD_OPT += -DLUAJIT_BIN=$(INSTALL_DIR)  # Install folder
 BUILD_OPT += -DCMAKE_BUILD_TYPE=Release
 
 # Select libraries
-#BUILD_OPT += -DANIMA_BUILD_SDL=no
+#BUILD_OPT += -DANIMA_BUILD_SDL3=no
 #BUILD_OPT += -DANIMA_BUILD_SNDFILE=no
 #BUILD_OPT += -DANIMA_BUILD_RTAUDIO=no
 #BUILD_OPT += -DANIMA_BUILD_IM=no
+
+# Fixed SDL3 compilation error
+BUILD_OPT += -DSDL_OPENGLES=no
 
 ifeq ($(TC),msvc)
 	# Compile using build/anima.sln on Microsoft Visual Studio 2022 C/C++ IDE.
@@ -53,7 +56,7 @@ else
 	COPY_DLL2 = cp -f dll/$(CPU_CORE_BITS)/luajitw/{lua51.dll,luajitw.exe} bin/
 endif
 
-BUILD_DIR = build
+BUILD_DIR = .build
 
 .PHONY: main_build tools_build copy_dll build clean $(INSTALL_DIR) update zip patch rpatch luajitw
 

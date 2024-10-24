@@ -83,211 +83,6 @@ end
 M.FLT_MAX = lib.igGET_FLT_MAX()
 M.FLT_MIN = lib.igGET_FLT_MIN()
 
------------ImGui_ImplGlfwGL3
-local ImGui_ImplGlfwGL3 = {}
-ImGui_ImplGlfwGL3.__index = ImGui_ImplGlfwGL3
-
-
-function ImGui_ImplGlfwGL3.__new()
-    local ptr = lib.ImGui_ImplGlfwGL3_new()
-    ffi.gc(ptr,lib.ImGui_ImplGlfwGL3_delete)
-    return ptr
-end
-
-function ImGui_ImplGlfwGL3:destroy()
-    ffi.gc(self,nil) --prevent gc twice
-    lib.ImGui_ImplGlfwGL3_delete(self)
-end
-
-function ImGui_ImplGlfwGL3:NewFrame()
-    return lib.ImGui_ImplGlfwGL3_NewFrame(self)
-end
-
-function ImGui_ImplGlfwGL3:Render()
-    return lib.ImGui_ImplGlfwGL3_Render(self)
-end
-
-function ImGui_ImplGlfwGL3:Init(window, install_callbacks)
-    return lib.ImGui_ImplGlfwGL3_Init(self, window,install_callbacks);
-end
-
-function ImGui_ImplGlfwGL3.KeyCallback(window, key,scancode, action, mods)
-    return lib.ImGui_ImplGlfwGL3_KeyCallback(window, key,scancode, action, mods);
-end
-
-function ImGui_ImplGlfwGL3.MouseButtonCallback(win, button, action, mods)
-    return lib.ImGui_ImplGlfwGL3_MouseButtonCallback(win, button, action, mods)
-end
-
-function ImGui_ImplGlfwGL3.ScrollCallback(window,xoffset,yoffset)
-    return lib.ImGui_ImplGlfwGL3_MouseButtonCallback(window,xoffset,yoffset)
-end
-
-function ImGui_ImplGlfwGL3.CharCallback(window,c)
-    return lib.ImGui_ImplGlfwGL3_CharCallback(window, c);
-end
-
-M.ImplGlfwGL3 = ffi.metatype("ImGui_ImplGlfwGL3",ImGui_ImplGlfwGL3)
-
------------------------Imgui_Impl_SDL_opengl3
-local Imgui_Impl_SDL_opengl3 = {}
-Imgui_Impl_SDL_opengl3.__index = Imgui_Impl_SDL_opengl3
-
-function Imgui_Impl_SDL_opengl3.__call()
-    return setmetatable({ctx = lib.igCreateContext(nil)},Imgui_Impl_SDL_opengl3)
-end
-
-function Imgui_Impl_SDL_opengl3:Init(window, gl_context, glsl_version)
-    self.window = window
-	glsl_version = glsl_version or "#version 130"
-    lib.ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
-    lib.ImGui_ImplOpenGL3_Init(glsl_version);
-end
-
-function Imgui_Impl_SDL_opengl3:destroy()
-    lib.ImGui_ImplOpenGL3_Shutdown();
-    lib.ImGui_ImplSDL2_Shutdown();
-    lib.igDestroyContext(self.ctx);
-end
-
-function Imgui_Impl_SDL_opengl3:NewFrame()
-    lib.ImGui_ImplOpenGL3_NewFrame();
-    lib.ImGui_ImplSDL2_NewFrame();
-    lib.igNewFrame();
-end
-
-function Imgui_Impl_SDL_opengl3:Render()
-    lib.igRender()
-    lib.ImGui_ImplOpenGL3_RenderDrawData(lib.igGetDrawData());
-end
-M.Imgui_Impl_SDL_opengl3 = setmetatable({},Imgui_Impl_SDL_opengl3)
------------------------Imgui_Impl_SDL_opengl2
-local Imgui_Impl_SDL_opengl2 = {}
-Imgui_Impl_SDL_opengl2.__index = Imgui_Impl_SDL_opengl2
-
-function Imgui_Impl_SDL_opengl2.__call()
-    return setmetatable({ctx = lib.igCreateContext(nil)},Imgui_Impl_SDL_opengl2)
-end
-
-function Imgui_Impl_SDL_opengl2:Init(window, gl_context)
-    self.window = window
-    lib.ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
-    lib.ImGui_ImplOpenGL2_Init();
-end
-
-function Imgui_Impl_SDL_opengl2:destroy()
-    lib.ImGui_ImplOpenGL2_Shutdown();
-    lib.ImGui_ImplSDL2_Shutdown();
-    lib.igDestroyContext(self.ctx);
-end
-
-function Imgui_Impl_SDL_opengl2:NewFrame()
-    lib.ImGui_ImplOpenGL2_NewFrame();
-    lib.ImGui_ImplSDL2_NewFrame();
-    lib.igNewFrame();
-end
-
-function Imgui_Impl_SDL_opengl2:Render()
-    lib.igRender()
-    lib.ImGui_ImplOpenGL2_RenderDrawData(lib.igGetDrawData());
-end
-M.Imgui_Impl_SDL_opengl2 = setmetatable({},Imgui_Impl_SDL_opengl2)
------------------------Imgui_Impl_glfw_opengl3
-local Imgui_Impl_glfw_opengl3 = {}
-Imgui_Impl_glfw_opengl3.__index = Imgui_Impl_glfw_opengl3
-
-function Imgui_Impl_glfw_opengl3.__call()
-    return setmetatable({ctx = lib.igCreateContext(nil)},Imgui_Impl_glfw_opengl3)
-end
-
-function Imgui_Impl_glfw_opengl3:Init(window, install_callbacks,glsl_version)
-	glsl_version = glsl_version or "#version 130"
-    lib.ImGui_ImplGlfw_InitForOpenGL(window, install_callbacks);
-    lib.ImGui_ImplOpenGL3_Init(glsl_version);
-end
-
-function Imgui_Impl_glfw_opengl3:destroy()
-    lib.ImGui_ImplOpenGL3_Shutdown();
-    lib.ImGui_ImplGlfw_Shutdown();
-    lib.igDestroyContext(self.ctx);
-end
-
-function Imgui_Impl_glfw_opengl3:NewFrame()
-    lib.ImGui_ImplOpenGL3_NewFrame();
-    lib.ImGui_ImplGlfw_NewFrame();
-    lib.igNewFrame();
-end
-
-function Imgui_Impl_glfw_opengl3:Render()
-    lib.igRender()
-    lib.ImGui_ImplOpenGL3_RenderDrawData(lib.igGetDrawData());
-end
-
-function Imgui_Impl_glfw_opengl3.KeyCallback(window, key,scancode, action, mods)
-    return lib.ImGui_ImplGlfw_KeyCallback(window, key,scancode, action, mods);
-end
-
-function Imgui_Impl_glfw_opengl3.MouseButtonCallback(win, button, action, mods)
-    return lib.ImGui_ImplGlfw_MouseButtonCallback(win, button, action, mods)
-end
-
-function Imgui_Impl_glfw_opengl3.ScrollCallback(window,xoffset,yoffset)
-    return lib.ImGui_ImplGlfw_ScrollCallback(window,xoffset,yoffset)
-end
-
-function Imgui_Impl_glfw_opengl3.CharCallback(window,c)
-    return lib.ImGui_ImplGlfw_CharCallback(window, c);
-end
-
-M.Imgui_Impl_glfw_opengl3 = setmetatable({},Imgui_Impl_glfw_opengl3)
-
------------------------Imgui_Impl_glfw_opengl2
-local Imgui_Impl_glfw_opengl2 = {}
-Imgui_Impl_glfw_opengl2.__index = Imgui_Impl_glfw_opengl2
-
-function Imgui_Impl_glfw_opengl2.__call()
-    return setmetatable({ctx = lib.igCreateContext(nil)},Imgui_Impl_glfw_opengl2)
-end
-
-function Imgui_Impl_glfw_opengl2:Init(window, install_callbacks)
-    lib.ImGui_ImplGlfw_InitForOpenGL(window, install_callbacks);
-    lib.ImGui_ImplOpenGL2_Init();
-end
-
-function Imgui_Impl_glfw_opengl2:destroy()
-    lib.ImGui_ImplOpenGL2_Shutdown();
-    lib.ImGui_ImplGlfw_Shutdown();
-    lib.igDestroyContext(self.ctx);
-end
-
-function Imgui_Impl_glfw_opengl2:NewFrame()
-    lib.ImGui_ImplOpenGL2_NewFrame();
-    lib.ImGui_ImplGlfw_NewFrame();
-    lib.igNewFrame();
-end
-
-function Imgui_Impl_glfw_opengl2:Render()
-    lib.igRender()
-    lib.ImGui_ImplOpenGL2_RenderDrawData(lib.igGetDrawData());
-end
-
-function Imgui_Impl_glfw_opengl2.KeyCallback(window, key,scancode, action, mods)
-    return lib.ImGui_ImplGlfw_KeyCallback(window, key,scancode, action, mods);
-end
-
-function Imgui_Impl_glfw_opengl2.MouseButtonCallback(win, button, action, mods)
-    return lib.ImGui_ImplGlfw_MouseButtonCallback(win, button, action, mods)
-end
-
-function Imgui_Impl_glfw_opengl2.ScrollCallback(window,xoffset,yoffset)
-    return lib.ImGui_ImplGlfw_ScrollCallback(window,xoffset,yoffset)
-end
-
-function Imgui_Impl_glfw_opengl2.CharCallback(window,c)
-    return lib.ImGui_ImplGlfw_CharCallback(window, c);
-end
-
-M.Imgui_Impl_glfw_opengl2 = setmetatable({},Imgui_Impl_glfw_opengl2)
 -----------------------another Log
 local Log = {}
 Log.__index = Log
@@ -513,6 +308,103 @@ function M.Plotter(xmin,xmax,nvals)
 end
 
 
+
+-----------------------Imgui_Impl_glfw_opengl3
+local Imgui_Impl_glfw_opengl3 = {}
+Imgui_Impl_glfw_opengl3.__index = Imgui_Impl_glfw_opengl3
+
+function Imgui_Impl_glfw_opengl3.__call()
+    return setmetatable({ctx = lib.igCreateContext(nil)},Imgui_Impl_glfw_opengl3)
+end
+
+function Imgui_Impl_glfw_opengl3:Init(window, install_callbacks,glsl_version)
+	glsl_version = glsl_version or "#version 130"
+    lib.ImGui_ImplGlfw_InitForOpenGL(window, install_callbacks);
+    lib.ImGui_ImplOpenGL3_Init(glsl_version);
+end
+
+function Imgui_Impl_glfw_opengl3:destroy()
+    lib.ImGui_ImplOpenGL3_Shutdown();
+    lib.ImGui_ImplGlfw_Shutdown();
+    lib.igDestroyContext(self.ctx);
+end
+
+function Imgui_Impl_glfw_opengl3:NewFrame()
+    lib.ImGui_ImplOpenGL3_NewFrame();
+    lib.ImGui_ImplGlfw_NewFrame();
+    lib.igNewFrame();
+end
+
+function Imgui_Impl_glfw_opengl3:Render()
+    lib.igRender()
+    lib.ImGui_ImplOpenGL3_RenderDrawData(lib.igGetDrawData());
+end
+
+function Imgui_Impl_glfw_opengl3.KeyCallback(window, key,scancode, action, mods)
+    return lib.ImGui_ImplGlfw_KeyCallback(window, key,scancode, action, mods);
+end
+
+function Imgui_Impl_glfw_opengl3.MouseButtonCallback(win, button, action, mods)
+    return lib.ImGui_ImplGlfw_MouseButtonCallback(win, button, action, mods)
+end
+
+function Imgui_Impl_glfw_opengl3.ScrollCallback(window,xoffset,yoffset)
+    return lib.ImGui_ImplGlfw_ScrollCallback(window,xoffset,yoffset)
+end
+
+function Imgui_Impl_glfw_opengl3.CharCallback(window,c)
+    return lib.ImGui_ImplGlfw_CharCallback(window, c);
+end
+
+M.Imgui_Impl_glfw_opengl3 = setmetatable({},Imgui_Impl_glfw_opengl3)
+
+-----------------------Imgui_Impl_glfw_opengl2
+local Imgui_Impl_glfw_opengl2 = {}
+Imgui_Impl_glfw_opengl2.__index = Imgui_Impl_glfw_opengl2
+
+function Imgui_Impl_glfw_opengl2.__call()
+    return setmetatable({ctx = lib.igCreateContext(nil)},Imgui_Impl_glfw_opengl2)
+end
+
+function Imgui_Impl_glfw_opengl2:Init(window, install_callbacks)
+    lib.ImGui_ImplGlfw_InitForOpenGL(window, install_callbacks);
+    lib.ImGui_ImplOpenGL2_Init();
+end
+
+function Imgui_Impl_glfw_opengl2:destroy()
+    lib.ImGui_ImplOpenGL2_Shutdown();
+    lib.ImGui_ImplGlfw_Shutdown();
+    lib.igDestroyContext(self.ctx);
+end
+
+function Imgui_Impl_glfw_opengl2:NewFrame()
+    lib.ImGui_ImplOpenGL2_NewFrame();
+    lib.ImGui_ImplGlfw_NewFrame();
+    lib.igNewFrame();
+end
+
+function Imgui_Impl_glfw_opengl2:Render()
+    lib.igRender()
+    lib.ImGui_ImplOpenGL2_RenderDrawData(lib.igGetDrawData());
+end
+
+function Imgui_Impl_glfw_opengl2.KeyCallback(window, key,scancode, action, mods)
+    return lib.ImGui_ImplGlfw_KeyCallback(window, key,scancode, action, mods);
+end
+
+function Imgui_Impl_glfw_opengl2.MouseButtonCallback(win, button, action, mods)
+    return lib.ImGui_ImplGlfw_MouseButtonCallback(win, button, action, mods)
+end
+
+function Imgui_Impl_glfw_opengl2.ScrollCallback(window,xoffset,yoffset)
+    return lib.ImGui_ImplGlfw_ScrollCallback(window,xoffset,yoffset)
+end
+
+function Imgui_Impl_glfw_opengl2.CharCallback(window,c)
+    return lib.ImGui_ImplGlfw_CharCallback(window, c);
+end
+
+M.Imgui_Impl_glfw_opengl2 = setmetatable({},Imgui_Impl_glfw_opengl2)
 ----------BEGIN_AUTOGENERATED_LUA---------------------------
 --------------------------CanvasState----------------------------
 local CanvasState= {}
@@ -624,7 +516,10 @@ function ImDrawList:AddBezierQuadratic(p1,p2,p3,col,thickness,num_segments)
     num_segments = num_segments or 0
     return lib.ImDrawList_AddBezierQuadratic(self,p1,p2,p3,col,thickness,num_segments)
 end
-ImDrawList.AddCallback = lib.ImDrawList_AddCallback
+function ImDrawList:AddCallback(callback,userdata,userdata_size)
+    userdata_size = userdata_size or 0
+    return lib.ImDrawList_AddCallback(self,callback,userdata,userdata_size)
+end
 function ImDrawList:AddCircle(center,radius,col,num_segments,thickness)
     num_segments = num_segments or 0
     thickness = thickness or 1.0
@@ -1028,6 +923,14 @@ end
 ImGuiDockNode.SetLocalFlags = lib.ImGuiDockNode_SetLocalFlags
 ImGuiDockNode.UpdateMergedFlags = lib.ImGuiDockNode_UpdateMergedFlags
 M.ImGuiDockNode = ffi.metatype("ImGuiDockNode",ImGuiDockNode)
+--------------------------ImGuiErrorRecoveryState----------------------------
+local ImGuiErrorRecoveryState= {}
+ImGuiErrorRecoveryState.__index = ImGuiErrorRecoveryState
+function ImGuiErrorRecoveryState.__new(ctype)
+    local ptr = lib.ImGuiErrorRecoveryState_ImGuiErrorRecoveryState()
+    return ffi.gc(ptr,lib.ImGuiErrorRecoveryState_destroy)
+end
+M.ImGuiErrorRecoveryState = ffi.metatype("ImGuiErrorRecoveryState",ImGuiErrorRecoveryState)
 --------------------------ImGuiIDStackTool----------------------------
 local ImGuiIDStackTool= {}
 ImGuiIDStackTool.__index = ImGuiIDStackTool
@@ -1366,16 +1269,6 @@ function ImGuiStackLevelInfo.__new(ctype)
     return ffi.gc(ptr,lib.ImGuiStackLevelInfo_destroy)
 end
 M.ImGuiStackLevelInfo = ffi.metatype("ImGuiStackLevelInfo",ImGuiStackLevelInfo)
---------------------------ImGuiStackSizes----------------------------
-local ImGuiStackSizes= {}
-ImGuiStackSizes.__index = ImGuiStackSizes
-ImGuiStackSizes.CompareWithContextState = lib.ImGuiStackSizes_CompareWithContextState
-function ImGuiStackSizes.__new(ctype)
-    local ptr = lib.ImGuiStackSizes_ImGuiStackSizes()
-    return ffi.gc(ptr,lib.ImGuiStackSizes_destroy)
-end
-ImGuiStackSizes.SetToContextState = lib.ImGuiStackSizes_SetToContextState
-M.ImGuiStackSizes = ffi.metatype("ImGuiStackSizes",ImGuiStackSizes)
 --------------------------ImGuiStorage----------------------------
 local ImGuiStorage= {}
 ImGuiStorage.__index = ImGuiStorage
@@ -5523,6 +5416,7 @@ function M.BeginDragDropSource(flags)
 end
 M.BeginDragDropTarget = lib.igBeginDragDropTarget
 M.BeginDragDropTargetCustom = lib.igBeginDragDropTargetCustom
+M.BeginErrorTooltip = lib.igBeginErrorTooltip
 M.BeginGroup = lib.igBeginGroup
 M.BeginItemTooltip = lib.igBeginItemTooltip
 function M.BeginListBox(label,size)
@@ -5748,6 +5642,7 @@ M.DataTypeClamp = lib.igDataTypeClamp
 M.DataTypeCompare = lib.igDataTypeCompare
 M.DataTypeFormatString = lib.igDataTypeFormatString
 M.DataTypeGetInfo = lib.igDataTypeGetInfo
+M.DataTypeIsZero = lib.igDataTypeIsZero
 M.DebugAllocHook = lib.igDebugAllocHook
 M.DebugBreakButton = lib.igDebugBreakButton
 M.DebugBreakButtonTooltip = lib.igDebugBreakButtonTooltip
@@ -5971,6 +5866,7 @@ M.EndDisabled = lib.igEndDisabled
 M.EndDisabledOverrideReenable = lib.igEndDisabledOverrideReenable
 M.EndDragDropSource = lib.igEndDragDropSource
 M.EndDragDropTarget = lib.igEndDragDropTarget
+M.EndErrorTooltip = lib.igEndErrorTooltip
 M.EndFrame = lib.igEndFrame
 M.EndGroup = lib.igEndGroup
 M.EndListBox = lib.igEndListBox
@@ -5983,15 +5879,12 @@ M.EndTabBar = lib.igEndTabBar
 M.EndTabItem = lib.igEndTabItem
 M.EndTable = lib.igEndTable
 M.EndTooltip = lib.igEndTooltip
-function M.ErrorCheckEndFrameRecover(log_callback,user_data)
-    user_data = user_data or nil
-    return lib.igErrorCheckEndFrameRecover(log_callback,user_data)
-end
-function M.ErrorCheckEndWindowRecover(log_callback,user_data)
-    user_data = user_data or nil
-    return lib.igErrorCheckEndWindowRecover(log_callback,user_data)
-end
+M.ErrorCheckEndFrameFinalizeErrorTooltip = lib.igErrorCheckEndFrameFinalizeErrorTooltip
 M.ErrorCheckUsingSetCursorPosToExtendParentBoundaries = lib.igErrorCheckUsingSetCursorPosToExtendParentBoundaries
+M.ErrorLog = lib.igErrorLog
+M.ErrorRecoveryStoreState = lib.igErrorRecoveryStoreState
+M.ErrorRecoveryTryToRecoverState = lib.igErrorRecoveryTryToRecoverState
+M.ErrorRecoveryTryToRecoverWindowState = lib.igErrorRecoveryTryToRecoverWindowState
 function M.FindBestWindowPosForPopup(window)
     local nonUDT_out = ffi.new("ImVec2")
     lib.igFindBestWindowPosForPopup(nonUDT_out,window)
@@ -6904,7 +6797,6 @@ M.NavMoveRequestResolveWithLastItem = lib.igNavMoveRequestResolveWithLastItem
 M.NavMoveRequestResolveWithPastTreeNode = lib.igNavMoveRequestResolveWithPastTreeNode
 M.NavMoveRequestSubmit = lib.igNavMoveRequestSubmit
 M.NavMoveRequestTryWrapping = lib.igNavMoveRequestTryWrapping
-M.NavRestoreHighlightAfterMove = lib.igNavRestoreHighlightAfterMove
 M.NavUpdateCurrentWindowIsScrollPushableX = lib.igNavUpdateCurrentWindowIsScrollPushableX
 M.NewFrame = lib.igNewFrame
 M.NewLine = lib.igNewLine
@@ -7078,9 +6970,9 @@ function M.RenderFrameBorder(p_min,p_max,rounding)
     return lib.igRenderFrameBorder(p_min,p_max,rounding)
 end
 M.RenderMouseCursor = lib.igRenderMouseCursor
-function M.RenderNavHighlight(bb,id,flags)
+function M.RenderNavCursor(bb,id,flags)
     flags = flags or 0
-    return lib.igRenderNavHighlight(bb,id,flags)
+    return lib.igRenderNavCursor(bb,id,flags)
 end
 function M.RenderPlatformWindowsDefault(platform_render_arg,renderer_render_arg)
     platform_render_arg = platform_render_arg or nil
@@ -7210,6 +7102,8 @@ function M.SetKeyboardFocusHere(offset)
 end
 M.SetLastItemData = lib.igSetLastItemData
 M.SetMouseCursor = lib.igSetMouseCursor
+M.SetNavCursorVisible = lib.igSetNavCursorVisible
+M.SetNavCursorVisibleAfterMove = lib.igSetNavCursorVisibleAfterMove
 M.SetNavFocusScope = lib.igSetNavFocusScope
 M.SetNavID = lib.igSetNavID
 M.SetNavWindow = lib.igSetNavWindow
@@ -7513,7 +7407,14 @@ M.TabBarGetCurrentTab = lib.igTabBarGetCurrentTab
 M.TabBarGetTabName = lib.igTabBarGetTabName
 M.TabBarGetTabOrder = lib.igTabBarGetTabOrder
 M.TabBarProcessReorder = lib.igTabBarProcessReorder
-M.TabBarQueueFocus = lib.igTabBarQueueFocus
+M.TabBarQueueFocus_TabItemPtr = lib.igTabBarQueueFocus_TabItemPtr
+M.TabBarQueueFocus_Str = lib.igTabBarQueueFocus_Str
+function M.TabBarQueueFocus(a1,a2) -- generic version
+    if (ffi.istype('ImGuiTabItem*',a2) or ffi.istype('ImGuiTabItem',a2) or ffi.istype('ImGuiTabItem[]',a2)) then return M.TabBarQueueFocus_TabItemPtr(a1,a2) end
+    if (ffi.istype('const char*',a2) or ffi.istype('char[]',a2) or type(a2)=='string') then return M.TabBarQueueFocus_Str(a1,a2) end
+    print(a1,a2)
+    error'M.TabBarQueueFocus could not find overloaded'
+end
 M.TabBarQueueReorder = lib.igTabBarQueueReorder
 M.TabBarQueueReorderFromMousePos = lib.igTabBarQueueReorderFromMousePos
 M.TabBarRemoveTab = lib.igTabBarRemoveTab

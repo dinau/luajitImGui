@@ -11,13 +11,18 @@ local M = {}
 local function startGLFW(W, postf)
     local window = W.window
     local ig = W.ig
+	local gl, glc, glu, glext = W.gllib.libraries()											
     while not window:shouldClose() do
     
         W.lj_glfw.pollEvents()
+		if (window:getAttrib(W.lj_glfw.glfwc.GLFW_ICONIFIED) ~= 0) then
+            ig.lib.ImGui_ImplGlfw_Sleep(10);
+            goto continue
+        end																 		   
         
         window:makeContextCurrent()
         
-        W.gllib.gl.glClear(W.gllib.glc.GL_COLOR_BUFFER_BIT)
+        gl.glClear(glc.GL_COLOR_BUFFER_BIT)
         
         if W.preimgui then W.preimgui() end
         
@@ -41,6 +46,7 @@ local function startGLFW(W, postf)
         end
         
         window:swapBuffers()                    
+		::continue::	  
     end
     if postf then postf() end
     W.ig_impl:destroy()
@@ -112,6 +118,10 @@ local function startSDL(W, postf)
                 done = true;
             end
         end
+		if (bit.band(sdl.GetWindowFlags(window), sdl.WINDOW_MINIMIZED) > 0) then
+            sdl.Delay(10);
+            goto continue
+        end	
         --standard rendering
         sdl.gL_MakeCurrent(window, W.gl_context);
         gl.glViewport(0, 0, igio.DisplaySize.x, igio.DisplaySize.y);
@@ -132,18 +142,19 @@ local function startSDL(W, postf)
             if bit.band(igio.ConfigFlags , ig.lib.ImGuiConfigFlags_ViewportsEnable) ~= 0 then
                 ig.UpdatePlatformWindows();
                 ig.RenderPlatformWindowsDefault();
-                sdl.gL_MakeCurrent(window, gl_context)
+                sdl.gL_MakeCurrent(window, W.gl_context)
             end
         end
         
         sdl.gL_SwapWindow(window);
+		::continue::	  
     end
     
     -- Cleanup
     if postf then postf() end
     W.ig_Impl:destroy()
 
-    sdl.gL_DeleteContext(gl_context);
+    sdl.gL_DeleteContext(W.gl_context);
     sdl.destroyWindow(window);
     sdl.quit();
 end
@@ -177,7 +188,7 @@ function M:SDL(w,h,title,args)
     sdl.gL_SetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 2);
     local current = ffi.new("SDL_DisplayMode[1]")
     sdl.getCurrentDisplayMode(0, current);
-    local window = sdl.createWindow(title or "", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, w, h, sdl.WINDOW_OPENGL+sdl.WINDOW_RESIZABLE); 
+    local window = sdl.createWindow(title or "", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, w, h, sdl.WINDOW_OPENGL + sdl.WINDOW_RESIZABLE + sdl.SDL_WINDOW_ALLOW_HIGHDPI); 
     W.gl_context = sdl.gL_CreateContext(window);
     if args.vsync then sdl.gL_SetSwapInterval(1) end
 
@@ -202,6 +213,126 @@ function M:SDL(w,h,title,args)
 
     W.window = window
     W.start = startSDL
+    return W
+end
+
+local function startSDL3(W, postf)
+    local ffi = require"ffi"
+
+    local window = W.window
+    local sdl = W.sdl
+    local ig = W.ig
+    local gl,glc = W.gllib.gl,W.gllib.glc
+    local igio = ig.GetIO()
+    local done = false;
+    while (not done) do
+        --SDL_Event 
+        local event = ffi.new"SDL_Event"
+        while (sdl.pollEvent(event)) do
+            ig.lib.ImGui_ImplSDL3_ProcessEvent(event);
+            if (event.type == sdl.EVENT_QUIT) then
+                done = true;
+            end
+            if (event.type == sdl.EVENT_WINDOW_CLOSE_REQUESTED and event.window.windowID == sdl.getWindowID(window)) then
+                done = true;
+            end
+        end
+		if (bit.band(sdl.GetWindowFlags(window), sdl.WINDOW_MINIMIZED) > 0) then
+            sdl.Delay(10);
+            goto continue
+        end
+        --standard rendering
+        sdl.gL_MakeCurrent(window, W.gl_context);
+        gl.glViewport(0, 0, igio.DisplaySize.x, igio.DisplaySize.y);
+        gl.glClear(glc.GL_COLOR_BUFFER_BIT)
+        
+        if W.preimgui then W.preimgui() end
+
+        W.ig_Impl:NewFrame()
+
+        MainDockSpace(W)
+        W:draw(ig)
+        
+        W.ig_Impl:Render()
+        
+        --viewport branch
+        if W.has_imgui_viewport then
+            local igio = ig.GetIO()
+            if bit.band(igio.ConfigFlags , ig.lib.ImGuiConfigFlags_ViewportsEnable) ~= 0 then
+                ig.UpdatePlatformWindows();
+                ig.RenderPlatformWindowsDefault();
+                sdl.gL_MakeCurrent(window, W.gl_context)
+            end
+        end
+        
+        sdl.gL_SwapWindow(window);
+		::continue::	  
+    end
+    
+    -- Cleanup
+    if postf then postf() end
+    W.ig_Impl:destroy()
+
+    sdl.gL_DestroyContext(W.gl_context);
+    sdl.destroyWindow(window);
+    sdl.quit();
+end
+function M:SDL3(w,h,title,args)
+
+    args = args or {}
+    local W = {args = args}
+    local ffi = require "ffi"
+    W.sdl = require"sdl3_ffi"
+    local sdl = W.sdl
+    W.gllib = require"gl"
+    W.gllib.set_loader(W.sdl)
+    --local gl, glc, glu, glext = gllib.libraries()
+    W.ig = require"imgui.sdl3"
+
+    if not (sdl.init(sdl.INIT_VIDEO+sdl.INIT_GAMEPAD)) then
+        print(string.format("Error: %s\n", ffi.string(sdl.getError())));
+        error"failed sdl3_init";
+    end
+
+
+    sdl.gL_SetAttribute(sdl.GL_DOUBLEBUFFER, 1);
+    sdl.gL_SetAttribute(sdl.GL_DEPTH_SIZE, 24);
+    sdl.gL_SetAttribute(sdl.GL_STENCIL_SIZE, 8);
+    if args.gl2 then
+        sdl.gL_SetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 2);
+    else
+        sdl.gL_SetAttribute(sdl.GL_CONTEXT_FLAGS, sdl.GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+        sdl.gL_SetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE);
+        sdl.gL_SetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3);
+    end
+    sdl.gL_SetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 2);
+
+    local window = sdl.createWindow(title or "", w, h, sdl.WINDOW_OPENGL + sdl.WINDOW_RESIZABLE)-- + sdl.SDL_WINDOW_HIDDEN); 
+    W.gl_context = sdl.gL_CreateContext(window);
+    if args.vsync then sdl.gL_SetSwapInterval(1) end
+
+    if args.gl2 then
+        W.ig_Impl = W.ig.Imgui_Impl_SDL3_opengl2()
+    else
+        W.ig_Impl = W.ig.Imgui_Impl_SDL3_opengl3()
+    end
+    
+    local igio = W.ig.GetIO()
+    igio.ConfigFlags = W.ig.lib.ImGuiConfigFlags_NavEnableKeyboard + igio.ConfigFlags
+    local ok = pcall(function() return W.ig.lib.ImGuiConfigFlags_ViewportsEnable end)
+    if ok then
+        W.has_imgui_viewport = true
+        igio.ConfigFlags = igio.ConfigFlags + W.ig.lib.ImGuiConfigFlags_DockingEnable
+        if args.use_imgui_viewport then
+            igio.ConfigFlags = igio.ConfigFlags + W.ig.lib.ImGuiConfigFlags_ViewportsEnable
+        end
+    end
+    
+    W.ig_Impl:Init(window, W.gl_context)
+
+    W.window = window
+    W.start = startSDL3
+
     return W
 end
 
