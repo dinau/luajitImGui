@@ -62,7 +62,7 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
 ##### [glfw_opengl3](examples/glfw_opengl3/glfw_opengl3.lua)  
 
-This can image load and save.
+This can load and save image file. 
 
 ![glfw_opengl3](examples/img/glfw_opengl3.png)
 
@@ -115,13 +115,14 @@ cd bin/examples
 
 - WindowsOS 64bit  
 - Latest  
-[luajitImGui-1.91.4.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.4.0.zip) 2024/10  
+[luajitImGui-1.91.4.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.4.0.zip) 2024/10  
+
 - Old  
 [luajitImGui-1.91.2.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.2.0.zip) 2024/10  
 [luajitImGui-1.91.1.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.1.0.zip) 2024/09  
-[luajitImGui-1.91.0.3.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.0.3.zip)  
+[luajitImGui-1.91.0.3.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.0.3.zip)  
 - WindowsOS 32bit  
-[luajitImGui-1.91.0.2.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.0.2.zip)  
+[luajitImGui-1.91.0.2.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.0.2.zip)  
 
 #### Running examples
 
@@ -133,7 +134,7 @@ for instance,
 ```sh
 cd luajitImGui-1.91.0.0
 cd examples/glfw_opengl3
-glfw_opengl3.exe         # Double click on Windows file explore
+glfw_opengl3.exe         # or double click on Windows file explore
 ```
 
 #### Other examples 
@@ -147,10 +148,10 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 ---
 
 - Prerequisites  
-   Installed MSys2/MinGW tools, at least install,
+   Install at least on MSys2/MinGW console,
 
    ```sh
-   pacman -S mingw-w64-ucrt-x86_64-{cmake,gcc,clang,llvm-openmp,patch}
+   pacman -S mingw-w64-ucrt-x86_64-{cmake,gcc,clang,llvm-openmp,patch} make
   ```
 
 - Build **on MSys2 console**,
@@ -181,18 +182,24 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 ---
 
 - WindowsOS 64bit versions
-   - Updated to
-      - 2024/10: ImGui / CImGui v1.91.4 / LuaJITImGui v1.91.4.0
-      - 2024/10: ImGui / CImGui v1.91.2 / LuaJITImGui v1.91.2.0
-      - 2024/09: ImGui / CImGui v1.91.1 / LuaJITImGui v1.91.1.0
-      - 2024/09: ImGui / CImGui v1.91.0 / LuaJITImGui v1.91.0.3
+   | Date    | ImGui / CImGui | LuaJITImGui | Commemt |
+   | ---     | -----------    | ---         | ---     |
+   | 2024/10 | v1.91.4        | v1.91.4.0   |         |
+   | 2024/10 | v1.91.2        | v1.91.2.0   |         |
+   | 2024/09 | v1.91.1        | v1.91.1.0   |         |
+   | 2024/09 | v1.91.0        | v1.91.0.3   |         |
+
 - WindowsOS 32bit versions
-   - Updated to
-      - 2024/08: ImGui v1.91.0 / LuaJITImGui v1.91.0.2 last version
-      - 2024/07: ImGui v1.90.9 , 2024/06: ImGui v1.90.8 , 2024/05: ImGui v1.90.7 , 2024/05: ImGui v1.90.6 , 2024/03: ImGui v1.90.4
-      - 2024/02: Added: Button "Save window image" and combo box,  
-      it can be saved as JPEG, PNG, TIFF, BMP file format
-      - 2024/01: Added: Icon font demo
+   | Date    | ImGui / CImGui | LuaJITImGui | Commemt                                                                                              |
+   | ---     | -----------    | ---         | ---                                                                                                  |
+   | 2024/08 | v1.91.0        | v1.91.0.2   |                                                                                                      |
+   | 2024/07 | v1.90.9        | v1.90.9.0   |                                                                                                      |
+   | 2024/06 | v1.90.8        | v1.90.8.0   |                                                                                                      |
+   | 2024/05 | v1.90.7        | v1.90.7.0   |                                                                                                      |
+   | 2024/05 | v1.90.6        | v1.90.6.2   |                                                                                                      |
+   | 2024/03 | v1.90.4        | v1.90.4.0   |                                                                                                      |
+   | 2024/02 | v1.90.1        | v1.90.1.3   | Added: Button "Save window image" and combo box, it can be saved as JPEG, PNG, TIFF, BMP file format |
+   | 2024/01 | v1.90.1        | v1.90.1.0   | Added: Icon font demo                                                                                |
 
 
 #### Similar project
