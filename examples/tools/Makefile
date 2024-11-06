@@ -4,7 +4,7 @@ endif
 
 C_SRC = execLuaSource
 
-EXAMPLES_DIR = ../../bin/examples/LuaJIT-ImGui/examples
+EXAMPLES_DIR = ../../bin/examples
 
 CFLAGS += -mwindows
 
@@ -49,18 +49,18 @@ all:  gen_bat
 	@echo =
 	$(foreach exdir,$(EXAMPLE_DIRS), $(call def_gen_exe,$(exdir)))
 
-
 gen_bat:
 	@echo =
 	@echo === Generating Batch files ===
 	@echo =
-	cp -f r.bat $(EXAMPLES_DIR)/
+	cp -f r.bat $(EXAMPLES_DIR)/LuaJIT-ImGui/examples/
+	cp -f julia.bat $(EXAMPLES_DIR)/juliaSet/
 	$(foreach expName,$(EXAMPLE_NAMES), $(call def_gen_bat,$(expName)))
 
 define def_gen_bat
-	@echo @echo off >          $(EXAMPLES_DIR)/$(1).bat
-	@echo call r.bat $1.lua >> $(EXAMPLES_DIR)/$(1).bat
-	@echo $(EXAMPLES_DIR)/$(1).bat
+	@echo @echo off >          $(EXAMPLES_DIR)/LuaJIT-ImGui/examples/$(1).bat
+	@echo call r.bat $1.lua >> $(EXAMPLES_DIR)/LuaJIT-ImGui/examples/$(1).bat
+	@echo $(EXAMPLES_DIR)/LuaJIT-ImGui/examples/$(1).bat
 
 endef
 

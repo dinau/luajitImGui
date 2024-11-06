@@ -103,6 +103,7 @@ clean:
 	-rm -fr $(BUILD_DIR)
 	-rm  bin/*.dll bin/*.exe
 	-rm -fr bin/examples
+	-rm -fr bin/lua/*.lua
 	-rm -fr bin/lua/anima
 	-rm -fr bin/lua/imgui
 	-rm -fr bin/lua/IPOL
