@@ -8,13 +8,15 @@ local gl, glc, glu, glext = gllib.libraries()
 local ig    = require"imgui.sdl"
 require"mylib.loadimage"
 require"mylib.setupFonts"
+require"./zoomglass"
 local IFA   = require"mylib.fonticon.IconsFontAwesome6"
 
 --- Global var: app
---require"mylib.apps"
+require"mylib.apps"
 
 ---
-local SaveImageName = "screenImage"
+local SaveImageName = "ImageSaved"
+
 -- Select {JPEG, PNG, TIFF, BMP}
 local SaveFormat = "JPEG"
 
@@ -26,36 +28,32 @@ local ImgDir = "img/"
 local IconDir = "res/img/"
 
 -- Load inifile
---loadIni()
+LoadIni()
 
 if (sdl.init(sdl.INIT_VIDEO+sdl.INIT_TIMER) ~= 0) then
-    print(string.format("Error: %s\n", sdl.getError()));
-    return -1;
+    print(string.format("Error: %s\n", sdl.getError()))
+    return -1
 end
 
-sdl.gL_SetAttribute(sdl.GL_CONTEXT_FLAGS, sdl.GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-sdl.gL_SetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE);
-sdl.gL_SetAttribute(sdl.GL_DOUBLEBUFFER, 1);
-sdl.gL_SetAttribute(sdl.GL_DEPTH_SIZE, 24);
-sdl.gL_SetAttribute(sdl.GL_STENCIL_SIZE, 8);
-sdl.gL_SetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3);
-sdl.gL_SetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 3);
+sdl.gL_SetAttribute(sdl.GL_CONTEXT_FLAGS, sdl.GL_CONTEXT_FORWARD_COMPATIBLE_FLAG)
+sdl.gL_SetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
+sdl.gL_SetAttribute(sdl.GL_DOUBLEBUFFER, 1)
+sdl.gL_SetAttribute(sdl.GL_DEPTH_SIZE, 24)
+sdl.gL_SetAttribute(sdl.GL_STENCIL_SIZE, 8)
+sdl.gL_SetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3)
+sdl.gL_SetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 3)
 
 local current = ffi.new("SDL_DisplayMode[1]")
-sdl.getCurrentDisplayMode(0, current);
+sdl.getCurrentDisplayMode(0, current)
 
---local window = sdl.createWindow("ImGui SDL2+OpenGL3 example", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, 700, 500, sdl.WINDOW_OPENGL+sdl.WINDOW_RESIZABLE);
---local window = sdl.createWindow("ImGui SDL2+OpenGL3 example"
---                 ,app.mainWinodw.posx -- x
---                 ,app.mainWinodw.posy -- y
---                 ,app.mainwinodw.width, app.mainWindow.height  -- w, h
---                 ,sdl.WINDOW_OPENGL+sdl.WINDOW_RESIZABLE);
 local window = sdl.createWindow("ImGui SDL2+OpenGL3 example"
-                 ,100 -- x
-                 ,100 -- y
-                 ,1024, 800  -- w, h
-                 ,sdl.WINDOW_OPENGL+sdl.WINDOW_RESIZABLE);
-local gl_context = sdl.gL_CreateContext(window);
+                 ,App.mainWindow.posx -- x
+                 ,App.mainWindow.posy -- y
+                 ,App.mainWindow.width, App.mainWindow.height  -- w, h
+                 ,sdl.WINDOW_OPENGL + sdl.WINDOW_RESIZABLE + sdl.WINDOW_HIDDEN)
+local gl_context = sdl.gL_CreateContext(window)
+
+sdl.gL_MakeCurrent(window, gl_context)
 sdl.gL_SetSwapInterval(1); -- Enable vsync
 
 local ig_impl = ig.Imgui_Impl_SDL_opengl3()
@@ -109,7 +107,8 @@ local sBuf       = ffi.new("char[?]",sBufLen)
 local somefloat  = ffi.new("float[1]",0.0)
 local clearColor = ffi.new("float[3]",{0.25,0.65,0.85})
 local counter = 0
-local done = false;
+local done = false
+local showWindowDelay = 2
 --
 local sdlVer = ffi.new("SDL_version")
 sdl.GetVersion(sdlVer)
@@ -120,25 +119,25 @@ while (not done) do
   --SDL_Event
   local event = ffi.new"SDL_Event"
   while (sdl.pollEvent(event) ~=0) do
-    ig.lib.ImGui_ImplSDL2_ProcessEvent(event);
+    ig.lib.ImGui_ImplSDL2_ProcessEvent(event)
     if (event.type == sdl.QUIT) then
-      done = true;
+      done = true
     end
     if (event.type == sdl.WINDOWEVENT and event.window.event == sdl.WINDOWEVENT_CLOSE and event.window.windowID == sdl.getWindowID(window)) then
-      done = true;
+      done = true
     end
   end
   --standard rendering
-  sdl.gL_MakeCurrent(window, gl_context);
+  --sdl.gL_MakeCurrent(window, gl_context)
   gl.glClearColor(clearColor[0],clearColor[1],clearColor[2],1.0)
-  gl.glViewport(0, 0, pio.DisplaySize.x, pio.DisplaySize.y);
+  gl.glViewport(0, 0, pio.DisplaySize.x, pio.DisplaySize.y)
   gl.glClear(glc.GL_COLOR_BUFFER_BIT)
 
   ig_impl:NewFrame()
   -- Show ImGui demo
   if fShowDemo[0] then ig.ShowDemoWindow(fShowDemo) end
   local svName
-  if ig.Begin(sTitle) then
+  do ig.Begin(sTitle)
     ig.Text(string.format("SDL2 v%d.%d.%d",sdlVer.major,sdlVer.minor,sdlVer.patch))
     local s = "OpenGL v" .. ffi.string(gl.glGetString(glc.GL_VERSION)):split(" ")[1]
     ig.Text(s)
@@ -175,7 +174,7 @@ while (not done) do
     ig.PushStyleColor(ig.lib.ImGuiCol_ButtonHovered, ig.ImVec4(0.8, 0.8, 0.0, 1.0))
     ig.PushStyleColor(ig.lib.ImGuiCol_ButtonActive,  ig.ImVec4(0.9, 0.9, 0.0, 1.0))
     ig.PushStyleColor(ig.lib.ImGuiCol_Text, ig.ImVec4(0.0, 0.0, 0.0,1.0))
-    if ig.Button("Save screeen image") then
+    if ig.Button("Save window image") then
       fReqImageCapture = true
     end
     ig.PopStyleColor(4)
@@ -185,7 +184,7 @@ while (not done) do
     -- Show tooltip help
     svName = SaveImageName .. "_" .. counter .. utils.imageExt[SaveFormat]
     if ig.IsItemHovered() and ig.BeginTooltip() then
-      ig.Text(string.format("[Unimplement]: Save to \"%s\"", svName))
+      ig.Text(string.format("Save to \"%s\"", svName))
       ig.EndTooltip()
     end
     -- End Save button of screen image
@@ -206,8 +205,14 @@ while (not done) do
     ig.End()
   end
   --
-  if ig.Begin("Image window") then
-    ig.Image(ffi.cast("ImTextureID",pic1.texture[0]),pic1.size)
+  do ig.Begin("Image window")
+    local imageBoxPosTop = ig.GetCursorScreenPos() -- Get absolute pos.
+    ig.Image(ffi.cast("ImTextureID",pic1.texture[0]), pic1.size)
+    local imageBoxPosEnd = ig.GetCursorScreenPos() -- Get absolute pos.
+    --
+    if ig.IsItemHovered(ig.ImGuiHoveredFlags_DelayNone) then
+      zoomGlass(pic1.texture, pic1.width, imageBoxPosTop, imageBoxPosEnd)
+    end
     ig.End()
   end
 
@@ -216,18 +221,31 @@ while (not done) do
   -- Save screen image to file
   if fReqImageCapture then
     fReqImageCapture = false
-    -- TODO
-    --local w,h,x,y = getCurrentWindowSize(window)
-    --utils.saveImage(svName, SaveFormat, w , h)
+
+    local wkSize = ig.GetMainViewport().WorkSize
+    utils.saveImage(glext,svName, SaveFormat, wkSize.x , wkSize.y)
   end
   --
   sdl.gL_SwapWindow(window)
+
+  if showWindowDelay >= 0 then
+    showWindowDelay = showWindowDelay - 1
+  end
+  if showWindowDelay == 0 then
+    sdl.showWindow(window)
+  end
 end
 
--- Cleanup
---saveIni(window)
-ig_impl:destroy()
+-- Save Window info
+local info = {}
+info.x, info.y = window:getPos()
+local wsize = ig.GetMainViewport().WorkSize
+info.w = wsize.x
+info.h = wsize.y
+SaveIni(info)
 
-sdl.gL_DeleteContext(gl_context);
-sdl.destroyWindow(window);
-sdl.quit();
+-- Cleanup
+ig_impl:destroy()
+sdl.gL_DeleteContext(gl_context)
+sdl.destroyWindow(window)
+sdl.quit()

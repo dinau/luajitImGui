@@ -50,6 +50,14 @@ local mLine = ffi.new("int[?]",1)
 local mColumn = ffi.new("int[?]",1)
 local openfind = false
 local findbuf = ffi.new("char[?]",256)
+local showhelp = false
+local help_txt = 
+[[multicursor (ctrl + click to add a new one)
+ctrl + d for selecting next match
+ctrl + [ and ctrl + ] for indentation
+ctrl + backspace and ctrl + delete for word mode delete
+ctrl + / for comment toggling]]
+
 local function Render(self)
 	local editor = self.editor
 	editor:GetCursorPosition(mLine, mColumn)
@@ -108,17 +116,25 @@ local function Render(self)
 				end
 				ig.EndMenu()
 			end
+			
+			if ig.BeginMenu("Help") then
+				if (ig.MenuItem("Show")) then
+					showhelp = true
+				end
+				ig.EndMenu()
+			end
 			ig.EndMenuBar();
 		end
 
 	--ig.BeginChild(self.ID)--, nil, ig.lib.ImGuiWindowFlags_HorizontalScrollbar + ig.lib.ImGuiWindowFlags_MenuBar);
 		--ig.SetWindowSize(ig.ImVec2(800, 600), ig.lib.ImGuiCond_FirstUseEver);
 	
-		ig.Text("%6d/%-6d %6d lines  | %s | %s | %s", toint(mLine[0] + 1), toint(mColumn[0] + 1), toint(editor:GetLineCount()),
-		editor:IsOverwriteEnabled() and "Ovr" or "Ins",
-		editor:CanUndo() and "*" or " ",
-		--langNames[tonumber(editor:GetLanguageDefinition())+1],
-		self.file_name)
+		ig.Text("%6d/%-6d %6d lines  | %s |", toint(mLine[0] + 1), toint(mColumn[0] + 1), toint(editor:GetLineCount()),
+		editor:IsOverwriteEnabled() and "Ovr" or "Ins")
+		ig.SameLine()
+		local dirty = editor:CanUndo()
+		local tcolor = dirty and ig.ImVec4(1,0,0,1) or ig.ImVec4(1,1,1,1)
+		ig.TextColored(tcolor," %s | %s ",dirty and "*" or " ", self.file_name)
 		ig.SameLine()
 		self.lang_combo:draw()
 		ig.SameLine()
@@ -147,6 +163,18 @@ local function Render(self)
 				end
 			ig.End()
 		end
+		if showhelp then
+			ig.SetNextWindowSize(ig.ImVec2(500,200));
+			ig.OpenPopup("Help##p")
+			if ig.BeginPopupModal("Help##p") then 
+				ig.TextWrapped(help_txt)
+				if ig.Button("OK") then
+					ig.CloseCurrentPopup()
+					showhelp = false
+				end
+				ig.EndPopup()
+			end
+		end
 
 end
 local function Save(self,fname)
@@ -154,7 +182,15 @@ local function Save(self,fname)
 	if fname then
 		local file,err = io.open(fname,"w")
 		assert(file,err)
+		
+		-- local cstr = ig.lib.TextEditor_GetText_alloc(editor)
+		-- local str = ffi.string(cstr)
+		-- ig.lib.TextEditor_GetText_free(cstr)
+		
+		--local str = ffi.string(ig.lib.TextEditor_GetText_static(editor))
+		
 		local str = ffi.string(editor:GetText())
+		
 		file:write(str)
 		file:close()
 	end

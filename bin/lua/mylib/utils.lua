@@ -138,7 +138,7 @@ end
 
 ---
 local gllib = require"gl"
-gllib.set_loader(glfw)
+--gllib.set_loader(glfw)
 local gl, glc, glu, glext = gllib.libraries()
 
 M.imageExt = {JPEG=".jpg", PNG=".png", TIFF=".tif", BMP=".bmp"}
@@ -147,7 +147,7 @@ M.imageExt = {JPEG=".jpg", PNG=".png", TIFF=".tif", BMP=".bmp"}
 --- SaveImage
 --------------
 --- Refer to luajitImGui/anima/mirror-im/html/index.html
-function M.saveImage(filename,formato,width,height,xPos,yPos)
+function M.saveImage(glext, filename, formato, width, height, xPos, yPos)
   local formato = formato or "TIFF"
   local xPos = xPos or 0
   local yPos = yPos or 0

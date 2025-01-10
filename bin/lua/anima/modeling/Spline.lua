@@ -78,7 +78,7 @@ local function Editor(GL,updatefunc,args)
 		--points in curr_spline
 		for i,v in ipairs(M.sccoors[NM.curr_spline]) do
 			local scpoint = ViewportToScreen(v.x,v.y)
-			local color = i==1 and ig.U32(1,1,0,1) or ig.U32(1,0,0,1)
+			local color = i==1 and ig.U32(1,1,0,1) or ig.U32(1,0,0,0.5)
 			dl:AddCircleFilled(scpoint, 4, color)
 		end
 		if curr_hole[0]>0 then
@@ -90,13 +90,17 @@ local function Editor(GL,updatefunc,args)
 		end
 		--polylines
 		for i=1,numsplines do
-			local color = i == NM.curr_spline and ig.U32(0.5,1,0,1) or ig.U32(0.25,0.5,0,1)
+			local color = i == NM.curr_spline and ig.U32(0.75,1,0,1) or ig.U32(0.75,1,0,0.2) --(0.25,0.5,0,0.5)
 			local pointsI = ffi.new("ImVec2[?]",#M.ps[i])
 			for j,p in ipairs(M.ps[i]) do
 				local scpoint = ViewportToScreen(p.x,p.y)
 				pointsI[j-1] = scpoint
 			end
-			dl:AddPolyline(pointsI,#M.ps[i],color,true, 1)
+			if NM.drawregion then
+				dl:AddConcavePolyFilled(pointsI,#M.ps[i],color)
+			else
+				dl:AddPolyline(pointsI,#M.ps[i],color,ig.lib.ImDrawFlags_Closed, 1)
+			end
 			if M.ps[i].holes then
 				for j,hole in ipairs(M.ps[i].holes) do
 					local pointsI = ffi.new("ImVec2[?]",#hole)
@@ -180,6 +184,7 @@ local function Editor(GL,updatefunc,args)
 				else
 					table.insert(M.sccoors[NM.curr_spline].holes[curr_hole[0]],mposvp)
 				end
+				updatefunc(M,"insert")
 				M:calc_spline()
 				if M:numpoints(ii)>2 then updatefunc(M) end
 			end
@@ -294,7 +299,7 @@ local function Editor(GL,updatefunc,args)
 		return box2d(self.ps[ii])
 	end
 	
-	function M:newspline(pts)
+	function M:newspline(pts, dontcalc)
 		numsplines=numsplines+1;
 		NM.vars.curr_spline[0]=numsplines 
 		NM.defs.curr_spline.args.max=numsplines 
@@ -303,6 +308,8 @@ local function Editor(GL,updatefunc,args)
 			for i,p in ipairs(pts) do
 				self.sccoors[NM.curr_spline][i] = p
 			end
+			--dontcalc used in Spline3D before setting frame
+			if not dontcalc then M:calc_spline() end
 		end
 		--M:process_all()
 		return numsplines
@@ -499,7 +506,7 @@ end
 --[=[
 local GL = GLcanvas{H=500,aspect=1,DEBUG=true}
 local function update(n) print("update spline",n) end
-local edit = Editor(GL,update,{region=false})--,doblend=true})
+local edit = Editor(GL,update,{region=true})--,doblend=true})
 local plugin = require"anima.plugins.plugin"
 edit.fb = plugin.serializer(edit)
 function GL.imgui()

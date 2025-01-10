@@ -94,7 +94,7 @@ while not window:shouldClose() do
   if fShowDemo[0] then ig.ShowDemoWindow(fShowDemo) end
 
   -- Show Simple window
-  if ig.Begin(sTitle) then
+  do ig.Begin(sTitle)
     ig.Text(IFA.ICON_FA_COMMENT .. "  ImGui v" .. ffi.string(ig.GetVersion()))
     ig.Text(IFA.ICON_FA_COMMENT .. "  GLFW v" .. ffi.string(glfw.glfwVersionString()))
     local s = "OpenGL v" .. ffi.string(gl.glGetString(glc.GL_VERSION)):split(" ")[1]

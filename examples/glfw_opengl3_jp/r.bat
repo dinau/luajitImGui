@@ -9,9 +9,10 @@ rem ---------------------------------
 rem Set Lua libraries and *.dll path
 rem ---------------------------------
 set bin=..\..\bin
+set LUA_CPATH=..\..\bin
 set LUA_PATH=;;..\lib\?.lua;%bin%\examples\LuaJIT-ImGui\examples\?.lua
 rem Clear PATH if you need.
-set PATH=
+set PATH=tbin
 set PATH=%path%;..\lib
 
 rem ----------------

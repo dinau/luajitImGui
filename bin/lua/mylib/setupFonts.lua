@@ -1,27 +1,24 @@
 local ffi   = require "ffi"
---local ig    = require"imgui.glfw"
 local utils = require"mylib.utils"
 local IFA   = require"mylib.fonticon.IconsFontAwesome6"
 
 -------------
 --- point2px
 -------------
-function point2px(point)
-  -- ## Convert point to pixel
+function point2px(point) -- ## Convert point to pixel
   return ((point * 96) / 72)
 end
 
-local ranges_icon_fonts = ffi.new("unsigned short[3]",{IFA.ICON_MIN_FA,  IFA.ICON_MAX_FA, 0})
 local config = ffi.new("ImFontConfig",{
   FontDataOwnedByAtlas = true,
-  FontNo = fontNo,
+  FontNo = 0,
   OversampleH = 3,
   OversampleV = 1,
   PixelSnapH = false,
   GlyphMaxAdvanceX = 1000.0,
   RasterizerMultiply = 1.0,
   RasterizerDensity  = 1.0,
-  MergeMode = true,          -- ** Notice **
+  MergeMode = false,          -- ** Notice **
   EllipsisChar = -1,
 })
 
@@ -29,60 +26,42 @@ function setupFonts(pio)
   local fontsAtlas = pio.Fonts
   --maximal range allowed with ImWchar16
   --local ranges = ffi.new("ImWchar[3]",{0x0001,0xFFFF,0})
-  local ranges = nil
-  local fontSize
-  local fontNo
-  local sActiveFontTitle
+  local sActiveFontTitle = ""
   local sActiveFontName = ""
-  --
-  --
-  if true then -- For Japanese fonts
-    local fontJP = "meiryo"
-   -- local fontJP = "YuGothM"
-    if fontJP == "meiryo" then
-      sActiveFontName  = os.getenv("windir") .. "/fonts/meiryo.ttc" -- Windows7, 8.1
-      sActiveFontTitle = "メイリオ"
-      fontSize = 14 -- point
-      fontNo   = 0
-    elseif fontJP == "YuGothM" then
-      sActiveFontName = os.getenv("windir") .. "/fonts/YuGothM.ttc" -- Windows10, 11
-      sActiveFontTitle = "ゆうゴシック"
-      fontSize = 11.5 -- point
-      fontNo   = 0
-    end
-    --
+  local fontTbl = {
+                   {fontName="meiryo.ttc",  point=14.5,   fontNo=0, title="メイリオ"}   -- Windows7, 8
+                  ,{fontName="YuGothM.ttc", point=11.5, fontNo=0, title="ゆうゴシック"} -- Windows10, 11
+                  ,{fontName="segoeuil.ttf",point=14.0, fontNo=0, title="Seoge UI"}     -- English region standard font
+                  }
+  local theFONT = nil
+  local sActiveFontName = ""
+  for _, fInfo in ipairs(fontTbl) do
+    sActiveFontName = os.getenv("windir") .. "/fonts/" .. fInfo.fontName
     if utils.fileExists(sActiveFontName) then
       ranges = fontsAtlas:GetGlyphRangesJapanese()
-      local theFONT= fontsAtlas:AddFontFromFileTTF(sActiveFontName
-                                                   ,point2px(fontSize)
-                                                   ,imFontConfig
-                                                   ,ranges)
+      config.FontNo = fInfo.fontNo
+      theFONT = fontsAtlas:AddFontFromFileTTF(sActiveFontName ,point2px(fInfo.point) ,config ,ranges)
       if (theFONT ~= nil) then
-        pio.FontDefault = theFONT -- OK, set as default font
-      else
-        print("Error!: Font load error", sActiveFontName)
+        pio.FontDefault = theFONT -- OK, set as first font
+        sActiveFontTitle = fInfo.title
+        break
       end
-    else
-      print("Error!: Can't find fontName: ", sActivefontName)
-      sActiveFontName = ""
     end
+  end -- end for
+  if (theFONT == nil) then
+    print("Error!: First font loading error", sActiveFontName)
   end
 
   -- Add Icon font
-  --local  fontFullPath = "../lib/fonticon/fa6/fa-solid-900.ttf"
+  local ranges_icon_fonts = ffi.new("unsigned int[3]",IFA.ICON_MIN_FA,  IFA.ICON_MAX_FA, 0)
   local path = require"anima.path"
-  local fontFullPath = path.chain(path.animapath()
-                            ,"..","mylib","fonticon","fa6"
-                            ,"fa-solid-900.ttf")
-  --local  fontFullPath = "../lib/fonticon/fa6/fa-solid-900.ttf"
-  if utils.fileExists(fontFullPath) then
-    print("OK", fontFullPath)
-    fontsAtlas:AddFontFromFileTTF(fontFullPath
-                                ,point2px(11)
-                                ,config
-                                ,ranges_icon_fonts)
+  local iconFontPath = path.chain(path.animapath() ,"..","mylib","fonticon","fa6" ,"fa-solid-900.ttf")
+  if utils.fileExists(iconFontPath) then
+    config.MergeMode = true
+    fontsAtlas:AddFontFromFileTTF(iconFontPath ,point2px(11) ,config ,ranges_icon_fonts)
+    print("Loaded Icon font: ", iconFontPath)
   else
-    print("Error!: Can't find Icon fonts: " , fontFullPath)
+    print("Error!: Can't find Icon fonts: " , iconFontPath)
   end
 
   return true, sActiveFontName, sActiveFontTitle

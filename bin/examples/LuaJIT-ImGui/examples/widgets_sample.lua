@@ -8,7 +8,7 @@ local val = ffi.new("float[1]")
 local padval = ffi.new("float[2]")
 local curve = win.ig.Curve("mycurve",12,100)
 local Quat = ffi.new("quat",{1,0,0,0})
-local v3 = ffi.new("G3Dvec3",{1,0,0})
+local v3 = ffi.new("vec3",{1,0,0})
 local mat4 = win.ig.mat4_cast(Quat)
 
 function win:draw(ig)

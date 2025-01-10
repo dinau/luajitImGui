@@ -22,6 +22,8 @@ ffi_cdef[[
   typedef unsigned int FT_UInt32;
   typedef int FT_Fast;
   typedef unsigned int FT_UFast;
+  typedef long long int FT_Int64;
+  typedef unsigned long long int FT_UInt64;
   typedef struct FT_MemoryRec_* FT_Memory;
   typedef void*
   (*FT_Alloc_Func)( FT_Memory memory,
@@ -103,11 +105,11 @@ ffi_cdef[[
   } FT_Bitmap;
   typedef struct FT_Outline_
   {
-    short n_contours;
-    short n_points;
+    unsigned short n_contours;
+    unsigned short n_points;
     FT_Vector* points;
-    char* tags;
-    short* contours;
+    unsigned char* tags;
+    unsigned short* contours;
     int flags;
   } FT_Outline;
   typedef int
@@ -136,13 +138,13 @@ ffi_cdef[[
   } FT_Outline_Funcs;
   typedef enum FT_Glyph_Format_
   {
-    FT_GLYPH_FORMAT_NONE = ( ( (unsigned long)0 << 24 ) | ( (unsigned long)0 << 16 ) | ( (unsigned long)0 << 8 ) | (unsigned long)0 ),
-    FT_GLYPH_FORMAT_COMPOSITE = ( ( (unsigned long)'c' << 24 ) | ( (unsigned long)'o' << 16 ) | ( (unsigned long)'m' << 8 ) | (unsigned long)'p' ),
-    FT_GLYPH_FORMAT_BITMAP = ( ( (unsigned long)'b' << 24 ) | ( (unsigned long)'i' << 16 ) | ( (unsigned long)'t' << 8 ) | (unsigned long)'s' ),
-    FT_GLYPH_FORMAT_OUTLINE = ( ( (unsigned long)'o' << 24 ) | ( (unsigned long)'u' << 16 ) | ( (unsigned long)'t' << 8 ) | (unsigned long)'l' ),
-    FT_GLYPH_FORMAT_PLOTTER = ( ( (unsigned long)'p' << 24 ) | ( (unsigned long)'l' << 16 ) | ( (unsigned long)'o' << 8 ) | (unsigned long)'t' )
+    FT_GLYPH_FORMAT_NONE = ( ( (unsigned long)(unsigned char)(0) << 24 ) | ( (unsigned long)(unsigned char)(0) << 16 ) | ( (unsigned long)(unsigned char)(0) << 8 ) | (unsigned long)(unsigned char)(0) ),
+    FT_GLYPH_FORMAT_COMPOSITE = ( ( (unsigned long)(unsigned char)('c') << 24 ) | ( (unsigned long)(unsigned char)('o') << 16 ) | ( (unsigned long)(unsigned char)('m') << 8 ) | (unsigned long)(unsigned char)('p') ),
+    FT_GLYPH_FORMAT_BITMAP = ( ( (unsigned long)(unsigned char)('b') << 24 ) | ( (unsigned long)(unsigned char)('i') << 16 ) | ( (unsigned long)(unsigned char)('t') << 8 ) | (unsigned long)(unsigned char)('s') ),
+    FT_GLYPH_FORMAT_OUTLINE = ( ( (unsigned long)(unsigned char)('o') << 24 ) | ( (unsigned long)(unsigned char)('u') << 16 ) | ( (unsigned long)(unsigned char)('t') << 8 ) | (unsigned long)(unsigned char)('l') ),
+    FT_GLYPH_FORMAT_PLOTTER = ( ( (unsigned long)(unsigned char)('p') << 24 ) | ( (unsigned long)(unsigned char)('l') << 16 ) | ( (unsigned long)(unsigned char)('o') << 8 ) | (unsigned long)(unsigned char)('t') ),
+    FT_GLYPH_FORMAT_SVG = ( ( (unsigned long)(unsigned char)('S') << 24 ) | ( (unsigned long)(unsigned char)('V') << 16 ) | ( (unsigned long)(unsigned char)('G') << 8 ) | (unsigned long)(unsigned char)(' ') )
   } FT_Glyph_Format;
-  typedef struct FT_RasterRec_* FT_Raster;
   typedef struct FT_Span_
   {
     short x;
@@ -174,6 +176,7 @@ ffi_cdef[[
     void* user;
     FT_BBox clip_box;
   } FT_Raster_Params;
+  typedef struct FT_RasterRec_* FT_Raster;
   typedef int
   (*FT_Raster_NewFunc)( void* memory,
                         FT_Raster* raster );
@@ -233,7 +236,7 @@ ffi_cdef[[
   typedef struct FT_Data_
   {
     const FT_Byte* pointer;
-    FT_Int length;
+    FT_UInt length;
   } FT_Data;
   typedef void (*FT_Generic_Finalizer)( void* object );
   typedef struct FT_Generic_
@@ -278,6 +281,7 @@ ffi_cdef[[
   FT_Mod_Err_Type42 = 0,
   FT_Mod_Err_Winfonts = 0,
   FT_Mod_Err_GXvalid = 0,
+  FT_Mod_Err_Sdf = 0,
   FT_Mod_Err_Max };
   enum {
   FT_Err_Ok = 0x00,
@@ -301,6 +305,7 @@ ffi_cdef[[
   FT_Err_Invalid_Composite = 0x15 + 0,
   FT_Err_Too_Many_Hints = 0x16 + 0,
   FT_Err_Invalid_Pixel_Size = 0x17 + 0,
+  FT_Err_Invalid_SVG_Document = 0x18 + 0,
   FT_Err_Invalid_Handle = 0x20 + 0,
   FT_Err_Invalid_Library_Handle = 0x21 + 0,
   FT_Err_Invalid_Driver_Handle = 0x22 + 0,
@@ -357,6 +362,7 @@ ffi_cdef[[
   FT_Err_Invalid_Post_Table = 0x9B + 0,
   FT_Err_DEF_In_Glyf_Bytecode = 0x9C + 0,
   FT_Err_Missing_Bitmap = 0x9D + 0,
+  FT_Err_Missing_SVG_Hooks = 0x9E + 0,
   FT_Err_Syntax_Error = 0xA0 + 0,
   FT_Err_Stack_Underflow = 0xA1 + 0,
   FT_Err_Ignore = 0xA2 + 0,
@@ -405,26 +411,26 @@ ffi_cdef[[
   typedef struct FT_CharMapRec_* FT_CharMap;
   typedef enum FT_Encoding_
   {
-    FT_ENCODING_NONE = ( ( (FT_UInt32)(0) << 24 ) | ( (FT_UInt32)(0) << 16 ) | ( (FT_UInt32)(0) << 8 ) | (FT_UInt32)(0) ),
-    FT_ENCODING_MS_SYMBOL = ( ( (FT_UInt32)('s') << 24 ) | ( (FT_UInt32)('y') << 16 ) | ( (FT_UInt32)('m') << 8 ) | (FT_UInt32)('b') ),
-    FT_ENCODING_UNICODE = ( ( (FT_UInt32)('u') << 24 ) | ( (FT_UInt32)('n') << 16 ) | ( (FT_UInt32)('i') << 8 ) | (FT_UInt32)('c') ),
-    FT_ENCODING_SJIS = ( ( (FT_UInt32)('s') << 24 ) | ( (FT_UInt32)('j') << 16 ) | ( (FT_UInt32)('i') << 8 ) | (FT_UInt32)('s') ),
-    FT_ENCODING_PRC = ( ( (FT_UInt32)('g') << 24 ) | ( (FT_UInt32)('b') << 16 ) | ( (FT_UInt32)(' ') << 8 ) | (FT_UInt32)(' ') ),
-    FT_ENCODING_BIG5 = ( ( (FT_UInt32)('b') << 24 ) | ( (FT_UInt32)('i') << 16 ) | ( (FT_UInt32)('g') << 8 ) | (FT_UInt32)('5') ),
-    FT_ENCODING_WANSUNG = ( ( (FT_UInt32)('w') << 24 ) | ( (FT_UInt32)('a') << 16 ) | ( (FT_UInt32)('n') << 8 ) | (FT_UInt32)('s') ),
-    FT_ENCODING_JOHAB = ( ( (FT_UInt32)('j') << 24 ) | ( (FT_UInt32)('o') << 16 ) | ( (FT_UInt32)('h') << 8 ) | (FT_UInt32)('a') ),
+    FT_ENCODING_NONE = ( ( (FT_UInt32)(unsigned char)(0) << 24 ) | ( (FT_UInt32)(unsigned char)(0) << 16 ) | ( (FT_UInt32)(unsigned char)(0) << 8 ) | (FT_UInt32)(unsigned char)(0) ),
+    FT_ENCODING_MS_SYMBOL = ( ( (FT_UInt32)(unsigned char)('s') << 24 ) | ( (FT_UInt32)(unsigned char)('y') << 16 ) | ( (FT_UInt32)(unsigned char)('m') << 8 ) | (FT_UInt32)(unsigned char)('b') ),
+    FT_ENCODING_UNICODE = ( ( (FT_UInt32)(unsigned char)('u') << 24 ) | ( (FT_UInt32)(unsigned char)('n') << 16 ) | ( (FT_UInt32)(unsigned char)('i') << 8 ) | (FT_UInt32)(unsigned char)('c') ),
+    FT_ENCODING_SJIS = ( ( (FT_UInt32)(unsigned char)('s') << 24 ) | ( (FT_UInt32)(unsigned char)('j') << 16 ) | ( (FT_UInt32)(unsigned char)('i') << 8 ) | (FT_UInt32)(unsigned char)('s') ),
+    FT_ENCODING_PRC = ( ( (FT_UInt32)(unsigned char)('g') << 24 ) | ( (FT_UInt32)(unsigned char)('b') << 16 ) | ( (FT_UInt32)(unsigned char)(' ') << 8 ) | (FT_UInt32)(unsigned char)(' ') ),
+    FT_ENCODING_BIG5 = ( ( (FT_UInt32)(unsigned char)('b') << 24 ) | ( (FT_UInt32)(unsigned char)('i') << 16 ) | ( (FT_UInt32)(unsigned char)('g') << 8 ) | (FT_UInt32)(unsigned char)('5') ),
+    FT_ENCODING_WANSUNG = ( ( (FT_UInt32)(unsigned char)('w') << 24 ) | ( (FT_UInt32)(unsigned char)('a') << 16 ) | ( (FT_UInt32)(unsigned char)('n') << 8 ) | (FT_UInt32)(unsigned char)('s') ),
+    FT_ENCODING_JOHAB = ( ( (FT_UInt32)(unsigned char)('j') << 24 ) | ( (FT_UInt32)(unsigned char)('o') << 16 ) | ( (FT_UInt32)(unsigned char)('h') << 8 ) | (FT_UInt32)(unsigned char)('a') ),
     FT_ENCODING_GB2312 = FT_ENCODING_PRC,
     FT_ENCODING_MS_SJIS = FT_ENCODING_SJIS,
     FT_ENCODING_MS_GB2312 = FT_ENCODING_PRC,
     FT_ENCODING_MS_BIG5 = FT_ENCODING_BIG5,
     FT_ENCODING_MS_WANSUNG = FT_ENCODING_WANSUNG,
     FT_ENCODING_MS_JOHAB = FT_ENCODING_JOHAB,
-    FT_ENCODING_ADOBE_STANDARD = ( ( (FT_UInt32)('A') << 24 ) | ( (FT_UInt32)('D') << 16 ) | ( (FT_UInt32)('O') << 8 ) | (FT_UInt32)('B') ),
-    FT_ENCODING_ADOBE_EXPERT = ( ( (FT_UInt32)('A') << 24 ) | ( (FT_UInt32)('D') << 16 ) | ( (FT_UInt32)('B') << 8 ) | (FT_UInt32)('E') ),
-    FT_ENCODING_ADOBE_CUSTOM = ( ( (FT_UInt32)('A') << 24 ) | ( (FT_UInt32)('D') << 16 ) | ( (FT_UInt32)('B') << 8 ) | (FT_UInt32)('C') ),
-    FT_ENCODING_ADOBE_LATIN_1 = ( ( (FT_UInt32)('l') << 24 ) | ( (FT_UInt32)('a') << 16 ) | ( (FT_UInt32)('t') << 8 ) | (FT_UInt32)('1') ),
-    FT_ENCODING_OLD_LATIN_2 = ( ( (FT_UInt32)('l') << 24 ) | ( (FT_UInt32)('a') << 16 ) | ( (FT_UInt32)('t') << 8 ) | (FT_UInt32)('2') ),
-    FT_ENCODING_APPLE_ROMAN = ( ( (FT_UInt32)('a') << 24 ) | ( (FT_UInt32)('r') << 16 ) | ( (FT_UInt32)('m') << 8 ) | (FT_UInt32)('n') )
+    FT_ENCODING_ADOBE_STANDARD = ( ( (FT_UInt32)(unsigned char)('A') << 24 ) | ( (FT_UInt32)(unsigned char)('D') << 16 ) | ( (FT_UInt32)(unsigned char)('O') << 8 ) | (FT_UInt32)(unsigned char)('B') ),
+    FT_ENCODING_ADOBE_EXPERT = ( ( (FT_UInt32)(unsigned char)('A') << 24 ) | ( (FT_UInt32)(unsigned char)('D') << 16 ) | ( (FT_UInt32)(unsigned char)('B') << 8 ) | (FT_UInt32)(unsigned char)('E') ),
+    FT_ENCODING_ADOBE_CUSTOM = ( ( (FT_UInt32)(unsigned char)('A') << 24 ) | ( (FT_UInt32)(unsigned char)('D') << 16 ) | ( (FT_UInt32)(unsigned char)('B') << 8 ) | (FT_UInt32)(unsigned char)('C') ),
+    FT_ENCODING_ADOBE_LATIN_1 = ( ( (FT_UInt32)(unsigned char)('l') << 24 ) | ( (FT_UInt32)(unsigned char)('a') << 16 ) | ( (FT_UInt32)(unsigned char)('t') << 8 ) | (FT_UInt32)(unsigned char)('1') ),
+    FT_ENCODING_OLD_LATIN_2 = ( ( (FT_UInt32)(unsigned char)('l') << 24 ) | ( (FT_UInt32)(unsigned char)('a') << 16 ) | ( (FT_UInt32)(unsigned char)('t') << 8 ) | (FT_UInt32)(unsigned char)('2') ),
+    FT_ENCODING_APPLE_ROMAN = ( ( (FT_UInt32)(unsigned char)('a') << 24 ) | ( (FT_UInt32)(unsigned char)('r') << 16 ) | ( (FT_UInt32)(unsigned char)('m') << 8 ) | (FT_UInt32)(unsigned char)('n') )
   } FT_Encoding;
   typedef struct FT_CharMapRec_
   {
@@ -555,7 +561,7 @@ ffi_cdef[[
                   const char* filepathname );
   extern FT_Error
   FT_Attach_Stream( FT_Face face,
-                    FT_Open_Args* parameters );
+                    const FT_Open_Args* parameters );
   extern FT_Error
   FT_Reference_Face( FT_Face face );
   extern FT_Error
@@ -606,6 +612,10 @@ ffi_cdef[[
   FT_Set_Transform( FT_Face face,
                     FT_Matrix* matrix,
                     FT_Vector* delta );
+  extern void
+  FT_Get_Transform( FT_Face face,
+                    FT_Matrix* matrix,
+                    FT_Vector* delta );
   typedef enum FT_Render_Mode_
   {
     FT_RENDER_MODE_NORMAL = 0,
@@ -613,6 +623,7 @@ ffi_cdef[[
     FT_RENDER_MODE_MONO,
     FT_RENDER_MODE_LCD,
     FT_RENDER_MODE_LCD_V,
+    FT_RENDER_MODE_SDF,
     FT_RENDER_MODE_MAX
   } FT_Render_Mode;
   extern FT_Error
@@ -635,13 +646,6 @@ ffi_cdef[[
                         FT_Fixed point_size,
                         FT_Int degree,
                         FT_Fixed* akerning );
-  extern FT_Error
-  FT_Get_Glyph_Name( FT_Face face,
-                     FT_UInt glyph_index,
-                     FT_Pointer buffer,
-                     FT_UInt buffer_max );
-  extern const char*
-  FT_Get_Postscript_Name( FT_Face face );
   extern FT_Error
   FT_Select_Charmap( FT_Face face,
                      FT_Encoding encoding );
@@ -668,6 +672,13 @@ ffi_cdef[[
   FT_Get_Name_Index( FT_Face face,
                      const FT_String* glyph_name );
   extern FT_Error
+  FT_Get_Glyph_Name( FT_Face face,
+                     FT_UInt glyph_index,
+                     FT_Pointer buffer,
+                     FT_UInt buffer_max );
+  extern const char*
+  FT_Get_Postscript_Name( FT_Face face );
+  extern FT_Error
   FT_Get_SubGlyph_Info( FT_GlyphSlot glyph,
                         FT_UInt sub_index,
                         FT_Int *p_index,
@@ -675,18 +686,6 @@ ffi_cdef[[
                         FT_Int *p_arg1,
                         FT_Int *p_arg2,
                         FT_Matrix *p_transform );
-  typedef struct FT_LayerIterator_
-  {
-    FT_UInt num_layers;
-    FT_UInt layer;
-    FT_Byte* p;
-  } FT_LayerIterator;
-  extern FT_Bool
-  FT_Get_Color_Glyph_Layer( FT_Face face,
-                            FT_UInt base_glyph,
-                            FT_UInt *aglyph_index,
-                            FT_UInt *acolor_index,
-                            FT_LayerIterator* iterator );
   extern FT_UShort
   FT_Get_FSType_Flags( FT_Face face );
   extern FT_UInt
@@ -821,6 +820,20 @@ ffi_cdef[[
     FT_GlyphRec root;
     FT_Outline outline;
   } FT_OutlineGlyphRec;
+  typedef struct FT_SvgGlyphRec_* FT_SvgGlyph;
+  typedef struct FT_SvgGlyphRec_
+  {
+    FT_GlyphRec root;
+    FT_Byte* svg_document;
+    FT_ULong svg_document_length;
+    FT_UInt glyph_index;
+    FT_Size_Metrics metrics;
+    FT_UShort units_per_EM;
+    FT_UShort start_glyph_id;
+    FT_UShort end_glyph_id;
+    FT_Matrix transform;
+    FT_Vector delta;
+  } FT_SvgGlyphRec;
   extern FT_Error
   FT_New_Glyph( FT_Library library,
                 FT_Glyph_Format format,
@@ -833,8 +846,8 @@ ffi_cdef[[
                  FT_Glyph *target );
   extern FT_Error
   FT_Glyph_Transform( FT_Glyph glyph,
-                      FT_Matrix* matrix,
-                      FT_Vector* delta );
+                      const FT_Matrix* matrix,
+                      const FT_Vector* delta );
   typedef enum FT_Glyph_BBox_Mode_
   {
     FT_GLYPH_BBOX_UNSCALED = 0,
@@ -850,7 +863,7 @@ ffi_cdef[[
   extern FT_Error
   FT_Glyph_To_Bitmap( FT_Glyph* the_glyph,
                       FT_Render_Mode render_mode,
-                      FT_Vector* origin,
+                      const FT_Vector* origin,
                       FT_Bool destroy );
   extern void
   FT_Done_Glyph( FT_Glyph glyph );
@@ -862,7 +875,15 @@ ffi_cdef[[
   extern void
   FT_GlyphSlot_Embolden( FT_GlyphSlot slot );
   extern void
+  FT_GlyphSlot_AdjustWeight( FT_GlyphSlot slot,
+                             FT_Fixed xdelta,
+                             FT_Fixed ydelta );
+  extern void
   FT_GlyphSlot_Oblique( FT_GlyphSlot slot );
+  extern void
+  FT_GlyphSlot_Slant( FT_GlyphSlot slot,
+                      FT_Fixed xslant,
+                      FT_Fixed yslant );
   extern FT_Error
   FT_Outline_Decompose( FT_Outline* outline,
                         const FT_Outline_Funcs* func_interface,
@@ -916,7 +937,264 @@ ffi_cdef[[
     FT_ORIENTATION_NONE
   } FT_Orientation;
   extern FT_Orientation
-  FT_Outline_Get_Orientation( FT_Outline* outline );]]
+  FT_Outline_Get_Orientation( FT_Outline* outline );
+  typedef struct FT_Color_
+  {
+    FT_Byte blue;
+    FT_Byte green;
+    FT_Byte red;
+    FT_Byte alpha;
+  } FT_Color;
+  typedef struct FT_Palette_Data_ {
+    FT_UShort num_palettes;
+    const FT_UShort* palette_name_ids;
+    const FT_UShort* palette_flags;
+    FT_UShort num_palette_entries;
+    const FT_UShort* palette_entry_name_ids;
+  } FT_Palette_Data;
+  extern FT_Error
+  FT_Palette_Data_Get( FT_Face face,
+                       FT_Palette_Data *apalette );
+  extern FT_Error
+  FT_Palette_Select( FT_Face face,
+                     FT_UShort palette_index,
+                     FT_Color* *apalette );
+  extern FT_Error
+  FT_Palette_Set_Foreground_Color( FT_Face face,
+                                   FT_Color foreground_color );
+  typedef struct FT_LayerIterator_
+  {
+    FT_UInt num_layers;
+    FT_UInt layer;
+    FT_Byte* p;
+  } FT_LayerIterator;
+  extern FT_Bool
+  FT_Get_Color_Glyph_Layer( FT_Face face,
+                            FT_UInt base_glyph,
+                            FT_UInt *aglyph_index,
+                            FT_UInt *acolor_index,
+                            FT_LayerIterator* iterator );
+  typedef enum FT_PaintFormat_
+  {
+    FT_COLR_PAINTFORMAT_COLR_LAYERS = 1,
+    FT_COLR_PAINTFORMAT_SOLID = 2,
+    FT_COLR_PAINTFORMAT_LINEAR_GRADIENT = 4,
+    FT_COLR_PAINTFORMAT_RADIAL_GRADIENT = 6,
+    FT_COLR_PAINTFORMAT_SWEEP_GRADIENT = 8,
+    FT_COLR_PAINTFORMAT_GLYPH = 10,
+    FT_COLR_PAINTFORMAT_COLR_GLYPH = 11,
+    FT_COLR_PAINTFORMAT_TRANSFORM = 12,
+    FT_COLR_PAINTFORMAT_TRANSLATE = 14,
+    FT_COLR_PAINTFORMAT_SCALE = 16,
+    FT_COLR_PAINTFORMAT_ROTATE = 24,
+    FT_COLR_PAINTFORMAT_SKEW = 28,
+    FT_COLR_PAINTFORMAT_COMPOSITE = 32,
+    FT_COLR_PAINT_FORMAT_MAX = 33,
+    FT_COLR_PAINTFORMAT_UNSUPPORTED = 255
+  } FT_PaintFormat;
+  typedef struct FT_ColorStopIterator_
+  {
+    FT_UInt num_color_stops;
+    FT_UInt current_color_stop;
+    FT_Byte* p;
+    FT_Bool read_variable;
+  } FT_ColorStopIterator;
+  typedef struct FT_ColorIndex_
+  {
+    FT_UInt16 palette_index;
+    FT_F2Dot14 alpha;
+  } FT_ColorIndex;
+  typedef struct FT_ColorStop_
+  {
+    FT_Fixed stop_offset;
+    FT_ColorIndex color;
+  } FT_ColorStop;
+  typedef enum FT_PaintExtend_
+  {
+    FT_COLR_PAINT_EXTEND_PAD = 0,
+    FT_COLR_PAINT_EXTEND_REPEAT = 1,
+    FT_COLR_PAINT_EXTEND_REFLECT = 2
+  } FT_PaintExtend;
+  typedef struct FT_ColorLine_
+  {
+    FT_PaintExtend extend;
+    FT_ColorStopIterator color_stop_iterator;
+  } FT_ColorLine;
+  typedef struct FT_Affine_23_
+  {
+    FT_Fixed xx, xy, dx;
+    FT_Fixed yx, yy, dy;
+  } FT_Affine23;
+  typedef enum FT_Composite_Mode_
+  {
+    FT_COLR_COMPOSITE_CLEAR = 0,
+    FT_COLR_COMPOSITE_SRC = 1,
+    FT_COLR_COMPOSITE_DEST = 2,
+    FT_COLR_COMPOSITE_SRC_OVER = 3,
+    FT_COLR_COMPOSITE_DEST_OVER = 4,
+    FT_COLR_COMPOSITE_SRC_IN = 5,
+    FT_COLR_COMPOSITE_DEST_IN = 6,
+    FT_COLR_COMPOSITE_SRC_OUT = 7,
+    FT_COLR_COMPOSITE_DEST_OUT = 8,
+    FT_COLR_COMPOSITE_SRC_ATOP = 9,
+    FT_COLR_COMPOSITE_DEST_ATOP = 10,
+    FT_COLR_COMPOSITE_XOR = 11,
+    FT_COLR_COMPOSITE_PLUS = 12,
+    FT_COLR_COMPOSITE_SCREEN = 13,
+    FT_COLR_COMPOSITE_OVERLAY = 14,
+    FT_COLR_COMPOSITE_DARKEN = 15,
+    FT_COLR_COMPOSITE_LIGHTEN = 16,
+    FT_COLR_COMPOSITE_COLOR_DODGE = 17,
+    FT_COLR_COMPOSITE_COLOR_BURN = 18,
+    FT_COLR_COMPOSITE_HARD_LIGHT = 19,
+    FT_COLR_COMPOSITE_SOFT_LIGHT = 20,
+    FT_COLR_COMPOSITE_DIFFERENCE = 21,
+    FT_COLR_COMPOSITE_EXCLUSION = 22,
+    FT_COLR_COMPOSITE_MULTIPLY = 23,
+    FT_COLR_COMPOSITE_HSL_HUE = 24,
+    FT_COLR_COMPOSITE_HSL_SATURATION = 25,
+    FT_COLR_COMPOSITE_HSL_COLOR = 26,
+    FT_COLR_COMPOSITE_HSL_LUMINOSITY = 27,
+    FT_COLR_COMPOSITE_MAX = 28
+  } FT_Composite_Mode;
+  typedef struct FT_Opaque_Paint_
+  {
+    FT_Byte* p;
+    FT_Bool insert_root_transform;
+  } FT_OpaquePaint;
+  typedef struct FT_PaintColrLayers_
+  {
+    FT_LayerIterator layer_iterator;
+  } FT_PaintColrLayers;
+  typedef struct FT_PaintSolid_
+  {
+    FT_ColorIndex color;
+  } FT_PaintSolid;
+  typedef struct FT_PaintLinearGradient_
+  {
+    FT_ColorLine colorline;
+    FT_Vector p0;
+    FT_Vector p1;
+    FT_Vector p2;
+  } FT_PaintLinearGradient;
+  typedef struct FT_PaintRadialGradient_
+  {
+    FT_ColorLine colorline;
+    FT_Vector c0;
+    FT_Pos r0;
+    FT_Vector c1;
+    FT_Pos r1;
+  } FT_PaintRadialGradient;
+  typedef struct FT_PaintSweepGradient_
+  {
+    FT_ColorLine colorline;
+    FT_Vector center;
+    FT_Fixed start_angle;
+    FT_Fixed end_angle;
+  } FT_PaintSweepGradient;
+  typedef struct FT_PaintGlyph_
+  {
+    FT_OpaquePaint paint;
+    FT_UInt glyphID;
+  } FT_PaintGlyph;
+  typedef struct FT_PaintColrGlyph_
+  {
+    FT_UInt glyphID;
+  } FT_PaintColrGlyph;
+  typedef struct FT_PaintTransform_
+  {
+    FT_OpaquePaint paint;
+    FT_Affine23 affine;
+  } FT_PaintTransform;
+  typedef struct FT_PaintTranslate_
+  {
+    FT_OpaquePaint paint;
+    FT_Fixed dx;
+    FT_Fixed dy;
+  } FT_PaintTranslate;
+  typedef struct FT_PaintScale_
+  {
+    FT_OpaquePaint paint;
+    FT_Fixed scale_x;
+    FT_Fixed scale_y;
+    FT_Fixed center_x;
+    FT_Fixed center_y;
+  } FT_PaintScale;
+  typedef struct FT_PaintRotate_
+  {
+    FT_OpaquePaint paint;
+    FT_Fixed angle;
+    FT_Fixed center_x;
+    FT_Fixed center_y;
+  } FT_PaintRotate;
+  typedef struct FT_PaintSkew_
+  {
+    FT_OpaquePaint paint;
+    FT_Fixed x_skew_angle;
+    FT_Fixed y_skew_angle;
+    FT_Fixed center_x;
+    FT_Fixed center_y;
+  } FT_PaintSkew;
+  typedef struct FT_PaintComposite_
+  {
+    FT_OpaquePaint source_paint;
+    FT_Composite_Mode composite_mode;
+    FT_OpaquePaint backdrop_paint;
+  } FT_PaintComposite;
+  typedef struct FT_COLR_Paint_
+  {
+    FT_PaintFormat format;
+    union
+    {
+      FT_PaintColrLayers colr_layers;
+      FT_PaintGlyph glyph;
+      FT_PaintSolid solid;
+      FT_PaintLinearGradient linear_gradient;
+      FT_PaintRadialGradient radial_gradient;
+      FT_PaintSweepGradient sweep_gradient;
+      FT_PaintTransform transform;
+      FT_PaintTranslate translate;
+      FT_PaintScale scale;
+      FT_PaintRotate rotate;
+      FT_PaintSkew skew;
+      FT_PaintComposite composite;
+      FT_PaintColrGlyph colr_glyph;
+    } u;
+  } FT_COLR_Paint;
+  typedef enum FT_Color_Root_Transform_
+  {
+    FT_COLOR_INCLUDE_ROOT_TRANSFORM,
+    FT_COLOR_NO_ROOT_TRANSFORM,
+    FT_COLOR_ROOT_TRANSFORM_MAX
+  } FT_Color_Root_Transform;
+  typedef struct FT_ClipBox_
+  {
+    FT_Vector bottom_left;
+    FT_Vector top_left;
+    FT_Vector top_right;
+    FT_Vector bottom_right;
+  } FT_ClipBox;
+  extern FT_Bool
+  FT_Get_Color_Glyph_Paint( FT_Face face,
+                            FT_UInt base_glyph,
+                            FT_Color_Root_Transform root_transform,
+                            FT_OpaquePaint* paint );
+  extern FT_Bool
+  FT_Get_Color_Glyph_ClipBox( FT_Face face,
+                              FT_UInt base_glyph,
+                              FT_ClipBox* clip_box );
+  extern FT_Bool
+  FT_Get_Paint_Layers( FT_Face face,
+                       FT_LayerIterator* iterator,
+                       FT_OpaquePaint* paint );
+  extern FT_Bool
+  FT_Get_Colorline_Stops( FT_Face face,
+                          FT_ColorStop* color_stop,
+                          FT_ColorStopIterator* iterator );
+  extern FT_Bool
+  FT_Get_Paint( FT_Face face,
+                FT_OpaquePaint opaque_paint,
+                FT_COLR_Paint* paint );]]
 ffi_cdef[[static const int FT_RENDER_POOL_SIZE = 16384L;
 static const int FT_MAX_MODULES = 32;
 static const int FT_OUTLINE_NONE = 0x0;
@@ -945,6 +1223,7 @@ static const int FT_RASTER_FLAG_DEFAULT = 0x0;
 static const int FT_RASTER_FLAG_AA = 0x1;
 static const int FT_RASTER_FLAG_DIRECT = 0x2;
 static const int FT_RASTER_FLAG_CLIP = 0x4;
+static const int FT_RASTER_FLAG_SDF = 0x8;
 static const int FT_ERR_BASE = 0;
 static const int FT_FACE_FLAG_SCALABLE = ( 1L << 0 );
 static const int FT_FACE_FLAG_FIXED_SIZES = ( 1L << 1 );
@@ -962,6 +1241,9 @@ static const int FT_FACE_FLAG_CID_KEYED = ( 1L << 12 );
 static const int FT_FACE_FLAG_TRICKY = ( 1L << 13 );
 static const int FT_FACE_FLAG_COLOR = ( 1L << 14 );
 static const int FT_FACE_FLAG_VARIATION = ( 1L << 15 );
+static const int FT_FACE_FLAG_SVG = ( 1L << 16 );
+static const int FT_FACE_FLAG_SBIX = ( 1L << 17 );
+static const int FT_FACE_FLAG_SBIX_OVERLAY = ( 1L << 18 );
 static const int FT_STYLE_FLAG_ITALIC = ( 1 << 0 );
 static const int FT_STYLE_FLAG_BOLD = ( 1 << 1 );
 static const int FT_OPEN_MEMORY = 0x1;
@@ -983,12 +1265,14 @@ static const int FT_LOAD_NO_RECURSE = ( 1L << 10 );
 static const int FT_LOAD_IGNORE_TRANSFORM = ( 1L << 11 );
 static const int FT_LOAD_MONOCHROME = ( 1L << 12 );
 static const int FT_LOAD_LINEAR_DESIGN = ( 1L << 13 );
+static const int FT_LOAD_SBITS_ONLY = ( 1L << 14 );
 static const int FT_LOAD_NO_AUTOHINT = ( 1L << 15 );
 static const int FT_LOAD_COLOR = ( 1L << 20 );
 static const int FT_LOAD_COMPUTE_METRICS = ( 1L << 21 );
 static const int FT_LOAD_BITMAP_METRICS_ONLY = ( 1L << 22 );
+static const int FT_LOAD_NO_SVG = ( 1L << 24 );
 static const int FT_LOAD_ADVANCE_ONLY = ( 1L << 8 );
-static const int FT_LOAD_SBITS_ONLY = ( 1L << 14 );
+static const int FT_LOAD_SVG_ONLY = ( 1L << 23 );
 static const int FT_SUBGLYPH_FLAG_ARGS_ARE_WORDS = 1;
 static const int FT_SUBGLYPH_FLAG_ARGS_ARE_XY_VALUES = 2;
 static const int FT_SUBGLYPH_FLAG_ROUND_XY_TO_GRID = 4;
@@ -1010,4 +1294,6 @@ static const int FT_MODULE_DRIVER_SCALABLE = 0x100;
 static const int FT_MODULE_DRIVER_NO_OUTLINES = 0x200;
 static const int FT_MODULE_DRIVER_HAS_HINTER = 0x400;
 static const int FT_MODULE_DRIVER_HINTS_LIGHTLY = 0x800;
-static const int FT_DEBUG_HOOK_TRUETYPE = 0;]]
+static const int FT_DEBUG_HOOK_TRUETYPE = 0;
+static const int FT_PALETTE_FOR_LIGHT_BACKGROUND = 0x01;
+static const int FT_PALETTE_FOR_DARK_BACKGROUND = 0x02;]]

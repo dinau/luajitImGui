@@ -11,8 +11,7 @@ rem ---------------------------------
 set bin=..\..\bin
 set LUA_PATH=;;..\lib\?.lua;%bin%\examples\LuaJIT-ImGui\examples\?.lua
 rem Clear PATH if you need.
-set PATH=
-set PATH=%path%;..\lib
+set PATH=c:\drvdx\msys64\ucrt64\bin;
 
 rem ----------------
 rem Execute program

@@ -1,5 +1,5 @@
 local igwin = require"imgui.window"
-local win = igwin:SDL(800,400, "list clipper")
+local win = igwin:SDL3(800,400, "list clipper")
 local ig = win.ig
 local ffi = require"ffi"
 function win:draw(ig)

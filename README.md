@@ -18,7 +18,9 @@
   - [Build binaries from source](#build-binaries-from-source)
   - [My tools version](#my-tools-version)
   - [History](#history)
-  - [Similar project](#similar-project)
+  - [Similar project ImGui / CImGui](#similar-project-imgui--cimgui)
+  - [SDL Game tutorial Platfromer](#sdl-game-tutorial-platfromer)
+  - [Other link2](#other-link2)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -50,7 +52,7 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
 ---
 
-- v1.91.4dock (2024/10)
+- v1.91.6dock (2025/01)
 
 #### Examples
 
@@ -62,22 +64,26 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
 ##### [glfw_opengl3](examples/glfw_opengl3/glfw_opengl3.lua)  
 
-This can load and save image file. 
+This can load and save image file with magnifying glass. 
 
 ![glfw_opengl3](examples/img/glfw_opengl3.png)
 
 ##### [glfw_opengl3_implot](examples/glfw_opengl3_implot/glfw_opengl3_implot.lua)  
+
+With magnifying glass.
 
 ![glfw_opengl3_implot](examples/img/glfw_opengl3_implot.png)  
 See more example: [implot_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot_sample.lua)
 
 ##### [glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)  
 
-Showing font of local language.
+Showing font of local language with magnifying glass.
 
 ![glfw_opengl3_jp](examples/img/glfw_opengl3_jp.png)
 
 ##### [sdl2_opengl3](examples/sdl2_opengl3/sdl2_opengl3.lua)  
+
+With magnifying glass.
 
 ![sdl2_opengl3](examples/img/sdl2_opengl3.png)
 
@@ -113,15 +119,18 @@ cd bin/examples
 
 #### Download Zip binary
 
+---
+
 - WindowsOS 64bit  
 - Latest  
-[luajitImGui-1.91.4.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.4.0.zip) 2024/10  
+[luajitImGui-1.91.6.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.6.0.zip) 2025/01  
 
 - Old  
+[luajitImGui-1.91.4.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.4.0.zip) 2024/10  
 [luajitImGui-1.91.2.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.2.0.zip) 2024/10  
 [luajitImGui-1.91.1.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.1.0.zip) 2024/09  
 [luajitImGui-1.91.0.3.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.0.3.zip)  
-- WindowsOS 32bit  
+- WindowsOS 32bit last version  
 [luajitImGui-1.91.0.2.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.0.2.zip)  
 
 #### Running examples
@@ -169,7 +178,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 
 ---
 
-- Clang 18.1.8 (Current compiler)
+- Clang 19.1.6 (Current compiler)
    - Libraries: OpenMP 
 - Gcc.exe (Rev1, Built by MSYS2 project) 14.2.0)
 - (Microsoft Visual Studio 2022 C/C++)
@@ -184,6 +193,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 - WindowsOS 64bit versions
    | Date    | ImGui / CImGui | LuaJITImGui | Commemt |
    | ---     | -----------    | ---         | ---     |
+   | 2025/01 | v1.91.6        | v1.91.6.0   |         |
    | 2024/10 | v1.91.4        | v1.91.4.0   |         |
    | 2024/10 | v1.91.2        | v1.91.2.0   |         |
    | 2024/09 | v1.91.1        | v1.91.1.0   |         |
@@ -202,14 +212,36 @@ Refer to nice exmaples: [bin/examples](bin/examples)
    | 2024/01 | v1.90.1        | v1.90.1.0   | Added: Icon font demo                                                                                |
 
 
-#### Similar project
+#### Similar project ImGui / CImGui
 
 ---
 
-| Language             | Project                                                                                                                                         |
-| -------------------: | :----------------------------------------------------------------:                                                                              |
-| **Nim**              | [ImGuin](https://github.com/dinau/imguin), [Nimgl_test](https://github.com/dinau/nimgl_test), [Nim_implot](https://github.com/dinau/nim_implot) |
-| **Lua**              | [LuaJITImGui](https://github.com/dinau/luajitImGui)                                                                                             |
-| **Python**           | [DearPyGui for 32bit WindowsOS Binary](https://github.com/dinau/DearPyGui32/tree/win32)                                                         |
-| **Zig**, C lang.     | [Dear_Bindings_Build](https://github.com/dinau/dear_bindings_build)                                                                             |
-| **Zig**              | [ImGuinZ](https://github.com/dinau/imguinz)                                                                                         |
+   | Language             |          | Project                                                                                                                                         |
+   | -------------------: | :---:    | :----------------------------------------------------------------:                                                                              |
+   | **Nim**              | Compiler | [ImGuin](https://github.com/dinau/imguin), [Nimgl_test](https://github.com/dinau/nimgl_test), [Nim_implot](https://github.com/dinau/nim_implot) |
+   | **Lua**              | Script   | [LuaJITImGui](https://github.com/dinau/luajitImGui)                                                                                             |
+   | **Zig**, C lang.     | Compiler | [Dear_Bindings_Build](https://github.com/dinau/dear_bindings_build)                                                                             |
+   | **Zig**              | Compiler | [ImGuinZ](https://github.com/dinau/imguinz)                                                                                                     |
+   | **NeLua**            | Compiler | [NeLuaImGui](https://github.com/dinau/neluaImGui)                                                                                               |
+   | **Python**           | Script   | [DearPyGui for 32bit WindowsOS Binary](https://github.com/dinau/DearPyGui32/tree/win32)                                                         |
+
+#### SDL Game tutorial Platfromer
+
+---
+
+   ![ald](https://github.com/dinau/nelua-platformer/raw/main/img/platformer-nelua-sdl2.gif)
+   
+   | Language             |          | Project                                                                                                  |
+   | -------------------: | :---:    | :----------------------------------------------------------------:                                       |
+   | **Nim**              | Compiler | [Nim-Platformer](https://github.com/dinau/nim-platformer)/ [sdl3_nim](https://github.com/dinau/sdl3_nim) |
+   | **LuaJIT**           | Script   | [LuaJIT-Platformer](https://github.com/dinau/luajit-platformer)                                          |
+   | **Nelua**            | Compiler | [NeLua-Platformer](https://github.com/dinau/nelua-platformer)                                            |
+   | **Zig**              | Compiler | [Zig-Platformer](https://github.com/dinau/zig-platformer)                                                |
+  
+
+#### Other link2
+
+---
+
+- https://github.com/SpartanJ/SOIL2  
+SOIL2 is a tiny C library used primarily for uploading textures into OpenGL. 

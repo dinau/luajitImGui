@@ -9,11 +9,19 @@ local Sign = CG.Sign
 local IsPointInTri = CG.IsPointInTri
 local Angle = CG.Angle
 
+--Triangulation by Ear Clipping
+--David Eberly
 local function InsertHoles2(poly)
+	if not poly.holes then
+		return poly
+	end
 	holes = poly.holes
 	--first fusion holes with poly
 	--find hole with max X point
+	local nproc = 0
 	while #holes>0 do
+		--if nproc == 2 then return poly end
+		nproc = nproc + 1
 		--print("#holes",#holes)
 		local maxx = -math.huge
 		local maxhole, maxholevert
@@ -29,7 +37,7 @@ local function InsertHoles2(poly)
 		end
 		--find segment maxholevert-outer not intersecting outer
 		local Mp = holes[maxhole][maxholevert]
-		local I = Mp + mat.vec3(math.huge, 0,0)
+		local I = Mp + mat.vec2(math.huge,0) --mat.vec3(math.huge, 0,0)
 		local edge
 		for i=1,#poly do
 			local a,b = poly[i],poly[mod(i+1,#poly)]
@@ -37,9 +45,12 @@ local function InsertHoles2(poly)
 			if a.x > I.x and b.x > I.x then goto CONTINUE end
 			if (a.y <= Mp.y and Mp.y <= b.y) or (b.y <= Mp.y and Mp.y <= a.y) then
 				local Ite = CG.intersectSegmentX(a,b,Mp)
+				--local Ite2 = CG.IntersecPoint2(a,b,Mp,Mp+mat.vec2(1,0))
+				--if Ite ~= Ite2 then print("bad Ite",Ite,Ite2); error"bad Ite" end
 				if Ite.x < I.x then
 					edge = i
 					I = Ite
+					--print(nproc,"Ite",Ite,"edge",i,"Mp",Mp)
 				end
 			end
 			::CONTINUE::
@@ -47,7 +58,7 @@ local function InsertHoles2(poly)
 
 		assert(edge)
 
-		--if I is edge or edge+1 this is visible point
+		--if I is a or a+1 this is visible point
 		local VV,isendpoint
 		local a,b = poly[edge],poly[mod(edge+1,#poly)]
 		if I==a then
@@ -61,21 +72,21 @@ local function InsertHoles2(poly)
 		else
 			VV = edge
 		end
-		
+		--print("VV",VV,"isendpoint",isendpoint)
 		if not isendpoint then
 			local P = poly[VV]
 			--print("Rayintersec",a,b,Mp,P)
-			--check all reflex (not convex) poly vertex are outside triangle MIP
+			--check all reflex (not convex) poly vertex are outside triangle MpIP
 			local mintan = math.huge
 			local Ri
 			for i=1,#poly do
 				local a,b,c = poly[mod(i-1,#poly)],poly[i],poly[mod(i+1,#poly)]
-				--if IsConvex(a,b,c) then
-				if CG.Sign(a,b,c) > 0 then
+				if CG.Sign(a,b,c) < 0 then --is reflex
 					if M.IsPointInTri(b,Mp,I,P) then
 						--keep angle
 						local MR = b-Mp
 						local tan = math.abs(math.atan2(MR.y,MR.x))
+						--print("Reflex point",i,b,tan)
 						if tan < mintan then
 							Ri = i
 							mintan = tan
@@ -148,19 +159,23 @@ local function EarClipSimple(poly,CW)
 		local initind = #ind
 		
 		local hasC = check_crossings_ind(poly,ind)
-		if hasC then badcross=true;break; end
+		if hasC then badcross=true;print("badcross",#ind);break; end
 		
 		for i,v in ipairs(ind) do
 			--is convex?
 			local a,b,c = ind[mod(i-1,#ind)],ind[i],ind[mod(i+1,#ind)]
 			local s = Sign(poly[a],poly[b],poly[c])*CWfac
 			if s > 0 then --convex
+				--print("test",a,b,c,s,CG.TArea(poly[a],poly[b],poly[c]))
 				local empty = true
 				--test empty
 				local jlimit = mod(i-1,#ind)
 				local j = mod(i+2,#ind)
+				--local jlimit = mod(a-1,#poly)
+				--local j = mod(a+2,#poly)
 				while j~=jlimit do
-					local intri = IsPointInTri(poly[ind[j]],poly[a],poly[b],poly[c])
+					local intri = CG.IsPointInTri(poly[ind[j]],poly[a],poly[b],poly[c])
+					--local intri = CG.IsPointInTri(poly[j],poly[a],poly[b],poly[c])
 					if intri 
 					--and Sign(poly[ind[mod(j-1,#ind)]],poly[ind[j]],poly[ind[mod(j+1,#ind)]])>0 
 					then
@@ -168,19 +183,41 @@ local function EarClipSimple(poly,CW)
 						break
 					end
 					j = mod(j+1,#ind)
+					--j = mod(j+1,#poly)
 				end
+				--[=[
+				-- test cut line
+				if empty then
+				local jlimit = mod(i-1,#ind)
+				local j = mod(i+2,#ind)
+				while j~=jlimit do 
+					local j2 = mod(j+1,#ind)
+					local d = poly[ind[j]]
+					local e = poly[ind[j2]]
+					local inter = CG.SegmentIntersect(d,e,poly[a],poly[b])
+					if inter then empty = false; break end
+					inter = CG.SegmentIntersect(d,e,poly[b],poly[c])
+					if inter then empty = false; break end
+					inter = CG.SegmentIntersect(d,e,poly[c],poly[a])
+					if inter then empty = false; break end
+					j = j2
+				end
+				end
+				--]=]
+				
 				
 				if empty then
 					table.remove(ind,i)
 					table.insert(tr,a-1)
 					table.insert(tr,b-1)
 					table.insert(tr,c-1)
+					--coroutine.yield(tr, true)
 					break
 				end
 			end
 		end
 		if (initind == #ind) then
-			--print("failed to find ear, no convex is",not_convex,#ind) 
+			print("EarClipSimple failed to find ear, no convex is",not_convex,#ind) 
 			local repaired = false
 			--find consecutive repeated
 			for i=1,#ind do
@@ -188,7 +225,7 @@ local function EarClipSimple(poly,CW)
 				if poly[ind[i]]==poly[ind[j]] then 
 					table.remove(ind,i)
 					repaired = true
-					--print("consecutive repeat repaired",ind[i])
+					print("consecutive repeat repaired",ind[i])
 					break
 				end
 			end
@@ -196,7 +233,8 @@ local function EarClipSimple(poly,CW)
 			if not repaired then
 			for i=1,#ind do
 				local a,b,c = poly[ind[mod(i-1,#ind)]],poly[ind[i]],poly[ind[mod(i+1,#ind)]]
-				local ang,conv,s,cose = CG.Sign(a,b,c)
+				--local ang,conv,s,cose = CG.Sign(a,b,c)
+				local s = CG.Sign(a,b,c)
 				if (s==0) then
 					local angle,conv,s,cose = Angle(a,b,c)
 					if not angle==0 then
@@ -217,6 +255,7 @@ local function EarClipSimple(poly,CW)
 		end
 	end
 	if badcross then
+		print"EarClipSimple badcross"
 		local restpoly = {}
 		for i,v in ipairs(ind) do restpoly[#restpoly+1] = poly[ind[i]] end
 		return tr,false,restpoly
@@ -247,7 +286,7 @@ end
 local function EarClipSimple2(poly, use_closed)
 
 	--if poly.holes then
-		poly = CG.InsertHoles(poly,true)
+	poly = CG.InsertHoles(poly,false)
 		--assert(poly.EQ)
 		--print("poly is",poly)
 		--prtable(poly.br_equal)
@@ -396,18 +435,21 @@ local function EarClipSimple2(poly, use_closed)
 		for i=1,#ind do
 			if convex[i] then
 				local empty = true
+				local ai,bi,ci = ind[mod(i-1,#ind)],ind[i],ind[mod(i+1,#ind)]
 				local a,b,c = poly[mod(i-1,#ind)],poly[i],poly[mod(i+1,#ind)]
 				local jlimit = mod(i-1,#ind)
 				local j = mod(i+2,#ind)
 				while j~=jlimit do
-					--if not convex[j] and 
-					if IsPointInTri(poly[j],a,b,c) then
+					if not convex[j] and 
+					--if 
+					--CG.IsPointInTriC(poly[j],a,b,c) then
+					IsPointInTriI(j,ai,bi,ci) then
 						empty = false
 						break
 					end
-					--j = mod(j+1,#ind)
-					j = j + 1
-					if j > #ind then j = 1 end
+					j = mod(j+1,#ind)
+					-- j = j + 1
+					-- if j > #ind then j = 1 end
 				end
 				eartips[i] = empty
 			end
@@ -438,9 +480,9 @@ local function EarClipSimple2(poly, use_closed)
 						empty = false
 						break
 					end
-					--j = mod(j+1,#ind)
-					j = j + 1
-					if j > #ind then j = 1 end
+					j = mod(j+1,#ind)
+					-- j = j + 1
+					-- if j > #ind then j = 1 end
 				end
 				--local emptyCE1 = checkCE1(i) 
 				--empty = empty and checkCE1_3(i)
@@ -523,6 +565,7 @@ local function EarClipSimple2(poly, use_closed)
 			table.insert(tr,a-1)
 			table.insert(tr,b-1)
 			table.insert(tr,c-1)
+			--coroutine.yield(poly,tr,true)
 		end
 	end
 	--first bridges
@@ -640,6 +683,7 @@ local function EarClipSimple2(poly, use_closed)
 			if not repaired then break end
 		else
 			if not mineartipI then 
+				print"not mineartipI"
 				for i=1,#ind do
 					if eartips[ind[i]] then
 						print("angle",i,angles[ind[i]])
@@ -661,6 +705,7 @@ local function EarClipSimple2(poly, use_closed)
 	if #ind > 2 then
 		local restpoly = {}
 		for i,v in ipairs(ind) do restpoly[#restpoly+1] = poly[ind[i]] end
+		print("return restpoly",#restpoly)
 		return poly,tr,false,restpoly,ind
 	end	
 	--print("poly2 is",poly)

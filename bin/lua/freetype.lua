@@ -245,7 +245,8 @@ function face.track_kerning(face, point_size, degree, kerning)
 end
 
 function face.glyph_name(face, glyph_index, buffer, buffer_max)
-	buffer = buffer or ffi.new('uint8_t[?]', buffer_max or 64)
+	buffer_max = buffer_max or 64
+	buffer = buffer or ffi.new('uint8_t[?]', buffer_max)
 	local ret = C.FT_Get_Glyph_Name(face, glyph_index, buffer, buffer_max)
 	return ret == 0 and ffi.string(buffer) or nil
 end

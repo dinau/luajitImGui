@@ -8,13 +8,14 @@ gllib.set_loader(glfw)
 local gl, glc, glu, glext = gllib.libraries()
 require"mylib.loadimage"
 require"mylib.setupFonts"
+require"mylib.zoomglass"
 local IFA   = require"mylib.fonticon.IconsFontAwesome6"
 
 --- Global var: app
 require"mylib.apps"
 
 ---
-local SaveImageName = "windowImage"
+local SaveImageName = "ImageSaved"
 
 --- Global var
 local fReqImageCapture = false
@@ -24,7 +25,7 @@ local ImgDir = "img/"
 local IconDir = "res/img/"
 
 -- Load inifile
-loadIni()
+LoadIni()
 
 -- Call back
 glfw.setErrorCallback(function(error,description)
@@ -39,8 +40,8 @@ glfw.init()
 -------------------
 --- ### First set attribute to hide main window for avoiding flickering
 glfw.hint(glfw.glfwc.GLFW_VISIBLE,false)
-local window = glfw.Window(app.mainWindow.width,app.mainWindow.height) --- ### Create main window
-window:setPos(app.mainWindow.posx ,app.mainWindow.posy) --- ### Move main window to previous position
+local window = glfw.Window(App.mainWindow.width,App.mainWindow.height) --- ### Create main window
+window:setPos(App.mainWindow.posx ,App.mainWindow.posy) --- ### Move main window to previous position
 
 window:makeContextCurrent()
 
@@ -70,7 +71,7 @@ utils.loadWindowIcon(window, IconName)
 ---------------
 --- Load image
 ---------------
-local ImageName = ImgDir .. "fuji-400.jpg"
+local ImageName = ImgDir .. "fuji-400.png"
 local pic1 = {texture = ffi.new("GLuint[1]"), width = 0, height = 0, comp = 0}
 if nil == LoadTextureFromFile(ImageName, pic1) then
   print("Error!: Can't load image file: ",ImageName)
@@ -127,7 +128,7 @@ local somefloat  = ffi.new("float[1]",0.0)
 local clearColor = ffi.new("float[3]",{0.25,0.65,0.85})
 local counter    = 0
 local imageFormatTbl = {"JPEG", "PNG", "TIFF", "BMP"}
-local cmbItemIndex   = app.image.imageSaveFormatIndex
+local cmbItemIndex   = App.image.imageSaveFormatIndex
 local avoid_flicker = true
 
 while not window:shouldClose() do
@@ -139,7 +140,7 @@ while not window:shouldClose() do
   if fShowDemo[0] then ig.ShowDemoWindow(fShowDemo) end
   local svName
 
-  if ig.Begin(sTitle) then
+  do ig.Begin(sTitle)
     ig.Text("GLFW v" .. ffi.string(glfw.glfwVersionString()))
     local s = "OpenGL v" .. ffi.string(gl.glGetString(glc.GL_VERSION)):split(" ")[1]
     ig.Text(s)
@@ -202,7 +203,7 @@ while not window:shouldClose() do
           cmbItemIndex = n
         end
       end
-      app.image.imageSaveFormatIndex = cmbItemIndex
+      App.image.imageSaveFormatIndex = cmbItemIndex
       ig.EndCombo()
     end
     setTooltip("Select image format")
@@ -224,8 +225,14 @@ while not window:shouldClose() do
   end
 
   --
-  if ig.Begin("イメージ・ウインドウ") then
-    ig.Image(ffi.cast("ImTextureID",pic1.texture[0]),pic1.size)
+  do ig.Begin("イメージ・ウインドウ")
+    local imageBoxPosTop = ig.GetCursorScreenPos() -- Get absolute pos.
+    ig.Image(ffi.cast("ImTextureID",pic1.texture[0]), pic1.size)
+    local imageBoxPosEnd = ig.GetCursorScreenPos() -- Get absolute pos.
+    --
+    if ig.IsItemHovered(ig.ImGuiHoveredFlags_DelayNone) then
+      zoomGlass(pic1.texture, pic1.width, imageBoxPosTop, imageBoxPosEnd)
+    end
     ig.End()
   end
   --
@@ -239,16 +246,23 @@ while not window:shouldClose() do
   -- Save window image to file
   if fReqImageCapture then
     fReqImageCapture = false
-    local w,h,x,y = getCurrentWindowSize(window)
-    utils.saveImage(svName, imageFormatTbl[cmbItemIndex], w , h)
+    local wkSize = ig.GetMainViewport().WorkSize
+    utils.saveImage(glext, svName, imageFormatTbl[cmbItemIndex], wkSize.x , wkSize.y)
   end
   --
 end
 
+-- Save Window info
+local info = {}
+info.x, info.y = window:getPos()
+local wsize = ig.GetMainViewport().WorkSize
+info.w = wsize.x
+info.h = wsize.y
+SaveIni(info)
+
 -------------
 --- end proc
 -------------
-saveIni(window)
 ig_impl:destroy()
 window:destroy()
 glfw.terminate()

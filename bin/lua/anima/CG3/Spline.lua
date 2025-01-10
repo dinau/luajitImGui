@@ -29,9 +29,11 @@ local function CatmulRom(p0,p1,p2,p3,ps,alpha,amountOfPoints,last)
 	if p2==p3 then A3s = p2 end
 	
 	local inc = (t2-t1)/amountOfPoints
-	for i=0,range do
+	--alternative for exact points
+	ps[#ps + 1] = p1
+	for i= 1,range do
+	--for i=0,range do
 		local t = t1 + inc*i
-	--for t=t1; t<t2; t+=((t2-t1)/amountOfPoints))
 	    local A1 = A1s or (t1-t)/(t1-t0)*p0 + (t-t0)/(t1-t0)*p1;
 	    local A2 = (t2-t)/(t2-t1)*p1 + (t-t1)/(t2-t1)*p2;
 	    local A3 = A3s or (t3-t)/(t3-t2)*p2 + (t-t2)/(t3-t2)*p3;
@@ -40,7 +42,7 @@ local function CatmulRom(p0,p1,p2,p3,ps,alpha,amountOfPoints,last)
 	    local B2 = (t3-t)/(t3-t1)*A2 + (t-t1)/(t3-t1)*A3;
 
 	    local C = (t2-t)/(t2-t1)*B1 + (t-t1)/(t2-t1)*B2;
-	   -- print(C)
+
 	    ps[#ps + 1] = C
 	end
 end
@@ -64,10 +66,10 @@ local function Spline(points,alpha,amountOfPoints,closed,minlen)
 		end
 		divs = floor((points[#points]-points[#points-1]):norm()/minlen)
 		divs = max(1,min(divs, amountOfPoints))
-		CatmulRom(points[#points-2],points[#points-1],points[#points],points[1],ps,alpha,amountOfPoints)
+		CatmulRom(points[#points-2],points[#points-1],points[#points],points[1],ps,alpha,divs)
 		divs = floor((points[#points]-points[1]):norm()/minlen)
 		divs = max(1,min(divs, amountOfPoints))
-		CatmulRom(points[#points-1],points[#points],points[1],points[2],ps,alpha,amountOfPoints,true)
+		CatmulRom(points[#points-1],points[#points],points[1],points[2],ps,alpha,divs,true)
 		
 		ps[#ps] = nil --delete repeated
 	else

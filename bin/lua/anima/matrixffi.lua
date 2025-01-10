@@ -25,9 +25,9 @@ typedef struct {
 ]]
 
 ffi.cdef [[
-typedef struct vec2 { double x, y;       } vec2;
-typedef struct vec3 { double x, y, z;    } vec3;
-typedef struct vec4 { double x, y, z, w; } vec4;
+typedef struct dvec2 { double x, y;       } dvec2;
+typedef struct dvec3 { double x, y, z;    } dvec3;
+typedef struct dvec4 { double x, y, z, w; } dvec4;
 ]]
 
 local glFloatv = ffi.typeof('float[?]')
@@ -67,7 +67,7 @@ local metav2 = {
   __tostring = function(v) return '<'..v.x..','..v.y..'>' end
 }
 metav2.__index = metav2
-vec2 = ffi.metatype('vec2',metav2)
+vec2 = ffi.metatype('dvec2',metav2)
 
 local vec3
 local metav3 
@@ -128,7 +128,7 @@ metav3 =  {
 	
 }
 metav3.__index = metav3
-vec3 = ffi.metatype('vec3',metav3)
+vec3 = ffi.metatype('dvec3',metav3)
 
 local vec4
 local metav4 = {
@@ -166,13 +166,13 @@ local metav4 = {
   __tostring = function(v) return '<'..v.x..','..v.y..','..v.z..','..v.w..'>' end
 }
 metav4.__index = metav4
-vec4 = ffi.metatype('vec4', metav4)
+vec4 = ffi.metatype('dvec4', metav4)
 
 local M = {vec2 = vec2, vec3 = vec3, vec4 = vec4, vec = vec4,
-        vvec2 = ffi.typeof('vec2[?]'),
-        vvec3 = ffi.typeof('vec3[?]'),
-        vvec4 = ffi.typeof('vec4[?]'),
-        vvec  = ffi.typeof('vec4[?]')}
+        vvec2 = ffi.typeof('dvec2[?]'),
+        vvec3 = ffi.typeof('dvec3[?]'),
+        vvec4 = ffi.typeof('dvec4[?]'),
+        vvec  = ffi.typeof('dvec4[?]')}
 
 
 local mat2
@@ -487,6 +487,10 @@ function M.translate(x, y, z)
               0, 0, 1, z,
               0, 0, 0, 1)
 end
+
+function M.get_translate(mat)
+	return vec3(mat.m41, mat.m42, mat.m43)
+end
 function M.scale(x, y, z)
   if ffi.istype(vec2, x) then
     y = x.y
@@ -502,6 +506,19 @@ function M.scale(x, y, z)
               0, y, 0, 0,
               0, 0, z, 0,
               0, 0, 0, 1)
+end
+
+function M.get_scale(m)
+	return vec3(vec3(m.m11, m.m12, m.m13):norm(), vec3(m.m21, m.m22, m.m23):norm(), vec3(m.m31, m.m32, m.m33):norm())
+end
+function M.ortho_normalize(m)
+	local v1 = vec3(m.m11, m.m12, m.m13):normalize()
+	local v2 = vec3(m.m21, m.m22, m.m23):normalize()
+	local v3 = vec3(m.m31, m.m32, m.m33):normalize()
+	return mat4(v1.x, v2.x, v3.x, m.m41,
+				v1.y, v2.y, v3.y, m.m42,
+				v1.z, v2.z, v3.z, m.m43,
+				0,    0,    0,     1)
 end
 function M.frustum(l, r, b, t, n, f)
 	return mat4(2*n/(r-l),  0,  		(r+l)/(r-l),  0,

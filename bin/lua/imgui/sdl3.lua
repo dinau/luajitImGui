@@ -122,7 +122,7 @@ function M.quat_cast(f)
 end
 function M.quat_pos_cast(f)
 	local nonUDT_out = ffi.new("quat")
-	local nonUDT_pos = ffi.new("G3Dvec3")
+	local nonUDT_pos = ffi.new("vec3")
 	lib.quat_pos_cast(f,nonUDT_out,nonUDT_pos)
 	return nonUDT_out,nonUDT_pos
 end
@@ -567,7 +567,7 @@ function ImDrawList:AddText_FontPtr(font,font_size,pos,col,text_begin,text_end,w
 end
 function ImDrawList:AddText(a2,a3,a4,a5,a6,a7,a8,a9) -- generic version
     if ffi.istype('const ImVec2',a2) then return self:AddText_Vec2(a2,a3,a4,a5) end
-    if (ffi.istype('const ImFont*',a2) or ffi.istype('const ImFont',a2) or ffi.istype('const ImFont[]',a2)) then return self:AddText_FontPtr(a2,a3,a4,a5,a6,a7,a8,a9) end
+    if (ffi.istype('ImFont*',a2) or ffi.istype('ImFont',a2) or ffi.istype('ImFont[]',a2)) then return self:AddText_FontPtr(a2,a3,a4,a5,a6,a7,a8,a9) end
     print(a2,a3,a4,a5,a6,a7,a8,a9)
     error'ImDrawList:AddText could not find overloaded'
 end
@@ -2232,10 +2232,7 @@ TextEditor.GetTabSize = lib.TextEditor_GetTabSize
 TextEditor.GetText = lib.TextEditor_GetText
 
 TextEditor.GetUndoIndex = lib.TextEditor_GetUndoIndex
-function TextEditor:ImGuiDebugPanel(panelName)
-    panelName = panelName or "Debug"
-    return lib.TextEditor_ImGuiDebugPanel(self,panelName)
-end
+TextEditor.ImGuiDebugPanel = lib.TextEditor_ImGuiDebugPanel
 TextEditor.IsAutoIndentEnabled = lib.TextEditor_IsAutoIndentEnabled
 TextEditor.IsOverwriteEnabled = lib.TextEditor_IsOverwriteEnabled
 TextEditor.IsReadOnlyEnabled = lib.TextEditor_IsReadOnlyEnabled
@@ -2307,8 +2304,8 @@ M.imguiGizmo_getPanScale = lib.imguiGizmo_getPanScale
 imguiGizmo.getTransforms_vec3Ptr = lib.imguiGizmo_getTransforms_vec3Ptr
 imguiGizmo.getTransforms_vec4Ptr = lib.imguiGizmo_getTransforms_vec4Ptr
 function imguiGizmo:getTransforms(a2,a3,a4,a5) -- generic version
-    if (ffi.istype('G3Dvec3*',a4) or ffi.istype('G3Dvec3',a4) or ffi.istype('G3Dvec3[]',a4)) then return self:getTransforms_vec3Ptr(a2,a3,a4,a5) end
-    if (ffi.istype('G3Dvec4*',a4) or ffi.istype('G3Dvec4',a4) or ffi.istype('G3Dvec4[]',a4)) then return self:getTransforms_vec4Ptr(a2,a3,a4,a5) end
+    if (ffi.istype('vec3*',a4) or ffi.istype('vec3',a4) or ffi.istype('vec3[]',a4)) then return self:getTransforms_vec3Ptr(a2,a3,a4,a5) end
+    if (ffi.istype('vec4*',a4) or ffi.istype('vec4',a4) or ffi.istype('vec4[]',a4)) then return self:getTransforms_vec4Ptr(a2,a3,a4,a5) end
     print(a2,a3,a4,a5)
     error'imguiGizmo:getTransforms could not find overloaded'
 end
@@ -2347,23 +2344,42 @@ function M.imguiGizmo_setSphereColors(a1,a2) -- generic version
 end
 M.imguiGizmo = ffi.metatype("imguiGizmo",imguiGizmo)
 ------------------------------------------------------
+M.ImGuiFreeType_GetBuilderForFreeType = lib.ImGuiFreeType_GetBuilderForFreeType
+function M.ImGuiFreeType_SetAllocatorFunctions(alloc_func,free_func,user_data)
+    user_data = user_data or nil
+    return lib.ImGuiFreeType_SetAllocatorFunctions(alloc_func,free_func,user_data)
+end
 M.ImGuizmo_AllowAxisFlip = lib.ImGuizmo_AllowAxisFlip
 M.ImGuizmo_BeginFrame = lib.ImGuizmo_BeginFrame
 M.ImGuizmo_DecomposeMatrixToComponents = lib.ImGuizmo_DecomposeMatrixToComponents
 M.ImGuizmo_DrawCubes = lib.ImGuizmo_DrawCubes
 M.ImGuizmo_DrawGrid = lib.ImGuizmo_DrawGrid
 M.ImGuizmo_Enable = lib.ImGuizmo_Enable
+M.ImGuizmo_GetID_Str = lib.ImGuizmo_GetID_Str
+M.ImGuizmo_GetID_StrStr = lib.ImGuizmo_GetID_StrStr
+M.ImGuizmo_GetID_Ptr = lib.ImGuizmo_GetID_Ptr
+function M.ImGuizmo_GetID(a1,a2) -- generic version
+    if (ffi.istype('const char*',a1) or ffi.istype('char[]',a1) or type(a1)=='string') and a2==nil then return M.ImGuizmo_GetID_Str(a1) end
+    if (ffi.istype('const char*',a1) or ffi.istype('char[]',a1) or type(a1)=='string') and (ffi.istype('const char*',a2) or ffi.istype('char[]',a2) or type(a2)=='string') then return M.ImGuizmo_GetID_StrStr(a1,a2) end
+    if ffi.istype('void *',a1) then return M.ImGuizmo_GetID_Ptr(a1) end
+    print(a1,a2)
+    error'M.ImGuizmo_GetID could not find overloaded'
+end
 M.ImGuizmo_GetStyle = lib.ImGuizmo_GetStyle
 M.ImGuizmo_IsOver_Nil = lib.ImGuizmo_IsOver_Nil
 M.ImGuizmo_IsOver_OPERATION = lib.ImGuizmo_IsOver_OPERATION
-function M.ImGuizmo_IsOver(a1) -- generic version
+M.ImGuizmo_IsOver_FloatPtr = lib.ImGuizmo_IsOver_FloatPtr
+function M.ImGuizmo_IsOver(a1,a2) -- generic version
     if a1==nil then return M.ImGuizmo_IsOver_Nil() end
     if ffi.istype('OPERATION',a1) then return M.ImGuizmo_IsOver_OPERATION(a1) end
-    print(a1)
+    if (ffi.istype('float*',a1) or ffi.istype('float[]',a1)) then return M.ImGuizmo_IsOver_FloatPtr(a1,a2) end
+    print(a1,a2)
     error'M.ImGuizmo_IsOver could not find overloaded'
 end
 M.ImGuizmo_IsUsing = lib.ImGuizmo_IsUsing
 M.ImGuizmo_IsUsingAny = lib.ImGuizmo_IsUsingAny
+M.ImGuizmo_IsUsingViewManipulate = lib.ImGuizmo_IsUsingViewManipulate
+M.ImGuizmo_IsViewManipulateHovered = lib.ImGuizmo_IsViewManipulateHovered
 function M.ImGuizmo_Manipulate(view,projection,operation,mode,matrix,deltaMatrix,snap,localBounds,boundsSnap)
     boundsSnap = boundsSnap or nil
     deltaMatrix = deltaMatrix or nil
@@ -2371,8 +2387,23 @@ function M.ImGuizmo_Manipulate(view,projection,operation,mode,matrix,deltaMatrix
     snap = snap or nil
     return lib.ImGuizmo_Manipulate(view,projection,operation,mode,matrix,deltaMatrix,snap,localBounds,boundsSnap)
 end
+M.ImGuizmo_PopID = lib.ImGuizmo_PopID
+M.ImGuizmo_PushID_Str = lib.ImGuizmo_PushID_Str
+M.ImGuizmo_PushID_StrStr = lib.ImGuizmo_PushID_StrStr
+M.ImGuizmo_PushID_Ptr = lib.ImGuizmo_PushID_Ptr
+M.ImGuizmo_PushID_Int = lib.ImGuizmo_PushID_Int
+function M.ImGuizmo_PushID(a1,a2) -- generic version
+    if (ffi.istype('const char*',a1) or ffi.istype('char[]',a1) or type(a1)=='string') and a2==nil then return M.ImGuizmo_PushID_Str(a1) end
+    if (ffi.istype('const char*',a1) or ffi.istype('char[]',a1) or type(a1)=='string') and (ffi.istype('const char*',a2) or ffi.istype('char[]',a2) or type(a2)=='string') then return M.ImGuizmo_PushID_StrStr(a1,a2) end
+    if ffi.istype('void *',a1) then return M.ImGuizmo_PushID_Ptr(a1) end
+    if (ffi.istype('int32_t',a1) or type(a1)=='number') then return M.ImGuizmo_PushID_Int(a1) end
+    print(a1,a2)
+    error'M.ImGuizmo_PushID could not find overloaded'
+end
 M.ImGuizmo_RecomposeMatrixFromComponents = lib.ImGuizmo_RecomposeMatrixFromComponents
+M.ImGuizmo_SetAlternativeWindow = lib.ImGuizmo_SetAlternativeWindow
 M.ImGuizmo_SetAxisLimit = lib.ImGuizmo_SetAxisLimit
+M.ImGuizmo_SetAxisMask = lib.ImGuizmo_SetAxisMask
 function M.ImGuizmo_SetDrawlist(drawlist)
     drawlist = drawlist or nil
     return lib.ImGuizmo_SetDrawlist(drawlist)
@@ -6002,6 +6033,7 @@ function M.GetIDWithSeed(a1,a2,a3) -- generic version
     error'M.GetIDWithSeed could not find overloaded'
 end
 M.GetIO = lib.igGetIO
+M.GetIOEx = lib.igGetIOEx
 M.GetInputTextState = lib.igGetInputTextState
 M.GetItemFlags = lib.igGetItemFlags
 M.GetItemID = lib.igGetItemID
@@ -6062,6 +6094,7 @@ end
 M.GetMultiSelectState = lib.igGetMultiSelectState
 M.GetNavTweakPressedAmount = lib.igGetNavTweakPressedAmount
 M.GetPlatformIO = lib.igGetPlatformIO
+M.GetPlatformIOEx = lib.igGetPlatformIOEx
 function M.GetPopupAllowedExtentRect(window)
     local nonUDT_out = ffi.new("ImRect")
     lib.igGetPopupAllowedExtentRect(nonUDT_out,window)
@@ -6378,9 +6411,9 @@ function M.ImageButton(str_id,user_texture_id,image_size,uv0,uv1,bg_col,tint_col
     uv1 = uv1 or ImVec2(1,1)
     return lib.igImageButton(str_id,user_texture_id,image_size,uv0,uv1,bg_col,tint_col)
 end
-function M.ImageButtonEx(id,texture_id,image_size,uv0,uv1,bg_col,tint_col,flags)
+function M.ImageButtonEx(id,user_texture_id,image_size,uv0,uv1,bg_col,tint_col,flags)
     flags = flags or 0
-    return lib.igImageButtonEx(id,texture_id,image_size,uv0,uv1,bg_col,tint_col,flags)
+    return lib.igImageButtonEx(id,user_texture_id,image_size,uv0,uv1,bg_col,tint_col,flags)
 end
 function M.Indent(indent_w)
     indent_w = indent_w or 0.0
@@ -6996,7 +7029,10 @@ function M.ScrollToRectEx(window,rect,flags)
     return nonUDT_out
 end
 M.Scrollbar = lib.igScrollbar
-M.ScrollbarEx = lib.igScrollbarEx
+function M.ScrollbarEx(bb,id,axis,p_scroll_v,avail_v,contents_v,draw_rounding_flags)
+    draw_rounding_flags = draw_rounding_flags or 0
+    return lib.igScrollbarEx(bb,id,axis,p_scroll_v,avail_v,contents_v,draw_rounding_flags)
+end
 function M.Selectable_Bool(label,selected,flags,size)
     flags = flags or 0
     selected = selected or false
@@ -7716,17 +7752,17 @@ function M.gizmo3D_vec3PtrquatPtrvec3Ptr(noname1,noname2,noname3,noname4,noname5
 end
 function M.gizmo3D(a1,a2,a3,a4,a5,a6) -- generic version
     if (ffi.istype('quat*',a2) or ffi.istype('quat',a2) or ffi.istype('quat[]',a2)) and (ffi.istype('float',a3) or type(a3)=='number') and ((ffi.istype('int32_t',a4) or type(a4)=='number') or type(a4)=='nil') and a5==nil then return M.gizmo3D_quatPtrFloat(a1,a2,a3,a4) end
-    if (ffi.istype('G3Dvec4*',a2) or ffi.istype('G3Dvec4',a2) or ffi.istype('G3Dvec4[]',a2)) then return M.gizmo3D_vec4Ptr(a1,a2,a3,a4) end
-    if (ffi.istype('G3Dvec3*',a2) or ffi.istype('G3Dvec3',a2) or ffi.istype('G3Dvec3[]',a2)) and (ffi.istype('float',a3) or type(a3)=='number') and ((ffi.istype('int32_t',a4) or type(a4)=='number') or type(a4)=='nil') and a5==nil then return M.gizmo3D_vec3PtrFloat(a1,a2,a3,a4) end
+    if (ffi.istype('vec4*',a2) or ffi.istype('vec4',a2) or ffi.istype('vec4[]',a2)) then return M.gizmo3D_vec4Ptr(a1,a2,a3,a4) end
+    if (ffi.istype('vec3*',a2) or ffi.istype('vec3',a2) or ffi.istype('vec3[]',a2)) and (ffi.istype('float',a3) or type(a3)=='number') and ((ffi.istype('int32_t',a4) or type(a4)=='number') or type(a4)=='nil') and a5==nil then return M.gizmo3D_vec3PtrFloat(a1,a2,a3,a4) end
     if (ffi.istype('quat*',a2) or ffi.istype('quat',a2) or ffi.istype('quat[]',a2)) and (ffi.istype('quat*',a3) or ffi.istype('quat',a3) or ffi.istype('quat[]',a3)) and (ffi.istype('float',a4) or type(a4)=='number') and ((ffi.istype('int32_t',a5) or type(a5)=='number') or type(a5)=='nil') then return M.gizmo3D_quatPtrquatPtr(a1,a2,a3,a4,a5) end
-    if (ffi.istype('quat*',a2) or ffi.istype('quat',a2) or ffi.istype('quat[]',a2)) and (ffi.istype('G3Dvec4*',a3) or ffi.istype('G3Dvec4',a3) or ffi.istype('G3Dvec4[]',a3)) and (ffi.istype('float',a4) or type(a4)=='number') and ((ffi.istype('int32_t',a5) or type(a5)=='number') or type(a5)=='nil') then return M.gizmo3D_quatPtrvec4Ptr(a1,a2,a3,a4,a5) end
-    if (ffi.istype('quat*',a2) or ffi.istype('quat',a2) or ffi.istype('quat[]',a2)) and (ffi.istype('G3Dvec3*',a3) or ffi.istype('G3Dvec3',a3) or ffi.istype('G3Dvec3[]',a3)) and (ffi.istype('float',a4) or type(a4)=='number') and ((ffi.istype('int32_t',a5) or type(a5)=='number') or type(a5)=='nil') then return M.gizmo3D_quatPtrvec3Ptr(a1,a2,a3,a4,a5) end
-    if (ffi.istype('G3Dvec3*',a2) or ffi.istype('G3Dvec3',a2) or ffi.istype('G3Dvec3[]',a2)) and (ffi.istype('quat*',a3) or ffi.istype('quat',a3) or ffi.istype('quat[]',a3)) and (ffi.istype('float',a4) or type(a4)=='number') and ((ffi.istype('int32_t',a5) or type(a5)=='number') or type(a5)=='nil') then return M.gizmo3D_vec3PtrquatPtrFloat(a1,a2,a3,a4,a5) end
-    if (ffi.istype('G3Dvec3*',a2) or ffi.istype('G3Dvec3',a2) or ffi.istype('G3Dvec3[]',a2)) and (ffi.istype('G3Dvec4*',a3) or ffi.istype('G3Dvec4',a3) or ffi.istype('G3Dvec4[]',a3)) and (ffi.istype('float',a4) or type(a4)=='number') and ((ffi.istype('int32_t',a5) or type(a5)=='number') or type(a5)=='nil') then return M.gizmo3D_vec3Ptrvec4Ptr(a1,a2,a3,a4,a5) end
-    if (ffi.istype('G3Dvec3*',a2) or ffi.istype('G3Dvec3',a2) or ffi.istype('G3Dvec3[]',a2)) and (ffi.istype('G3Dvec3*',a3) or ffi.istype('G3Dvec3',a3) or ffi.istype('G3Dvec3[]',a3)) and (ffi.istype('float',a4) or type(a4)=='number') and ((ffi.istype('int32_t',a5) or type(a5)=='number') or type(a5)=='nil') then return M.gizmo3D_vec3Ptrvec3Ptr(a1,a2,a3,a4,a5) end
-    if (ffi.istype('G3Dvec3*',a2) or ffi.istype('G3Dvec3',a2) or ffi.istype('G3Dvec3[]',a2)) and (ffi.istype('quat*',a3) or ffi.istype('quat',a3) or ffi.istype('quat[]',a3)) and (ffi.istype('quat*',a4) or ffi.istype('quat',a4) or ffi.istype('quat[]',a4)) then return M.gizmo3D_vec3PtrquatPtrquatPtr(a1,a2,a3,a4,a5,a6) end
-    if (ffi.istype('G3Dvec3*',a2) or ffi.istype('G3Dvec3',a2) or ffi.istype('G3Dvec3[]',a2)) and (ffi.istype('quat*',a3) or ffi.istype('quat',a3) or ffi.istype('quat[]',a3)) and (ffi.istype('G3Dvec4*',a4) or ffi.istype('G3Dvec4',a4) or ffi.istype('G3Dvec4[]',a4)) then return M.gizmo3D_vec3PtrquatPtrvec4Ptr(a1,a2,a3,a4,a5,a6) end
-    if (ffi.istype('G3Dvec3*',a2) or ffi.istype('G3Dvec3',a2) or ffi.istype('G3Dvec3[]',a2)) and (ffi.istype('quat*',a3) or ffi.istype('quat',a3) or ffi.istype('quat[]',a3)) and (ffi.istype('G3Dvec3*',a4) or ffi.istype('G3Dvec3',a4) or ffi.istype('G3Dvec3[]',a4)) then return M.gizmo3D_vec3PtrquatPtrvec3Ptr(a1,a2,a3,a4,a5,a6) end
+    if (ffi.istype('quat*',a2) or ffi.istype('quat',a2) or ffi.istype('quat[]',a2)) and (ffi.istype('vec4*',a3) or ffi.istype('vec4',a3) or ffi.istype('vec4[]',a3)) and (ffi.istype('float',a4) or type(a4)=='number') and ((ffi.istype('int32_t',a5) or type(a5)=='number') or type(a5)=='nil') then return M.gizmo3D_quatPtrvec4Ptr(a1,a2,a3,a4,a5) end
+    if (ffi.istype('quat*',a2) or ffi.istype('quat',a2) or ffi.istype('quat[]',a2)) and (ffi.istype('vec3*',a3) or ffi.istype('vec3',a3) or ffi.istype('vec3[]',a3)) and (ffi.istype('float',a4) or type(a4)=='number') and ((ffi.istype('int32_t',a5) or type(a5)=='number') or type(a5)=='nil') then return M.gizmo3D_quatPtrvec3Ptr(a1,a2,a3,a4,a5) end
+    if (ffi.istype('vec3*',a2) or ffi.istype('vec3',a2) or ffi.istype('vec3[]',a2)) and (ffi.istype('quat*',a3) or ffi.istype('quat',a3) or ffi.istype('quat[]',a3)) and (ffi.istype('float',a4) or type(a4)=='number') and ((ffi.istype('int32_t',a5) or type(a5)=='number') or type(a5)=='nil') then return M.gizmo3D_vec3PtrquatPtrFloat(a1,a2,a3,a4,a5) end
+    if (ffi.istype('vec3*',a2) or ffi.istype('vec3',a2) or ffi.istype('vec3[]',a2)) and (ffi.istype('vec4*',a3) or ffi.istype('vec4',a3) or ffi.istype('vec4[]',a3)) and (ffi.istype('float',a4) or type(a4)=='number') and ((ffi.istype('int32_t',a5) or type(a5)=='number') or type(a5)=='nil') then return M.gizmo3D_vec3Ptrvec4Ptr(a1,a2,a3,a4,a5) end
+    if (ffi.istype('vec3*',a2) or ffi.istype('vec3',a2) or ffi.istype('vec3[]',a2)) and (ffi.istype('vec3*',a3) or ffi.istype('vec3',a3) or ffi.istype('vec3[]',a3)) and (ffi.istype('float',a4) or type(a4)=='number') and ((ffi.istype('int32_t',a5) or type(a5)=='number') or type(a5)=='nil') then return M.gizmo3D_vec3Ptrvec3Ptr(a1,a2,a3,a4,a5) end
+    if (ffi.istype('vec3*',a2) or ffi.istype('vec3',a2) or ffi.istype('vec3[]',a2)) and (ffi.istype('quat*',a3) or ffi.istype('quat',a3) or ffi.istype('quat[]',a3)) and (ffi.istype('quat*',a4) or ffi.istype('quat',a4) or ffi.istype('quat[]',a4)) then return M.gizmo3D_vec3PtrquatPtrquatPtr(a1,a2,a3,a4,a5,a6) end
+    if (ffi.istype('vec3*',a2) or ffi.istype('vec3',a2) or ffi.istype('vec3[]',a2)) and (ffi.istype('quat*',a3) or ffi.istype('quat',a3) or ffi.istype('quat[]',a3)) and (ffi.istype('vec4*',a4) or ffi.istype('vec4',a4) or ffi.istype('vec4[]',a4)) then return M.gizmo3D_vec3PtrquatPtrvec4Ptr(a1,a2,a3,a4,a5,a6) end
+    if (ffi.istype('vec3*',a2) or ffi.istype('vec3',a2) or ffi.istype('vec3[]',a2)) and (ffi.istype('quat*',a3) or ffi.istype('quat',a3) or ffi.istype('quat[]',a3)) and (ffi.istype('vec3*',a4) or ffi.istype('vec3',a4) or ffi.istype('vec3[]',a4)) then return M.gizmo3D_vec3PtrquatPtrvec3Ptr(a1,a2,a3,a4,a5,a6) end
     print(a1,a2,a3,a4,a5,a6)
     error'M.gizmo3D could not find overloaded'
 end
