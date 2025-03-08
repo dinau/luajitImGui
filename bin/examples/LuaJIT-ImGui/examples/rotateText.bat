@@ -1,2 +1,2 @@
 @echo off
-call r.bat rotateText.lua
+..\..\..\luajit.exe rotateText.lua

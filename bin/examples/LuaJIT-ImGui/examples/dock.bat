@@ -1,2 +1,2 @@
 @echo off
-call r.bat dock.lua
+..\..\..\luajit.exe dock.lua

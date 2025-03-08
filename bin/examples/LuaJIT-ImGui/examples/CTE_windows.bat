@@ -1,2 +1,2 @@
 @echo off
-call r.bat CTE_windows.lua
+..\..\..\luajit.exe CTE_windows.lua

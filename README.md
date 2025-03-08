@@ -24,6 +24,8 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+![alt](https://github.com/dinau/luajitimgui/actions/workflows/windows.yml/badge.svg)
+
 ### LuaJITImGui
 
 ---
@@ -52,11 +54,18 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
 ---
 
-- v1.91.6dock (2025/01)
+- v1.91.8dock (2025/03)
 
 #### Examples
 
 ---
+##### [implot3d.lua](bin/examples/LuaJIT-ImGui/examples/implot3d_sample.lua)
+
+This sample is attached by [anima](https://github.com/sonoro1234/anima) project. You can execute this sample using
+[implot3d_sample.bat](bin/examples/LuaJIT-ImGui/examples/implot3d_sample.bat)
+in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) folder.
+
+![implot3d_sample](examples/img/cimplot3d.gif)
 
 ##### [glfw_opengl3_simple](examples/glfw_opengl3_simple/glfw_opengl3_simple.lua)  
 
@@ -123,9 +132,10 @@ cd bin/examples
 
 - WindowsOS 64bit  
 - Latest  
-[luajitImGui-1.91.6.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.6.0.zip) 2025/01  
+[luajitImGui-1.91.8.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.0.zip) 2025/03  
 
 - Old  
+[luajitImGui-1.91.6.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.6.0.zip) 2025/01  
 [luajitImGui-1.91.4.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.4.0.zip) 2024/10  
 [luajitImGui-1.91.2.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.2.0.zip) 2024/10  
 [luajitImGui-1.91.1.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.1.0.zip) 2024/09  
@@ -160,7 +170,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
    Install at least on MSys2/MinGW console,
 
    ```sh
-   pacman -S mingw-w64-ucrt-x86_64-{cmake,gcc,clang,llvm-openmp,patch} make
+   pacman -S mingw-w64-ucrt-x86_64-{cmake,gcc,clang,llvm-openmp} patch make
   ```
 
 - Build **on MSys2 console**,
@@ -178,11 +188,11 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 
 ---
 
-- Clang 19.1.6 (Current compiler)
+- Clang 20.1.0 (Current compiler)
    - Libraries: OpenMP 
 - Gcc.exe (Rev1, Built by MSYS2 project) 14.2.0)
 - (Microsoft Visual Studio 2022 C/C++)
-- CMake version 3.30.3
+- CMake version 3.31.6
 - Git version 2.46.0.windows.1
 - Make: GNU Make 4.4.1
 
@@ -193,6 +203,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 - WindowsOS 64bit versions
    | Date    | ImGui / CImGui | LuaJITImGui | Commemt |
    | ---     | -----------    | ---         | ---     |
+   | 2025/03 | v1.91.8        | v1.91.8.0   |         |
    | 2025/01 | v1.91.6        | v1.91.6.0   |         |
    | 2024/10 | v1.91.4        | v1.91.4.0   |         |
    | 2024/10 | v1.91.2        | v1.91.2.0   |         |
@@ -202,7 +213,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 - WindowsOS 32bit versions
    | Date    | ImGui / CImGui | LuaJITImGui | Commemt                                                                                              |
    | ---     | -----------    | ---         | ---                                                                                                  |
-   | 2024/08 | v1.91.0        | v1.91.0.2   |                                                                                                      |
+   | 2024/08 | v1.91.0        | v1.91.0.2   | Last version                                                                                                     |
    | 2024/07 | v1.90.9        | v1.90.9.0   |                                                                                                      |
    | 2024/06 | v1.90.8        | v1.90.8.0   |                                                                                                      |
    | 2024/05 | v1.90.7        | v1.90.7.0   |                                                                                                      |

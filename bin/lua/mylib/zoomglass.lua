@@ -4,7 +4,7 @@ local ig    = require"imgui.glfw"
 --------------
 --- zoomGlass
 --------------
-function zoomGlass(textureID, itemWidth, itemPosTop, itemPosEnd)
+function zoomGlass(textureID, itemWidth, itemPosTop, itemPosEnd, title)
 --   # itemPosTop and itemPosEnd are absolute position in main window.
    if ig.BeginItemTooltip() then
      local itemHeight = itemPosEnd.y - itemPosTop.y
@@ -31,6 +31,9 @@ function zoomGlass(textureID, itemWidth, itemPosTop, itemPosEnd)
      local uv1 =        ig.ImVec2((region_x + region_sz) / my_tex_w, (region_y + region_sz) / my_tex_h)
      local tint_col =   ig.ImVec4(1.0, 1.0, 1.0, 1.0)    -- # No tint
      local border_col = ig.ImVec4(0.22, 0.56, 0.22, 1.0) -- # Green
+     if title ~= nil then
+       ig.Text("%s", title)
+     end
      ig.Image(ffi.cast("ImTextureID",textureID[0]), ig.ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1, tint_col, border_col)
      ig.EndTooltip()
    end

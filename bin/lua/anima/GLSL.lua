@@ -1,5 +1,9 @@
 --------------------------------GLSL
+-- local gllib = require"gl"
+-- local gl, glc, glu, glext = gllib.libraries()
 
+-- local eeee = {} --to check globals in this file
+-- for k,v in pairs(_G) do eeee[k]=v end
 
 local t = 
 {	GL_FLOAT = {1,'glUniform1fv'},
@@ -420,13 +424,18 @@ function GLSL:getunif()
 		local namel = ffi.string(name) 
 		local loc = glext.glGetUniformLocation(self.program,namel)
 		self.unif[namel] = Uniform(size[0],tipo[0],loc,namel)
+		--array uniforms name can vary between drivers
+		if namel:match("%[0%]") then
+			local name2 = namel:match"(%w+)"
+			self.unif[name2] = self.unif[namel]
+		end
 		--print(i,ffi.string(name),size[0],uniform_types[tipo[0]].name)
 		local typename = uniform_types[tipo[0]] and uniform_types[tipo[0]].name or "UNKNOWN_TYPE"
 		print(i,loc,string.format("%".. bufsize[0] .."s",namel),size[0],tipo[0],typename)
 		if loc >= 0 and tipo[0] == glc.GL_IMAGE_BUFFER then
-		local val = ffi.new("GLint[1]")
-		glext.glGetUniformiv(self.program,loc,val)
-		print("binding",val[0])
+			local val = ffi.new("GLint[1]")
+			glext.glGetUniformiv(self.program,loc,val)
+			print("binding",val[0])
 		end
 		assert(uniform_types[tipo[0]],"tipo desconocido")
 	end
@@ -923,7 +932,7 @@ end
 --------------different version of VBO
 function VBOk(kind)
 	kind = kind or glc.GL_ARRAY_BUFFER
-	local tVbo = {isVBO=true}
+	local tVbo = {isVBO=true,kind=kind}
 	tVbo.vbo = ffi.new("GLuint[1]",1)
 	glext.glGenBuffers(1, tVbo.vbo);
 	tVbo.handle = tVbo.vbo[0]
@@ -936,6 +945,12 @@ function VBOk(kind)
 		self:Bind(kind)
 		self.b_size = size or ffi.sizeof(values)
 		glext.glBufferData(kind,self.b_size,values, usage);
+	end
+	function tVbo:BufferStorage(values,usage,size)
+		usage = usage or glc.GL_DYNAMIC_DRAW
+		self:Bind(kind)
+		self.b_size = size or ffi.sizeof(values)
+		glext.glBufferStorage(kind,self.b_size,values, usage);
 	end
 	function tVbo:BindBufferBase(bind)
 		--kind = GL_ATOMIC_COUNTER_BUFFER, GL_TRANSFORM_FEEDBACK_BUFFER, GL_UNIFORM_BUFFER or GL_SHADER_STORAGE_BUFFER.
@@ -955,7 +970,9 @@ function VBOk(kind)
 		flags = flags or glc.GL_MAP_READ_BIT --,bit.bor(glc.GL_MAP_READ_BIT, glc.GL_MAP_INVALIDATE_BUFFER_BIT)
 		local ptr = glext.glMapBufferRange(kind,off,size,flags);
 		func(ptr)
+		--if not bit.bor(flags,glc.GL_MAP_PERSISTENT_BIT) then
 		glext.glUnmapBuffer(kind);
+		--end
 	end
 	function tVbo:delete()
 		glext.glDeleteBuffers(1,tVbo.vbo)
@@ -1335,7 +1352,30 @@ function image2D(w,h,type,data)
 	end
 	return im
 end
+function image2DArray(w,h,l,type)
+	type = type or "GL_RGBA"
+	local type32f = type.."32F"
+	if type=="GL_RED" then type32f = "GL_R32F" end
 
+	local tex = ffi.new("GLuint[1]")
+	gl.glGenTextures(1, tex);
+	gl.glBindTexture(glc.GL_TEXTURE_2D_ARRAY, tex[0]);
+	glext.glTexStorage3D(glc.GL_TEXTURE_2D_ARRAY, 1, glc[type32f], w, h, l)
+	
+	gl.glBindTexture(glc.GL_TEXTURE_2D_ARRAY, 0);
+	local im = {tex=tex[0]}
+	function im:Bind(unit,mode)
+		mode = mode or glc.GL_READ_WRITE
+		unit = unit or 0
+		glext.glBindImageTexture(unit, self.tex, 0, glc.GL_FALSE, 0, mode,glc[type32f]);
+	end
+	function im:BindT(unit)
+		glext.glActiveTexture(glc.GL_TEXTURE0 + unit);
+		--if not self.GL.restricted then gl.glEnable( glc.GL_TEXTURE_2D ); end
+		gl.glBindTexture(glc.GL_TEXTURE_2D, self.tex)
+	end
+	return im
+end
 --transform feedback with ping-pong
 function TFV(t,prog_update,update_vao)
 	local tfb = {}
@@ -1433,3 +1473,5 @@ function MakeGLGlobal()
 	end
 	setmetatable(_G,glmeta)
 end
+
+--for k,v in pairs(_G) do if not eeee[k] then print(k,v) end end

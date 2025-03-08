@@ -29,7 +29,7 @@ function setupFonts(pio)
   local sActiveFontTitle = ""
   local sActiveFontName = ""
   local fontTbl = {
-                   {fontName="meiryo.ttc",  point=14.5,   fontNo=0, title="メイリオ"}   -- Windows7, 8
+                   {fontName="meiryo.ttc",  point=14.5, fontNo=0, title="メイリオ"}     -- Windows7, 8
                   ,{fontName="YuGothM.ttc", point=11.5, fontNo=0, title="ゆうゴシック"} -- Windows10, 11
                   ,{fontName="segoeuil.ttf",point=14.0, fontNo=0, title="Seoge UI"}     -- English region standard font
                   }

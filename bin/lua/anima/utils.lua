@@ -278,49 +278,30 @@ function tb2st(t)
 	end
 	return(_tb2st(t))
 end
--- very readable but not suited for cyclic tables
-function tb2st_serialize(t)
-	local function serialize_key(val)
-		if type(val)=="number" then
-			return "["..tostring(k).."]="
-		else
-			return tostring(val) .."="
-		end
-	end
-	local function _tb2st(t)
-		if type(t)=="table" then
-			local str2="{"
-			for k,v in pairs(t) do
-				if type(v)=="number" then
-					str2=str2 .. serialize_key(k) .. string.format("%0.17g",v) ..","
-				else
-					str2=str2 .. serialize_key(k) .. _tb2st(v) ..","
-				end
-			end
-			str2=str2.."}"
-			return str2
-		else
-			return tostring(t)
-		end
-	end
-	return(_tb2st(t))
-end
+
 function tb2stSerialize(t)
-	local function _tb2st(t)
+	local function _tb2st(t,saved)
+		saved = saved or {}
 		if type(t)=="table" then
-			local str2="{"
-			for k,v in pairs(t) do
-				local Kstring = basicSerialize(k)
-				if type(v)=="number" then
-					str2=str2.."["..Kstring.."]="..string.format("%0.17g",v)..","
-				else
-					str2=str2.."["..Kstring.."]=".._tb2st(v)..","
+			if saved[t] then
+				--print"cicle"
+				return"cicle"
+			else
+				saved[t] = true
+				local str2="{"
+				for k,v in pairs(t) do
+					local Kstring = basicSerialize(k)
+					if type(v)=="number" then
+						str2=str2.."["..Kstring.."]="..string.format("%0.17g",v)..","
+					else
+						str2=str2.."["..Kstring.."]=".._tb2st(v,saved)..","
+					end
 				end
+				str2=str2.."}"
+				return str2
 			end
-			str2=str2.."}"
-			return str2
 		else
-			return tostring(t)
+			return basicSerialize(t)
 		end
 	end
 	return(_tb2st(t))
@@ -454,6 +435,7 @@ function dumpObj(o)
 end
 
 function tbl_compare(t1,t2)
+	local seen = {}
     local lookup_table = {}
     local function _comp(t1,t2)
         if type(t1) ~= "table" then
@@ -461,6 +443,8 @@ function tbl_compare(t1,t2)
         elseif lookup_table[t1] then
             return lookup_table[t1]
         end
+		if seen[t1] then print("seen",seen[t1] == t2, t1,t2) return true end
+		seen[t1] = t2
 		local eq = true
         for index, value in pairs(t1) do
 			if not _comp(t2[index] , value) then
@@ -472,10 +456,37 @@ function tbl_compare(t1,t2)
         return eq
     end
     if not _comp(t1,t2) then return false end
+	print"inverse compare"
 	lookup_table = {}
+	seen = {}
 	return _comp(t2,t1)
 end
 
+--binary save, can have issues with binary compatibility: endianess
+local function cdataser(val)
+	local ty = ffi.typeof(val)
+	local len = ffi.sizeof(val)
+	local s0 = ffi.sizeof(ty,0)
+	local s1 = ffi.sizeof(ty,1)
+	local tyst = tostring(ty):sub(7, -2)
+
+	if s0 ~= s1 then
+		--VLA s2=0, VLS s2~=0
+		local el_size = s1 - s0
+		local nelem = (len - s0)/el_size
+		local s = ffi.string(val, len)
+		-- local Y = ffi.typeof(ty)(nelem)
+		-- ffi.copy(Y, s, len)
+		-- return Y
+		return [[(function() local Y = ffi.typeof("]]..tyst..[[")(]]..nelem..[[);ffi.copy(Y,"]]..s..[[",]]..len..[=[);return Y; end)()]=]
+	end
+	local s = ffi.string(ty(val), len )
+	-- local Y = ffi.typeof(ty2)()
+	-- ffi.copy(Y, s, len)
+	-- return Y[0]
+	return [[(function() local Y = ffi.typeof("]]..tyst..[[")();ffi.copy(Y,"]]..s..[[",]]..len..[=[);return Y; end)()]=]
+end
+cdataser = require"anima.cdataser0"
 local function cdataSerialize(cd)
 	if ffi.istype("float[1]", cd) then
 		return table.concat{[[ffi.new('float[1]',]],cd[0],[[)]]}
@@ -497,11 +508,12 @@ local function cdataSerialize(cd)
 			tab[#tab] = [[})]]
 			return table.concat(tab)
 		else
-			print(cd,"not serialized")
+			print(cd,"binary serialized")
+			return cdataser(cd)
 		end
 	end
 end
-
+cdataSerialize = cdataser
 
 
 function basicSerialize (o)
@@ -511,15 +523,104 @@ function basicSerialize (o)
         return tostring(o)
     elseif type(o) == "string" then
         return string.format("%q", o)
-	elseif pcall(function() return o.__serialize end) then
-		return o.__serialize(o)
+	--elseif pcall(function() return o.__serialize end) then
+	--	return o.__serialize(o)
 	elseif type(o)=="cdata" then
 		return cdataSerialize(o)
 	else
 		return tostring(o) --"nil"
     end
 end
+-- very readable and now suited for cyclic tables
+local kw = {['and'] = true, ['break'] = true, ['do'] = true, ['else'] = true,
+	['elseif'] = true, ['end'] = true, ['false'] = true, ['for'] = true,
+	['function'] = true, ['goto'] = true, ['if'] = true, ['in'] = true,
+	['local'] = true, ['nil'] = true, ['not'] = true, ['or'] = true,
+	['repeat'] = true, ['return'] = true, ['then'] = true, ['true'] = true,
+	['until'] = true, ['while'] = true}
+function tb2st_serialize(t,options)
+	options = options or {}
+	local function sorter(a,b)
+        if type(a)==type(b) then 
+            return a<b 
+        elseif type(a)=="number" then
+            return true
+        else
+            assert(type(b)=="number")
+            return false
+        end
+    end
+	local function serialize_key(val, dodot, pretty)
+		local dot = dodot and "." or ""
+		if type(val)=="string" then
+			if  val:match '^[_%a][_%w]*$' and not kw[val] then
+				return dot..tostring(val)
+			else
+				return "[\""..tostring(val).."\"]"
+			end
+		elseif (not pretty) and (not dodot) and (type(val) == "number") and (math.floor(val)==val) then
+			return  --array index
+		else
+			return "["..tostring(val).."]"
+		end
+	end
+	local function serialize_key_name(val)
+		return serialize_key(val, true)
+	end
+	local insert = table.insert
+	local function _tb2st(t,saved,sref,level,name)
+		saved = saved or {}		-- initial value
+		level = level or 0
+		sref = sref or {}
+		name = name or "t"
+		if type(t)=="table" then
+			if saved[t] then
+				sref[#sref+1] = {saved[t],name}
+				return"nil"
+			else
+				saved[t] = name
 
+				local ordered_keys = {}
+				for k,v in pairs(t) do
+					insert(ordered_keys,k)
+				end
+				table.sort(ordered_keys,sorter)
+				
+				local str2 = {}
+				insert(str2,"{")
+				if options.pretty then insert(str2,"\n") end
+				for _,k in ipairs(ordered_keys) do
+					if options.pretty then insert(str2,("  "):rep(level+1)) end
+					local v = t[k]
+					local kser = serialize_key(k, nil, options.pretty)
+					insert(str2, (kser and (kser .."=") or ""))
+					if type(v)~="table" then
+						insert(str2, basicSerialize(v))
+					else
+						local name2 = name .. serialize_key_name(k)
+						insert(str2,_tb2st(v,saved,sref,level+1,name2))
+					end
+					if options.pretty then insert(str2,",\n") else insert(str2, ",") end
+				end
+				str2[#str2] = "}"
+				if level == 0 then
+					insert(str2, 1,"local ffi = require'ffi'\nlocal t=")
+					for i,v in ipairs(sref) do 
+						insert(str2, "\n"..v[2].."="..v[1])
+					end
+					insert(str2,"\n return t")
+				end
+				return table.concat(str2)
+			end
+		else
+			return basicSerialize(t)
+		end
+	end
+	return(_tb2st(t))
+end
+-- local a = {1,2,3,{11,12,13},casa="mia",6,["return"]=66}
+-- a[2] = a
+--print(tb2st_serialize(a,{pretty=true}))
 function basicToStr (o)
     if type(o) == "number" then
 		return string.format("%.17g", o)
@@ -527,12 +628,12 @@ function basicToStr (o)
         return tostring(o)
     elseif type(o) == "string" then
         return string.format("%q", o)
-	elseif ffi.istype("float[]",o) then
-		local size = ffi.sizeof(o)/ffi.sizeof"float"
-		local tab = {[[float[]<]],o[0]}
-		for i=1,size-1 do tab[#tab+1] = ",";tab[#tab+1] = o[i] end
-		tab[#tab+1] = [[>]]
-		return table.concat(tab)
+	-- elseif ffi.istype("float[]",o) then
+		-- local size = ffi.sizeof(o)/ffi.sizeof"float"
+		-- local tab = {[[float[]<]],o[0]}
+		-- for i=1,size-1 do tab[#tab+1] = ",";tab[#tab+1] = o[i] end
+		-- tab[#tab+1] = [[>]]
+		-- return table.concat(tab)
 	elseif ffi.istype("float[1]",o) then
 		return table.concat{[=[float[1]<]=],o[0],">"}
 	elseif ffi.istype("int[1]",o) then

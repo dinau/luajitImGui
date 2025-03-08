@@ -35,24 +35,36 @@ if (sdl.init(sdl.INIT_VIDEO+sdl.INIT_TIMER) ~= 0) then
     return -1
 end
 
-sdl.gL_SetAttribute(sdl.GL_CONTEXT_FLAGS, sdl.GL_CONTEXT_FORWARD_COMPATIBLE_FLAG)
-sdl.gL_SetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
-sdl.gL_SetAttribute(sdl.GL_DOUBLEBUFFER, 1)
-sdl.gL_SetAttribute(sdl.GL_DEPTH_SIZE, 24)
-sdl.gL_SetAttribute(sdl.GL_STENCIL_SIZE, 8)
-sdl.gL_SetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, 3)
-sdl.gL_SetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 3)
+local versions = {{4, 6}, {4, 5}, {4, 4}, {4, 3}, {4, 2}, {4, 1}, {4, 0}, {3, 3}}
+local window = 0
+for i,ver in pairs(versions) do
+  sdl.gL_SetAttribute(sdl.GL_CONTEXT_FLAGS, sdl.GL_CONTEXT_FORWARD_COMPATIBLE_FLAG)
+  sdl.gL_SetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
+  sdl.gL_SetAttribute(sdl.GL_DOUBLEBUFFER, 1)
+  sdl.gL_SetAttribute(sdl.GL_DEPTH_SIZE, 24)
+  sdl.gL_SetAttribute(sdl.GL_STENCIL_SIZE, 8)
+  sdl.gL_SetAttribute(sdl.GL_CONTEXT_MAJOR_VERSION, ver[1])
+  sdl.gL_SetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, ver[2])
 
-local current = ffi.new("SDL_DisplayMode[1]")
-sdl.getCurrentDisplayMode(0, current)
+  local current = ffi.new("SDL_DisplayMode[1]")
+  sdl.getCurrentDisplayMode(0, current)
 
-local window = sdl.createWindow("ImGui SDL2+OpenGL3 example"
-                 ,App.mainWindow.posx -- x
-                 ,App.mainWindow.posy -- y
-                 ,App.mainWindow.width, App.mainWindow.height  -- w, h
-                 ,sdl.WINDOW_OPENGL + sdl.WINDOW_RESIZABLE + sdl.WINDOW_HIDDEN)
+  window = sdl.createWindow("ImGui SDL2+OpenGL3 example"
+                   ,App.mainWindow.posx -- x
+                   ,App.mainWindow.posy -- y
+                   ,App.mainWindow.width, App.mainWindow.height  -- w, h
+                   ,sdl.WINDOW_OPENGL + sdl.WINDOW_RESIZABLE + sdl.WINDOW_HIDDEN)
+
+  if window ~= 0 then
+      break
+  end
+end
+if window == 0 then
+  print("Error!: sdl.createWindow()")
+  os.exit(false)
+end
+
 local gl_context = sdl.gL_CreateContext(window)
-
 sdl.gL_MakeCurrent(window, gl_context)
 sdl.gL_SetSwapInterval(1); -- Enable vsync
 
@@ -211,7 +223,7 @@ while (not done) do
     local imageBoxPosEnd = ig.GetCursorScreenPos() -- Get absolute pos.
     --
     if ig.IsItemHovered(ig.ImGuiHoveredFlags_DelayNone) then
-      zoomGlass(pic1.texture, pic1.width, imageBoxPosTop, imageBoxPosEnd)
+      zoomGlass(pic1.texture, pic1.width, imageBoxPosTop, imageBoxPosEnd, IFA.ICON_FA_MAGNIFYING_GLASS .. "  4 x")
     end
     ig.End()
   end

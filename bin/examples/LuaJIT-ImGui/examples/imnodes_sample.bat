@@ -1,2 +1,2 @@
 @echo off
-call r.bat imnodes_sample.lua
+..\..\..\luajit.exe imnodes_sample.lua

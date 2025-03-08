@@ -1,2 +1,2 @@
 @echo off
-call r.bat minimal_sdl.lua
+..\..\..\luajit.exe minimal_sdl.lua

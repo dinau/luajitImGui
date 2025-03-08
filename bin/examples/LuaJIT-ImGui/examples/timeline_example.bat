@@ -1,2 +1,2 @@
 @echo off
-call r.bat timeline_example.lua
+..\..\..\luajit.exe timeline_example.lua

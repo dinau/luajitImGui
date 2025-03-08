@@ -141,9 +141,11 @@ while not window:shouldClose() do
   local svName
 
   do ig.Begin(sTitle)
-    ig.Text("GLFW v" .. ffi.string(glfw.glfwVersionString()))
-    local s = "OpenGL v" .. ffi.string(gl.glGetString(glc.GL_VERSION)):split(" ")[1]
-    ig.Text(s)
+    ig.Text(IFA.ICON_FA_APPLE_WHOLE .. "  Lua: " .. _VERSION)
+    ig.Text(IFA.ICON_FA_PAGER .. "  Dear ImGui v" .. ffi.string(ig.GetVersion()))
+    ig.Text(IFA.ICON_FA_DISPLAY .. "  GLFW v" .. ffi.string(glfw.glfwVersionString()))
+    local s = "  OpenGL v" .. ffi.string(gl.glGetString(glc.GL_VERSION)):split(" ")[1]
+    ig.Text(IFA.ICON_FA_CUBES .. s)
     ig.Text("これは日本語表示テスト")
     ig.InputTextWithHint("テキスト入力", "ここに日本語を入力", sBuf,sBufLen)
     ig.Text("入力結果: " .. ffi.string(sBuf))
@@ -231,7 +233,7 @@ while not window:shouldClose() do
     local imageBoxPosEnd = ig.GetCursorScreenPos() -- Get absolute pos.
     --
     if ig.IsItemHovered(ig.ImGuiHoveredFlags_DelayNone) then
-      zoomGlass(pic1.texture, pic1.width, imageBoxPosTop, imageBoxPosEnd)
+      zoomGlass(pic1.texture, pic1.width, imageBoxPosTop, imageBoxPosEnd, IFA.ICON_FA_MAGNIFYING_GLASS .. "  4 x")
     end
     ig.End()
   end

@@ -48,7 +48,7 @@ addEditor(gui.pathut.abspath([[../cimgui/imgui/imgui.cpp]]))
 addEditor(gui.pathut.abspath("CTE_sample.lua"))
 
 function win:draw(ig)
-    ig.ShowDemoWindow()
+    --ig.ShowDemoWindow()
     
     local openfilepopup = false
 	local savefilepopup = false

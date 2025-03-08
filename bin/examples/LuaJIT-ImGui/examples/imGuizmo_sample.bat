@@ -1,2 +1,2 @@
 @echo off
-call r.bat imGuizmo_sample.lua
+..\..\..\luajit.exe imGuizmo_sample.lua

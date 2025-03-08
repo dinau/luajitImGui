@@ -1,2 +1,2 @@
 @echo off
-call r.bat piemenu.lua
+..\..\..\luajit.exe piemenu.lua

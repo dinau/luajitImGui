@@ -1,2 +1,2 @@
 @echo off
-call r.bat widgets_sample.lua
+..\..\..\luajit.exe widgets_sample.lua

@@ -235,7 +235,7 @@ while not window:shouldClose() do
     local imageBoxPosEnd = ig.GetCursorScreenPos() -- Get absolute pos.
     --
     if ig.IsItemHovered(ig.ImGuiHoveredFlags_DelayNone) then
-      zoomGlass(pic1.texture, pic1.width, imageBoxPosTop, imageBoxPosEnd)
+      zoomGlass(pic1.texture, pic1.width, imageBoxPosTop, imageBoxPosEnd, IFA.ICON_FA_MAGNIFYING_GLASS .. "  4 x")
     end
     ig.End()
   end

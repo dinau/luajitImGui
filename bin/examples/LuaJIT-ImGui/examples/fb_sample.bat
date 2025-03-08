@@ -1,2 +1,2 @@
 @echo off
-call r.bat fb_sample.lua
+..\..\..\luajit.exe fb_sample.lua

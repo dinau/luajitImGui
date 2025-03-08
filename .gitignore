@@ -1,3 +1,4 @@
+examples/glfw_opengl3_bench
 examples/sdl2
 examples/gui
 stringArray/

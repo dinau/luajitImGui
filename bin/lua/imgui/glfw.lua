@@ -225,7 +225,10 @@ function M.Curve(name,numpoints,LUTsize,pressed_on_modified)
 end
 
 
-function M.pad(label,value,sz)
+function M.pad(label,value,sz,minv,maxv)
+	minv = minv or -1
+	maxv = maxv or 1
+	local b = maxv - minv
 	local function clip(val,mini,maxi) return math.min(maxi,math.max(mini,val)) end
 	sz = sz or 200
 	local canvas_pos = M.GetCursorScreenPos();
@@ -238,16 +241,19 @@ function M.pad(label,value,sz)
 		local m = M.GetIO().MousePos
 		local md = M.GetIO().MouseDelta
 		if md.x == 0 and md.y == 0 and not M.IsMouseClicked(0,false) then touched=false end
-		value[0] = ((m.x - canvas_pos.x)/sz)*2 - 1
-		value[1] = (1.0 - (m.y - canvas_pos.y)/sz)*2 - 1
-		value[0] = clip(value[0], -1,1)
-		value[1] = clip(value[1], -1,1)
+		value[0] = ((m.x - canvas_pos.x)/sz)*b + minv
+		value[1] = (1.0 - (m.y - canvas_pos.y)/sz)*b + minv
+		value[0] = clip(value[0], minv,maxv)
+		value[1] = clip(value[1], minv,maxv)
 	end
+	local val0 = (value[0] - minv)/b 
+	local val1 = (value[1] - minv)/b 
 	local draw_list = M.GetWindowDrawList();
 	draw_list:AddRect(canvas_pos,canvas_pos+M.ImVec2(sz,sz),M.U32(1,0,0,1))
 	draw_list:AddLine(canvas_pos + M.ImVec2(0,sz/2),canvas_pos + M.ImVec2(sz,sz/2) ,M.U32(1,0,0,1))
 	draw_list:AddLine(canvas_pos + M.ImVec2(sz/2,0),canvas_pos + M.ImVec2(sz/2,sz) ,M.U32(1,0,0,1))
-	draw_list:AddCircleFilled(canvas_pos + M.ImVec2((1+value[0])*sz,((1-value[1])*sz)+1)*0.5,5,M.U32(1,0,0,1))
+	draw_list:AddCircleFilled(canvas_pos + M.ImVec2(val0*sz,(1-val1)*sz),5,M.U32(1,0,0,1))
+	draw_list:AddText(canvas_pos, M.U32(1,1,1,1), label)
 	return touched
 end
 
@@ -306,6 +312,65 @@ function M.Plotter(xmin,xmax,nvals)
 	Graph:init()
 	return Graph
 end
+------------------- LuaCombo
+function M.LuaCombo(label,strs,action,args)
+    args = args or {}
+    action = action or function() end
+    strs = strs or {"none"}
+    local combo = {}
+    local strings
+    local IDbyname
+    combo.currItem = ffi.new("int[?]",1)
+    local Items, anchors
+    local combowidth
+    local function calcwidth()
+        combowidth = 0
+        for i = 1,#strings  do
+            combowidth = math.max(combowidth, M.CalcTextSize(strings[i]).x)
+        end
+        combowidth = combowidth + M.GetStyle().FramePadding.x * 2.0 + M.GetFrameHeight() --for arrow width!!
+    end
+    function combo:set(strs, ini, newaction)
+        action = newaction and newaction or action
+        anchors = {}
+        IDbyname = {}
+        strings = strs or strings
+        self.currItem[0] = ini and ini-1 or 0
+        Items = ffi.new("const char*[?]",#strings)
+        for i = 0,#strings-1  do
+            anchors[#anchors+1] = ffi.new("const char*",strings[i+1])
+            Items[i] = anchors[#anchors]
+            IDbyname[strings[i+1]] = i+1
+        end
+        if args.calcwidth then combowidth = nil end
+        action(ffi.string(Items[self.currItem[0]]),self.currItem[0]+1)
+    end
+    function combo:set_index(ind)
+        self.currItem[0] = ind and ind-1 or 0
+        action(ffi.string(Items[self.currItem[0]]),self.currItem[0]+1)
+    end
+    function combo:set_name(name)
+        self:set_index(IDbyname[name])
+    end
+    combo:set(strs)
+    function combo:draw()
+        if args.calcwidth then 
+            if not combowidth then calcwidth() end
+            M.SetNextItemWidth(combowidth) 
+        end
+        if M.Combo(label,self.currItem,Items,#strings,-1) then
+            action(ffi.string(Items[self.currItem[0]]),self.currItem[0]+1)
+        end
+    end
+    function combo:get()
+        return ffi.string(Items[self.currItem[0]]),self.currItem[0]+1
+    end
+    function combo:get_name()
+        return ffi.string(Items[self.currItem[0]])
+    end
+    return combo
+end
+
 
 
 
@@ -1650,6 +1715,140 @@ function ImNodesStyle.__new(ctype)
     return ffi.gc(ptr,lib.ImNodesStyle_destroy)
 end
 M.ImNodesStyle = ffi.metatype("ImNodesStyle",ImNodesStyle)
+--------------------------ImPlot3DBox----------------------------
+local ImPlot3DBox= {}
+ImPlot3DBox.__index = ImPlot3DBox
+ImPlot3DBox.ClipLineSegment = lib.ImPlot3DBox_ClipLineSegment
+ImPlot3DBox.Contains = lib.ImPlot3DBox_Contains
+ImPlot3DBox.Expand = lib.ImPlot3DBox_Expand
+function ImPlot3DBox.ImPlot3DBox_Nil()
+    local ptr = lib.ImPlot3DBox_ImPlot3DBox_Nil()
+    return ffi.gc(ptr,lib.ImPlot3DBox_destroy)
+end
+function ImPlot3DBox.ImPlot3DBox_Plot3DPoInt(min,max)
+    local ptr = lib.ImPlot3DBox_ImPlot3DBox_Plot3DPoInt(min,max)
+    return ffi.gc(ptr,lib.ImPlot3DBox_destroy)
+end
+function ImPlot3DBox.__new(ctype,a1,a2) -- generic version
+    if a1==nil then return ImPlot3DBox.ImPlot3DBox_Nil() end
+    if ffi.istype('const ImPlot3DPoint',a1) then return ImPlot3DBox.ImPlot3DBox_Plot3DPoInt(a1,a2) end
+    print(ctype,a1,a2)
+    error'ImPlot3DBox.__new could not find overloaded'
+end
+M.ImPlot3DBox = ffi.metatype("ImPlot3DBox",ImPlot3DBox)
+--------------------------ImPlot3DPoint----------------------------
+local ImPlot3DPoint= {}
+ImPlot3DPoint.__index = ImPlot3DPoint
+function ImPlot3DPoint:Cross(rhs)
+    local nonUDT_out = ffi.new("ImPlot3DPoint")
+    lib.ImPlot3DPoint_Cross(nonUDT_out,self,rhs)
+    return nonUDT_out
+end
+ImPlot3DPoint.Dot = lib.ImPlot3DPoint_Dot
+function ImPlot3DPoint.ImPlot3DPoint_Nil()
+    local ptr = lib.ImPlot3DPoint_ImPlot3DPoint_Nil()
+    return ffi.gc(ptr,lib.ImPlot3DPoint_destroy)
+end
+function ImPlot3DPoint.ImPlot3DPoint_Float(_x,_y,_z)
+    local ptr = lib.ImPlot3DPoint_ImPlot3DPoint_Float(_x,_y,_z)
+    return ffi.gc(ptr,lib.ImPlot3DPoint_destroy)
+end
+function ImPlot3DPoint.__new(ctype,a1,a2,a3) -- generic version
+    if a1==nil then return ImPlot3DPoint.ImPlot3DPoint_Nil() end
+    if (ffi.istype('float',a1) or type(a1)=='number') then return ImPlot3DPoint.ImPlot3DPoint_Float(a1,a2,a3) end
+    print(ctype,a1,a2,a3)
+    error'ImPlot3DPoint.__new could not find overloaded'
+end
+ImPlot3DPoint.IsNaN = lib.ImPlot3DPoint_IsNaN
+ImPlot3DPoint.Length = lib.ImPlot3DPoint_Length
+ImPlot3DPoint.LengthSquared = lib.ImPlot3DPoint_LengthSquared
+ImPlot3DPoint.Normalize = lib.ImPlot3DPoint_Normalize
+function ImPlot3DPoint:Normalized()
+    local nonUDT_out = ffi.new("ImPlot3DPoint")
+    lib.ImPlot3DPoint_Normalized(nonUDT_out,self)
+    return nonUDT_out
+end
+M.ImPlot3DPoint = ffi.metatype("ImPlot3DPoint",ImPlot3DPoint)
+--------------------------ImPlot3DQuat----------------------------
+local ImPlot3DQuat= {}
+ImPlot3DQuat.__index = ImPlot3DQuat
+function ImPlot3DQuat:Conjugate()
+    local nonUDT_out = ffi.new("ImPlot3DQuat")
+    lib.ImPlot3DQuat_Conjugate(nonUDT_out,self)
+    return nonUDT_out
+end
+ImPlot3DQuat.Dot = lib.ImPlot3DQuat_Dot
+function M.ImPlot3DQuat_FromTwoVectors(v0,v1)
+    local nonUDT_out = ffi.new("ImPlot3DQuat")
+    lib.ImPlot3DQuat_FromTwoVectors(nonUDT_out,v0,v1)
+    return nonUDT_out
+end
+function ImPlot3DQuat.ImPlot3DQuat_Nil()
+    local ptr = lib.ImPlot3DQuat_ImPlot3DQuat_Nil()
+    return ffi.gc(ptr,lib.ImPlot3DQuat_destroy)
+end
+function ImPlot3DQuat.ImPlot3DQuat_FloatFloat(_x,_y,_z,_w)
+    local ptr = lib.ImPlot3DQuat_ImPlot3DQuat_FloatFloat(_x,_y,_z,_w)
+    return ffi.gc(ptr,lib.ImPlot3DQuat_destroy)
+end
+function ImPlot3DQuat.ImPlot3DQuat_FloatPlot3DPoInt(_angle,_axis)
+    local ptr = lib.ImPlot3DQuat_ImPlot3DQuat_FloatPlot3DPoInt(_angle,_axis)
+    return ffi.gc(ptr,lib.ImPlot3DQuat_destroy)
+end
+function ImPlot3DQuat.__new(ctype,a1,a2,a3,a4) -- generic version
+    if a1==nil then return ImPlot3DQuat.ImPlot3DQuat_Nil() end
+    if (ffi.istype('float',a1) or type(a1)=='number') and (ffi.istype('float',a2) or type(a2)=='number') then return ImPlot3DQuat.ImPlot3DQuat_FloatFloat(a1,a2,a3,a4) end
+    if (ffi.istype('float',a1) or type(a1)=='number') and ffi.istype('const ImPlot3DPoint',a2) then return ImPlot3DQuat.ImPlot3DQuat_FloatPlot3DPoInt(a1,a2) end
+    print(ctype,a1,a2,a3,a4)
+    error'ImPlot3DQuat.__new could not find overloaded'
+end
+function ImPlot3DQuat:Inverse()
+    local nonUDT_out = ffi.new("ImPlot3DQuat")
+    lib.ImPlot3DQuat_Inverse(nonUDT_out,self)
+    return nonUDT_out
+end
+ImPlot3DQuat.Length = lib.ImPlot3DQuat_Length
+ImPlot3DQuat.Normalize = lib.ImPlot3DQuat_Normalize
+function ImPlot3DQuat:Normalized()
+    local nonUDT_out = ffi.new("ImPlot3DQuat")
+    lib.ImPlot3DQuat_Normalized(nonUDT_out,self)
+    return nonUDT_out
+end
+function M.ImPlot3DQuat_Slerp(q1,q2,t)
+    local nonUDT_out = ffi.new("ImPlot3DQuat")
+    lib.ImPlot3DQuat_Slerp(nonUDT_out,q1,q2,t)
+    return nonUDT_out
+end
+M.ImPlot3DQuat = ffi.metatype("ImPlot3DQuat",ImPlot3DQuat)
+--------------------------ImPlot3DRange----------------------------
+local ImPlot3DRange= {}
+ImPlot3DRange.__index = ImPlot3DRange
+ImPlot3DRange.Contains = lib.ImPlot3DRange_Contains
+ImPlot3DRange.Expand = lib.ImPlot3DRange_Expand
+function ImPlot3DRange.ImPlot3DRange_Nil()
+    local ptr = lib.ImPlot3DRange_ImPlot3DRange_Nil()
+    return ffi.gc(ptr,lib.ImPlot3DRange_destroy)
+end
+function ImPlot3DRange.ImPlot3DRange_Float(min,max)
+    local ptr = lib.ImPlot3DRange_ImPlot3DRange_Float(min,max)
+    return ffi.gc(ptr,lib.ImPlot3DRange_destroy)
+end
+function ImPlot3DRange.__new(ctype,a1,a2) -- generic version
+    if a1==nil then return ImPlot3DRange.ImPlot3DRange_Nil() end
+    if (ffi.istype('float',a1) or type(a1)=='number') then return ImPlot3DRange.ImPlot3DRange_Float(a1,a2) end
+    print(ctype,a1,a2)
+    error'ImPlot3DRange.__new could not find overloaded'
+end
+ImPlot3DRange.Size = lib.ImPlot3DRange_Size
+M.ImPlot3DRange = ffi.metatype("ImPlot3DRange",ImPlot3DRange)
+--------------------------ImPlot3DStyle----------------------------
+local ImPlot3DStyle= {}
+ImPlot3DStyle.__index = ImPlot3DStyle
+function ImPlot3DStyle.__new(ctype)
+    local ptr = lib.ImPlot3DStyle_ImPlot3DStyle()
+    return ffi.gc(ptr,lib.ImPlot3DStyle_destroy)
+end
+M.ImPlot3DStyle = ffi.metatype("ImPlot3DStyle",ImPlot3DStyle)
 --------------------------ImPlotAlignmentData----------------------------
 local ImPlotAlignmentData= {}
 ImPlotAlignmentData.__index = ImPlotAlignmentData
@@ -2507,6 +2706,640 @@ M.ImNodes_IsNodeHovered = lib.ImNodes_IsNodeHovered
 M.ImNodes_IsOutputSlotKind = lib.ImNodes_IsOutputSlotKind
 M.ImNodes_IsSlotCurveHovered = lib.ImNodes_IsSlotCurveHovered
 M.ImNodes_OutputSlotKind = lib.ImNodes_OutputSlotKind
+function M.ImPlot3D_AddColormap_Vec4Ptr(name,cols,size,qual)
+    if qual == nil then qual = true end
+    return lib.ImPlot3D_AddColormap_Vec4Ptr(name,cols,size,qual)
+end
+function M.ImPlot3D_AddColormap_U32Ptr(name,cols,size,qual)
+    if qual == nil then qual = true end
+    return lib.ImPlot3D_AddColormap_U32Ptr(name,cols,size,qual)
+end
+function M.ImPlot3D_AddColormap(a1,a2,a3,a4) -- generic version
+    if (ffi.istype('const ImVec4*',a2) or ffi.istype('const ImVec4',a2) or ffi.istype('const ImVec4[]',a2)) then return M.ImPlot3D_AddColormap_Vec4Ptr(a1,a2,a3,a4) end
+    if ffi.typeof('uint32_t*') == ffi.typeof(a2) or ffi.typeof('const uint32_t*') == ffi.typeof(a2) or ffi.typeof('uint32_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint32_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_AddColormap_U32Ptr(a1,a2,a3,a4) end
+    print(a1,a2,a3,a4)
+    error'M.ImPlot3D_AddColormap could not find overloaded'
+end
+function M.ImPlot3D_BeginPlot(title_id,size,flags)
+    flags = flags or 0
+    size = size or ImVec2(-1,0)
+    return lib.ImPlot3D_BeginPlot(title_id,size,flags)
+end
+M.ImPlot3D_CreateContext = lib.ImPlot3D_CreateContext
+function M.ImPlot3D_DestroyContext(ctx)
+    ctx = ctx or nil
+    return lib.ImPlot3D_DestroyContext(ctx)
+end
+M.ImPlot3D_EndPlot = lib.ImPlot3D_EndPlot
+function M.ImPlot3D_GetColormapColor(idx,cmap)
+    cmap = cmap or -1
+    local nonUDT_out = ffi.new("ImVec4")
+    lib.ImPlot3D_GetColormapColor(nonUDT_out,idx,cmap)
+    return nonUDT_out
+end
+M.ImPlot3D_GetColormapCount = lib.ImPlot3D_GetColormapCount
+M.ImPlot3D_GetColormapIndex = lib.ImPlot3D_GetColormapIndex
+M.ImPlot3D_GetColormapName = lib.ImPlot3D_GetColormapName
+function M.ImPlot3D_GetColormapSize(cmap)
+    cmap = cmap or -1
+    return lib.ImPlot3D_GetColormapSize(cmap)
+end
+M.ImPlot3D_GetCurrentContext = lib.ImPlot3D_GetCurrentContext
+M.ImPlot3D_GetPlotDrawList = lib.ImPlot3D_GetPlotDrawList
+function M.ImPlot3D_GetPlotPos()
+    local nonUDT_out = ffi.new("ImVec2")
+    lib.ImPlot3D_GetPlotPos(nonUDT_out)
+    return nonUDT_out
+end
+function M.ImPlot3D_GetPlotSize()
+    local nonUDT_out = ffi.new("ImVec2")
+    lib.ImPlot3D_GetPlotSize(nonUDT_out)
+    return nonUDT_out
+end
+M.ImPlot3D_GetStyle = lib.ImPlot3D_GetStyle
+M.ImPlot3D_GetStyleColorU32 = lib.ImPlot3D_GetStyleColorU32
+function M.ImPlot3D_GetStyleColorVec4(idx)
+    local nonUDT_out = ffi.new("ImVec4")
+    lib.ImPlot3D_GetStyleColorVec4(nonUDT_out,idx)
+    return nonUDT_out
+end
+function M.ImPlot3D_NextColormapColor()
+    local nonUDT_out = ffi.new("ImVec4")
+    lib.ImPlot3D_NextColormapColor(nonUDT_out)
+    return nonUDT_out
+end
+function M.ImPlot3D_PixelsToPlotPlane_Vec2(pix,plane,mask)
+    if mask == nil then mask = true end
+    local nonUDT_out = ffi.new("ImPlot3DPoint")
+    lib.ImPlot3D_PixelsToPlotPlane_Vec2(nonUDT_out,pix,plane,mask)
+    return nonUDT_out
+end
+function M.ImPlot3D_PixelsToPlotPlane_double(x,y,plane,mask)
+    if mask == nil then mask = true end
+    local nonUDT_out = ffi.new("ImPlot3DPoint")
+    lib.ImPlot3D_PixelsToPlotPlane_double(nonUDT_out,x,y,plane,mask)
+    return nonUDT_out
+end
+function M.ImPlot3D_PixelsToPlotPlane(a2,a3,a4,a5) -- generic version
+    if ffi.istype('const ImVec2',a2) then return M.ImPlot3D_PixelsToPlotPlane_Vec2(a2,a3,a4) end
+    if (ffi.istype('double',a2) or type(a2)=='number') then return M.ImPlot3D_PixelsToPlotPlane_double(a2,a3,a4,a5) end
+    print(a2,a3,a4,a5)
+    error'M.ImPlot3D_PixelsToPlotPlane could not find overloaded'
+end
+M.ImPlot3D_PixelsToPlotRay_Vec2 = lib.ImPlot3D_PixelsToPlotRay_Vec2
+M.ImPlot3D_PixelsToPlotRay_double = lib.ImPlot3D_PixelsToPlotRay_double
+function M.ImPlot3D_PixelsToPlotRay(a1,a2) -- generic version
+    if ffi.istype('const ImVec2',a1) then return M.ImPlot3D_PixelsToPlotRay_Vec2(a1) end
+    if (ffi.istype('double',a1) or type(a1)=='number') then return M.ImPlot3D_PixelsToPlotRay_double(a1,a2) end
+    print(a1,a2)
+    error'M.ImPlot3D_PixelsToPlotRay could not find overloaded'
+end
+function M.ImPlot3D_PlotLine_FloatPtr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("float")
+    return lib.ImPlot3D_PlotLine_FloatPtr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotLine_doublePtr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("double")
+    return lib.ImPlot3D_PlotLine_doublePtr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotLine_S8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS8")
+    return lib.ImPlot3D_PlotLine_S8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotLine_U8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU8")
+    return lib.ImPlot3D_PlotLine_U8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotLine_S16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS16")
+    return lib.ImPlot3D_PlotLine_S16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotLine_U16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU16")
+    return lib.ImPlot3D_PlotLine_U16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotLine_S32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS32")
+    return lib.ImPlot3D_PlotLine_S32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotLine_U32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU32")
+    return lib.ImPlot3D_PlotLine_U32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotLine_S64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS64")
+    return lib.ImPlot3D_PlotLine_S64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotLine_U64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU64")
+    return lib.ImPlot3D_PlotLine_U64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotLine(a1,a2,a3,a4,a5,a6,a7,a8) -- generic version
+    if (ffi.istype('float*',a2) or ffi.istype('float[]',a2)) then return M.ImPlot3D_PlotLine_FloatPtr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if (ffi.istype('double*',a2) or ffi.istype('double[]',a2)) then return M.ImPlot3D_PlotLine_doublePtr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if (ffi.istype('const ImS8*',a2) or ffi.istype('char[]',a2) or type(a2)=='string') then return M.ImPlot3D_PlotLine_S8Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint8_t*') == ffi.typeof(a2) or ffi.typeof('const uint8_t*') == ffi.typeof(a2) or ffi.typeof('uint8_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint8_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotLine_U8Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('int16_t*') == ffi.typeof(a2) or ffi.typeof('const int16_t*') == ffi.typeof(a2) or ffi.typeof('int16_t[?]') == ffi.typeof(a2) or ffi.typeof('const int16_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotLine_S16Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint16_t*') == ffi.typeof(a2) or ffi.typeof('const uint16_t*') == ffi.typeof(a2) or ffi.typeof('uint16_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint16_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotLine_U16Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('int32_t*') == ffi.typeof(a2) or ffi.typeof('const int32_t*') == ffi.typeof(a2) or ffi.typeof('int32_t[?]') == ffi.typeof(a2) or ffi.typeof('const int32_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotLine_S32Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint32_t*') == ffi.typeof(a2) or ffi.typeof('const uint32_t*') == ffi.typeof(a2) or ffi.typeof('uint32_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint32_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotLine_U32Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('int64_t*') == ffi.typeof(a2) or ffi.typeof('const int64_t*') == ffi.typeof(a2) or ffi.typeof('int64_t[?]') == ffi.typeof(a2) or ffi.typeof('const int64_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotLine_S64Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint64_t*') == ffi.typeof(a2) or ffi.typeof('const uint64_t*') == ffi.typeof(a2) or ffi.typeof('uint64_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint64_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotLine_U64Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    print(a1,a2,a3,a4,a5,a6,a7,a8)
+    error'M.ImPlot3D_PlotLine could not find overloaded'
+end
+function M.ImPlot3D_PlotMesh(label_id,vtx,idx,vtx_count,idx_count,flags)
+    flags = flags or 0
+    return lib.ImPlot3D_PlotMesh(label_id,vtx,idx,vtx_count,idx_count,flags)
+end
+function M.ImPlot3D_PlotQuad_FloatPtr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("float")
+    return lib.ImPlot3D_PlotQuad_FloatPtr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotQuad_doublePtr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("double")
+    return lib.ImPlot3D_PlotQuad_doublePtr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotQuad_S8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS8")
+    return lib.ImPlot3D_PlotQuad_S8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotQuad_U8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU8")
+    return lib.ImPlot3D_PlotQuad_U8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotQuad_S16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS16")
+    return lib.ImPlot3D_PlotQuad_S16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotQuad_U16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU16")
+    return lib.ImPlot3D_PlotQuad_U16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotQuad_S32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS32")
+    return lib.ImPlot3D_PlotQuad_S32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotQuad_U32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU32")
+    return lib.ImPlot3D_PlotQuad_U32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotQuad_S64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS64")
+    return lib.ImPlot3D_PlotQuad_S64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotQuad_U64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU64")
+    return lib.ImPlot3D_PlotQuad_U64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotQuad(a1,a2,a3,a4,a5,a6,a7,a8) -- generic version
+    if (ffi.istype('float*',a2) or ffi.istype('float[]',a2)) then return M.ImPlot3D_PlotQuad_FloatPtr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if (ffi.istype('double*',a2) or ffi.istype('double[]',a2)) then return M.ImPlot3D_PlotQuad_doublePtr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if (ffi.istype('const ImS8*',a2) or ffi.istype('char[]',a2) or type(a2)=='string') then return M.ImPlot3D_PlotQuad_S8Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint8_t*') == ffi.typeof(a2) or ffi.typeof('const uint8_t*') == ffi.typeof(a2) or ffi.typeof('uint8_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint8_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotQuad_U8Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('int16_t*') == ffi.typeof(a2) or ffi.typeof('const int16_t*') == ffi.typeof(a2) or ffi.typeof('int16_t[?]') == ffi.typeof(a2) or ffi.typeof('const int16_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotQuad_S16Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint16_t*') == ffi.typeof(a2) or ffi.typeof('const uint16_t*') == ffi.typeof(a2) or ffi.typeof('uint16_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint16_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotQuad_U16Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('int32_t*') == ffi.typeof(a2) or ffi.typeof('const int32_t*') == ffi.typeof(a2) or ffi.typeof('int32_t[?]') == ffi.typeof(a2) or ffi.typeof('const int32_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotQuad_S32Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint32_t*') == ffi.typeof(a2) or ffi.typeof('const uint32_t*') == ffi.typeof(a2) or ffi.typeof('uint32_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint32_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotQuad_U32Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('int64_t*') == ffi.typeof(a2) or ffi.typeof('const int64_t*') == ffi.typeof(a2) or ffi.typeof('int64_t[?]') == ffi.typeof(a2) or ffi.typeof('const int64_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotQuad_S64Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint64_t*') == ffi.typeof(a2) or ffi.typeof('const uint64_t*') == ffi.typeof(a2) or ffi.typeof('uint64_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint64_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotQuad_U64Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    print(a1,a2,a3,a4,a5,a6,a7,a8)
+    error'M.ImPlot3D_PlotQuad could not find overloaded'
+end
+function M.ImPlot3D_PlotScatter_FloatPtr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("float")
+    return lib.ImPlot3D_PlotScatter_FloatPtr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotScatter_doublePtr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("double")
+    return lib.ImPlot3D_PlotScatter_doublePtr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotScatter_S8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS8")
+    return lib.ImPlot3D_PlotScatter_S8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotScatter_U8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU8")
+    return lib.ImPlot3D_PlotScatter_U8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotScatter_S16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS16")
+    return lib.ImPlot3D_PlotScatter_S16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotScatter_U16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU16")
+    return lib.ImPlot3D_PlotScatter_U16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotScatter_S32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS32")
+    return lib.ImPlot3D_PlotScatter_S32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotScatter_U32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU32")
+    return lib.ImPlot3D_PlotScatter_U32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotScatter_S64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS64")
+    return lib.ImPlot3D_PlotScatter_S64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotScatter_U64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU64")
+    return lib.ImPlot3D_PlotScatter_U64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotScatter(a1,a2,a3,a4,a5,a6,a7,a8) -- generic version
+    if (ffi.istype('float*',a2) or ffi.istype('float[]',a2)) then return M.ImPlot3D_PlotScatter_FloatPtr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if (ffi.istype('double*',a2) or ffi.istype('double[]',a2)) then return M.ImPlot3D_PlotScatter_doublePtr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if (ffi.istype('const ImS8*',a2) or ffi.istype('char[]',a2) or type(a2)=='string') then return M.ImPlot3D_PlotScatter_S8Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint8_t*') == ffi.typeof(a2) or ffi.typeof('const uint8_t*') == ffi.typeof(a2) or ffi.typeof('uint8_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint8_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotScatter_U8Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('int16_t*') == ffi.typeof(a2) or ffi.typeof('const int16_t*') == ffi.typeof(a2) or ffi.typeof('int16_t[?]') == ffi.typeof(a2) or ffi.typeof('const int16_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotScatter_S16Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint16_t*') == ffi.typeof(a2) or ffi.typeof('const uint16_t*') == ffi.typeof(a2) or ffi.typeof('uint16_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint16_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotScatter_U16Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('int32_t*') == ffi.typeof(a2) or ffi.typeof('const int32_t*') == ffi.typeof(a2) or ffi.typeof('int32_t[?]') == ffi.typeof(a2) or ffi.typeof('const int32_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotScatter_S32Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint32_t*') == ffi.typeof(a2) or ffi.typeof('const uint32_t*') == ffi.typeof(a2) or ffi.typeof('uint32_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint32_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotScatter_U32Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('int64_t*') == ffi.typeof(a2) or ffi.typeof('const int64_t*') == ffi.typeof(a2) or ffi.typeof('int64_t[?]') == ffi.typeof(a2) or ffi.typeof('const int64_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotScatter_S64Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint64_t*') == ffi.typeof(a2) or ffi.typeof('const uint64_t*') == ffi.typeof(a2) or ffi.typeof('uint64_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint64_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotScatter_U64Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    print(a1,a2,a3,a4,a5,a6,a7,a8)
+    error'M.ImPlot3D_PlotScatter could not find overloaded'
+end
+function M.ImPlot3D_PlotSurface_FloatPtr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    scale_max = scale_max or 0
+    scale_min = scale_min or 0
+    stride = stride or ffi.sizeof("float")
+    return lib.ImPlot3D_PlotSurface_FloatPtr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+end
+function M.ImPlot3D_PlotSurface_doublePtr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    scale_max = scale_max or 0
+    scale_min = scale_min or 0
+    stride = stride or ffi.sizeof("double")
+    return lib.ImPlot3D_PlotSurface_doublePtr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+end
+function M.ImPlot3D_PlotSurface_S8Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    scale_max = scale_max or 0
+    scale_min = scale_min or 0
+    stride = stride or ffi.sizeof("ImS8")
+    return lib.ImPlot3D_PlotSurface_S8Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+end
+function M.ImPlot3D_PlotSurface_U8Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    scale_max = scale_max or 0
+    scale_min = scale_min or 0
+    stride = stride or ffi.sizeof("ImU8")
+    return lib.ImPlot3D_PlotSurface_U8Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+end
+function M.ImPlot3D_PlotSurface_S16Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    scale_max = scale_max or 0
+    scale_min = scale_min or 0
+    stride = stride or ffi.sizeof("ImS16")
+    return lib.ImPlot3D_PlotSurface_S16Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+end
+function M.ImPlot3D_PlotSurface_U16Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    scale_max = scale_max or 0
+    scale_min = scale_min or 0
+    stride = stride or ffi.sizeof("ImU16")
+    return lib.ImPlot3D_PlotSurface_U16Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+end
+function M.ImPlot3D_PlotSurface_S32Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    scale_max = scale_max or 0
+    scale_min = scale_min or 0
+    stride = stride or ffi.sizeof("ImS32")
+    return lib.ImPlot3D_PlotSurface_S32Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+end
+function M.ImPlot3D_PlotSurface_U32Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    scale_max = scale_max or 0
+    scale_min = scale_min or 0
+    stride = stride or ffi.sizeof("ImU32")
+    return lib.ImPlot3D_PlotSurface_U32Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+end
+function M.ImPlot3D_PlotSurface_S64Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    scale_max = scale_max or 0
+    scale_min = scale_min or 0
+    stride = stride or ffi.sizeof("ImS64")
+    return lib.ImPlot3D_PlotSurface_S64Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+end
+function M.ImPlot3D_PlotSurface_U64Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    scale_max = scale_max or 0
+    scale_min = scale_min or 0
+    stride = stride or ffi.sizeof("ImU64")
+    return lib.ImPlot3D_PlotSurface_U64Ptr(label_id,xs,ys,zs,x_count,y_count,scale_min,scale_max,flags,offset,stride)
+end
+function M.ImPlot3D_PlotSurface(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) -- generic version
+    if (ffi.istype('float*',a2) or ffi.istype('float[]',a2)) then return M.ImPlot3D_PlotSurface_FloatPtr(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) end
+    if (ffi.istype('double*',a2) or ffi.istype('double[]',a2)) then return M.ImPlot3D_PlotSurface_doublePtr(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) end
+    if (ffi.istype('const ImS8*',a2) or ffi.istype('char[]',a2) or type(a2)=='string') then return M.ImPlot3D_PlotSurface_S8Ptr(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) end
+    if ffi.typeof('uint8_t*') == ffi.typeof(a2) or ffi.typeof('const uint8_t*') == ffi.typeof(a2) or ffi.typeof('uint8_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint8_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotSurface_U8Ptr(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) end
+    if ffi.typeof('int16_t*') == ffi.typeof(a2) or ffi.typeof('const int16_t*') == ffi.typeof(a2) or ffi.typeof('int16_t[?]') == ffi.typeof(a2) or ffi.typeof('const int16_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotSurface_S16Ptr(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) end
+    if ffi.typeof('uint16_t*') == ffi.typeof(a2) or ffi.typeof('const uint16_t*') == ffi.typeof(a2) or ffi.typeof('uint16_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint16_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotSurface_U16Ptr(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) end
+    if ffi.typeof('int32_t*') == ffi.typeof(a2) or ffi.typeof('const int32_t*') == ffi.typeof(a2) or ffi.typeof('int32_t[?]') == ffi.typeof(a2) or ffi.typeof('const int32_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotSurface_S32Ptr(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) end
+    if ffi.typeof('uint32_t*') == ffi.typeof(a2) or ffi.typeof('const uint32_t*') == ffi.typeof(a2) or ffi.typeof('uint32_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint32_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotSurface_U32Ptr(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) end
+    if ffi.typeof('int64_t*') == ffi.typeof(a2) or ffi.typeof('const int64_t*') == ffi.typeof(a2) or ffi.typeof('int64_t[?]') == ffi.typeof(a2) or ffi.typeof('const int64_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotSurface_S64Ptr(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) end
+    if ffi.typeof('uint64_t*') == ffi.typeof(a2) or ffi.typeof('const uint64_t*') == ffi.typeof(a2) or ffi.typeof('uint64_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint64_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotSurface_U64Ptr(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11) end
+    print(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)
+    error'M.ImPlot3D_PlotSurface could not find overloaded'
+end
+function M.ImPlot3D_PlotText(text,x,y,z,angle,pix_offset)
+    angle = angle or 0.0
+    pix_offset = pix_offset or ImVec2(0,0)
+    return lib.ImPlot3D_PlotText(text,x,y,z,angle,pix_offset)
+end
+function M.ImPlot3D_PlotToPixels_Plot3DPoInt(point)
+    local nonUDT_out = ffi.new("ImVec2")
+    lib.ImPlot3D_PlotToPixels_Plot3DPoInt(nonUDT_out,point)
+    return nonUDT_out
+end
+function M.ImPlot3D_PlotToPixels_double(x,y,z)
+    local nonUDT_out = ffi.new("ImVec2")
+    lib.ImPlot3D_PlotToPixels_double(nonUDT_out,x,y,z)
+    return nonUDT_out
+end
+function M.ImPlot3D_PlotToPixels(a2,a3,a4) -- generic version
+    if ffi.istype('const ImPlot3DPoint',a2) then return M.ImPlot3D_PlotToPixels_Plot3DPoInt(a2) end
+    if (ffi.istype('double',a2) or type(a2)=='number') then return M.ImPlot3D_PlotToPixels_double(a2,a3,a4) end
+    print(a2,a3,a4)
+    error'M.ImPlot3D_PlotToPixels could not find overloaded'
+end
+function M.ImPlot3D_PlotTriangle_FloatPtr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("float")
+    return lib.ImPlot3D_PlotTriangle_FloatPtr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotTriangle_doublePtr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("double")
+    return lib.ImPlot3D_PlotTriangle_doublePtr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotTriangle_S8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS8")
+    return lib.ImPlot3D_PlotTriangle_S8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotTriangle_U8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU8")
+    return lib.ImPlot3D_PlotTriangle_U8Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotTriangle_S16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS16")
+    return lib.ImPlot3D_PlotTriangle_S16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotTriangle_U16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU16")
+    return lib.ImPlot3D_PlotTriangle_U16Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotTriangle_S32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS32")
+    return lib.ImPlot3D_PlotTriangle_S32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotTriangle_U32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU32")
+    return lib.ImPlot3D_PlotTriangle_U32Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotTriangle_S64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImS64")
+    return lib.ImPlot3D_PlotTriangle_S64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotTriangle_U64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+    flags = flags or 0
+    offset = offset or 0
+    stride = stride or ffi.sizeof("ImU64")
+    return lib.ImPlot3D_PlotTriangle_U64Ptr(label_id,xs,ys,zs,count,flags,offset,stride)
+end
+function M.ImPlot3D_PlotTriangle(a1,a2,a3,a4,a5,a6,a7,a8) -- generic version
+    if (ffi.istype('float*',a2) or ffi.istype('float[]',a2)) then return M.ImPlot3D_PlotTriangle_FloatPtr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if (ffi.istype('double*',a2) or ffi.istype('double[]',a2)) then return M.ImPlot3D_PlotTriangle_doublePtr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if (ffi.istype('const ImS8*',a2) or ffi.istype('char[]',a2) or type(a2)=='string') then return M.ImPlot3D_PlotTriangle_S8Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint8_t*') == ffi.typeof(a2) or ffi.typeof('const uint8_t*') == ffi.typeof(a2) or ffi.typeof('uint8_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint8_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotTriangle_U8Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('int16_t*') == ffi.typeof(a2) or ffi.typeof('const int16_t*') == ffi.typeof(a2) or ffi.typeof('int16_t[?]') == ffi.typeof(a2) or ffi.typeof('const int16_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotTriangle_S16Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint16_t*') == ffi.typeof(a2) or ffi.typeof('const uint16_t*') == ffi.typeof(a2) or ffi.typeof('uint16_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint16_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotTriangle_U16Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('int32_t*') == ffi.typeof(a2) or ffi.typeof('const int32_t*') == ffi.typeof(a2) or ffi.typeof('int32_t[?]') == ffi.typeof(a2) or ffi.typeof('const int32_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotTriangle_S32Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint32_t*') == ffi.typeof(a2) or ffi.typeof('const uint32_t*') == ffi.typeof(a2) or ffi.typeof('uint32_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint32_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotTriangle_U32Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('int64_t*') == ffi.typeof(a2) or ffi.typeof('const int64_t*') == ffi.typeof(a2) or ffi.typeof('int64_t[?]') == ffi.typeof(a2) or ffi.typeof('const int64_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotTriangle_S64Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    if ffi.typeof('uint64_t*') == ffi.typeof(a2) or ffi.typeof('const uint64_t*') == ffi.typeof(a2) or ffi.typeof('uint64_t[?]') == ffi.typeof(a2) or ffi.typeof('const uint64_t[?]') == ffi.typeof(a2) then return M.ImPlot3D_PlotTriangle_U64Ptr(a1,a2,a3,a4,a5,a6,a7,a8) end
+    print(a1,a2,a3,a4,a5,a6,a7,a8)
+    error'M.ImPlot3D_PlotTriangle could not find overloaded'
+end
+function M.ImPlot3D_PopColormap(count)
+    count = count or 1
+    return lib.ImPlot3D_PopColormap(count)
+end
+function M.ImPlot3D_PopStyleColor(count)
+    count = count or 1
+    return lib.ImPlot3D_PopStyleColor(count)
+end
+function M.ImPlot3D_PopStyleVar(count)
+    count = count or 1
+    return lib.ImPlot3D_PopStyleVar(count)
+end
+M.ImPlot3D_PushColormap_Plot3DColormap = lib.ImPlot3D_PushColormap_Plot3DColormap
+M.ImPlot3D_PushColormap_Str = lib.ImPlot3D_PushColormap_Str
+function M.ImPlot3D_PushColormap(a1) -- generic version
+    if (ffi.istype('int32_t',a1) or type(a1)=='number') then return M.ImPlot3D_PushColormap_Plot3DColormap(a1) end
+    if (ffi.istype('const char*',a1) or ffi.istype('char[]',a1) or type(a1)=='string') then return M.ImPlot3D_PushColormap_Str(a1) end
+    print(a1)
+    error'M.ImPlot3D_PushColormap could not find overloaded'
+end
+M.ImPlot3D_PushStyleColor_U32 = lib.ImPlot3D_PushStyleColor_U32
+M.ImPlot3D_PushStyleColor_Vec4 = lib.ImPlot3D_PushStyleColor_Vec4
+function M.ImPlot3D_PushStyleColor(a1,a2) -- generic version
+    if (ffi.istype('uint32_t',a2) or type(a2)=='number') then return M.ImPlot3D_PushStyleColor_U32(a1,a2) end
+    if ffi.istype('const ImVec4',a2) then return M.ImPlot3D_PushStyleColor_Vec4(a1,a2) end
+    print(a1,a2)
+    error'M.ImPlot3D_PushStyleColor could not find overloaded'
+end
+M.ImPlot3D_PushStyleVar_Float = lib.ImPlot3D_PushStyleVar_Float
+M.ImPlot3D_PushStyleVar_Int = lib.ImPlot3D_PushStyleVar_Int
+M.ImPlot3D_PushStyleVar_Vec2 = lib.ImPlot3D_PushStyleVar_Vec2
+function M.ImPlot3D_PushStyleVar(a1,a2) -- generic version
+    if (ffi.istype('float',a2) or type(a2)=='number') then return M.ImPlot3D_PushStyleVar_Float(a1,a2) end
+    if (ffi.istype('int32_t',a2) or type(a2)=='number') then return M.ImPlot3D_PushStyleVar_Int(a1,a2) end
+    if ffi.istype('const ImVec2',a2) then return M.ImPlot3D_PushStyleVar_Vec2(a1,a2) end
+    print(a1,a2)
+    error'M.ImPlot3D_PushStyleVar could not find overloaded'
+end
+function M.ImPlot3D_SampleColormap(t,cmap)
+    cmap = cmap or -1
+    local nonUDT_out = ffi.new("ImVec4")
+    lib.ImPlot3D_SampleColormap(nonUDT_out,t,cmap)
+    return nonUDT_out
+end
+M.ImPlot3D_SetCurrentContext = lib.ImPlot3D_SetCurrentContext
+function M.ImPlot3D_SetNextFillStyle(col,alpha_mod)
+    alpha_mod = alpha_mod or -1
+    col = col or ImVec4(0,0,0,-1)
+    return lib.ImPlot3D_SetNextFillStyle(col,alpha_mod)
+end
+function M.ImPlot3D_SetNextLineStyle(col,weight)
+    col = col or ImVec4(0,0,0,-1)
+    weight = weight or -1
+    return lib.ImPlot3D_SetNextLineStyle(col,weight)
+end
+function M.ImPlot3D_SetNextMarkerStyle(marker,size,fill,weight,outline)
+    fill = fill or ImVec4(0,0,0,-1)
+    marker = marker or -1
+    outline = outline or ImVec4(0,0,0,-1)
+    size = size or -1
+    weight = weight or -1
+    return lib.ImPlot3D_SetNextMarkerStyle(marker,size,fill,weight,outline)
+end
+function M.ImPlot3D_SetupAxes(x_label,y_label,z_label,x_flags,y_flags,z_flags)
+    x_flags = x_flags or 0
+    y_flags = y_flags or 0
+    z_flags = z_flags or 0
+    return lib.ImPlot3D_SetupAxes(x_label,y_label,z_label,x_flags,y_flags,z_flags)
+end
+function M.ImPlot3D_SetupAxesLimits(x_min,x_max,y_min,y_max,z_min,z_max,cond)
+    cond = cond or 2
+    return lib.ImPlot3D_SetupAxesLimits(x_min,x_max,y_min,y_max,z_min,z_max,cond)
+end
+function M.ImPlot3D_SetupAxis(axis,label,flags)
+    flags = flags or 0
+    label = label or nil
+    return lib.ImPlot3D_SetupAxis(axis,label,flags)
+end
+function M.ImPlot3D_SetupAxisFormat(idx,formatter,data)
+    data = data or nil
+    return lib.ImPlot3D_SetupAxisFormat(idx,formatter,data)
+end
+function M.ImPlot3D_SetupAxisLimits(axis,v_min,v_max,cond)
+    cond = cond or 2
+    return lib.ImPlot3D_SetupAxisLimits(axis,v_min,v_max,cond)
+end
+function M.ImPlot3D_SetupAxisTicks_doublePtr(axis,values,n_ticks,labels,keep_default)
+    keep_default = keep_default or false
+    labels = labels or nil
+    return lib.ImPlot3D_SetupAxisTicks_doublePtr(axis,values,n_ticks,labels,keep_default)
+end
+function M.ImPlot3D_SetupAxisTicks_double(axis,v_min,v_max,n_ticks,labels,keep_default)
+    keep_default = keep_default or false
+    labels = labels or nil
+    return lib.ImPlot3D_SetupAxisTicks_double(axis,v_min,v_max,n_ticks,labels,keep_default)
+end
+function M.ImPlot3D_SetupAxisTicks(a1,a2,a3,a4,a5,a6) -- generic version
+    if (ffi.istype('double*',a2) or ffi.istype('double[]',a2)) then return M.ImPlot3D_SetupAxisTicks_doublePtr(a1,a2,a3,a4,a5) end
+    if (ffi.istype('double',a2) or type(a2)=='number') then return M.ImPlot3D_SetupAxisTicks_double(a1,a2,a3,a4,a5,a6) end
+    print(a1,a2,a3,a4,a5,a6)
+    error'M.ImPlot3D_SetupAxisTicks could not find overloaded'
+end
+M.ImPlot3D_SetupBoxScale = lib.ImPlot3D_SetupBoxScale
+function M.ImPlot3D_SetupLegend(location,flags)
+    flags = flags or 0
+    return lib.ImPlot3D_SetupLegend(location,flags)
+end
+function M.ImPlot3D_ShowDemoWindow(p_open)
+    p_open = p_open or nil
+    return lib.ImPlot3D_ShowDemoWindow(p_open)
+end
+function M.ImPlot3D_ShowStyleEditor(ref)
+    ref = ref or nil
+    return lib.ImPlot3D_ShowStyleEditor(ref)
+end
+function M.ImPlot3D_StyleColorsAuto(dst)
+    dst = dst or nil
+    return lib.ImPlot3D_StyleColorsAuto(dst)
+end
+function M.ImPlot3D_StyleColorsClassic(dst)
+    dst = dst or nil
+    return lib.ImPlot3D_StyleColorsClassic(dst)
+end
+function M.ImPlot3D_StyleColorsDark(dst)
+    dst = dst or nil
+    return lib.ImPlot3D_StyleColorsDark(dst)
+end
+function M.ImPlot3D_StyleColorsLight(dst)
+    dst = dst or nil
+    return lib.ImPlot3D_StyleColorsLight(dst)
+end
 function M.ImPlot_AddColormap_Vec4Ptr(name,cols,size,qual)
     if qual == nil then qual = true end
     return lib.ImPlot_AddColormap_Vec4Ptr(name,cols,size,qual)
@@ -2796,6 +3629,7 @@ function M.ImPlot_GetLocationPos(outer_rect,inner_size,location,pad)
     return nonUDT_out
 end
 M.ImPlot_GetMarkerName = lib.ImPlot_GetMarkerName
+M.ImPlot_GetMonth = lib.ImPlot_GetMonth
 M.ImPlot_GetPlot = lib.ImPlot_GetPlot
 M.ImPlot_GetPlotDrawList = lib.ImPlot_GetPlotDrawList
 function M.ImPlot_GetPlotLimits(x_axis,y_axis)
@@ -2837,6 +3671,7 @@ function M.ImPlot_GetStyleColorVec4(idx)
     lib.ImPlot_GetStyleColorVec4(nonUDT_out,idx)
     return nonUDT_out
 end
+M.ImPlot_GetTime = lib.ImPlot_GetTime
 M.ImPlot_GetYear = lib.ImPlot_GetYear
 function M.ImPlot_HideNextItem(hidden,cond)
     cond = cond or 2
@@ -3162,6 +3997,11 @@ function M.ImPlot_MkLocTime(ptm)
     lib.ImPlot_MkLocTime(nonUDT_out,ptm)
     return nonUDT_out
 end
+function M.ImPlot_MkTime(ptm)
+    local nonUDT_out = ffi.new("ImPlotTime")
+    lib.ImPlot_MkTime(nonUDT_out,ptm)
+    return nonUDT_out
+end
 function M.ImPlot_NextColormapColor()
     local nonUDT_out = ffi.new("ImVec4")
     lib.ImPlot_NextColormapColor(nonUDT_out)
@@ -3169,6 +4009,11 @@ function M.ImPlot_NextColormapColor()
 end
 M.ImPlot_NextColormapColorU32 = lib.ImPlot_NextColormapColorU32
 M.ImPlot_NiceNum = lib.ImPlot_NiceNum
+function M.ImPlot_Now()
+    local nonUDT_out = ffi.new("ImPlotTime")
+    lib.ImPlot_Now(nonUDT_out)
+    return nonUDT_out
+end
 M.ImPlot_OrderOfMagnitude = lib.ImPlot_OrderOfMagnitude
 M.ImPlot_OrderToPrecision = lib.ImPlot_OrderToPrecision
 function M.ImPlot_PixelsToPlot_Vec2(pix,x_axis,y_axis)
@@ -5378,6 +6223,11 @@ function M.ImPlot_TagY(a1,a2,a3,...) -- generic version
     error'M.ImPlot_TagY could not find overloaded'
 end
 M.ImPlot_TagYV = lib.ImPlot_TagYV
+function M.ImPlot_Today()
+    local nonUDT_out = ffi.new("ImPlotTime")
+    lib.ImPlot_Today(nonUDT_out)
+    return nonUDT_out
+end
 M.ImPlot_TransformForward_Log10 = lib.ImPlot_TransformForward_Log10
 M.ImPlot_TransformForward_Logit = lib.ImPlot_TransformForward_Logit
 M.ImPlot_TransformForward_SymLog = lib.ImPlot_TransformForward_SymLog
@@ -6252,6 +7102,7 @@ function M.ImFloor(a1,a2) -- generic version
     error'M.ImFloor could not find overloaded'
 end
 M.ImFontAtlasBuildFinish = lib.igImFontAtlasBuildFinish
+M.ImFontAtlasBuildGetOversampleFactors = lib.igImFontAtlasBuildGetOversampleFactors
 M.ImFontAtlasBuildInit = lib.igImFontAtlasBuildInit
 M.ImFontAtlasBuildMultiplyCalcLookupTable = lib.igImFontAtlasBuildMultiplyCalcLookupTable
 M.ImFontAtlasBuildMultiplyRectAlpha8 = lib.igImFontAtlasBuildMultiplyRectAlpha8
@@ -6669,6 +7520,7 @@ function M.IsMouseReleased(a1,a2) -- generic version
     print(a1,a2)
     error'M.IsMouseReleased could not find overloaded'
 end
+M.IsMouseReleasedWithDelay = lib.igIsMouseReleasedWithDelay
 M.IsNamedKey = lib.igIsNamedKey
 M.IsNamedKeyOrMod = lib.igIsNamedKeyOrMod
 function M.IsPopupOpen_Str(str_id,flags)
@@ -6946,6 +7798,7 @@ M.PushItemFlag = lib.igPushItemFlag
 M.PushItemWidth = lib.igPushItemWidth
 M.PushMultiItemsWidths = lib.igPushMultiItemsWidths
 M.PushOverrideID = lib.igPushOverrideID
+M.PushPasswordFont = lib.igPushPasswordFont
 M.PushStyleColor_U32 = lib.igPushStyleColor_U32
 M.PushStyleColor_Vec4 = lib.igPushStyleColor_Vec4
 function M.PushStyleColor(a1,a2) -- generic version
@@ -7477,6 +8330,7 @@ function M.TabItemCalcSize(a2,a3) -- generic version
 end
 M.TabItemEx = lib.igTabItemEx
 M.TabItemLabelAndCloseButton = lib.igTabItemLabelAndCloseButton
+M.TabItemSpacing = lib.igTabItemSpacing
 M.TableAngledHeadersRow = lib.igTableAngledHeadersRow
 M.TableAngledHeadersRowEx = lib.igTableAngledHeadersRowEx
 M.TableBeginApplyRequests = lib.igTableBeginApplyRequests

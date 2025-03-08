@@ -1,2 +1,2 @@
 @echo off
-call r.bat sdl_audio.lua
+..\..\..\luajit.exe sdl_audio.lua

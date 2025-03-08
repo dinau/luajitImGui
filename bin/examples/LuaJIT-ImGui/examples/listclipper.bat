@@ -1,2 +1,2 @@
 @echo off
-call r.bat listclipper.lua
+..\..\..\luajit.exe listclipper.lua

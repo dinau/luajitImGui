@@ -1,2 +1,2 @@
 @echo off
-call r.bat minimal_main_viewport.lua
+..\..\..\luajit.exe minimal_main_viewport.lua

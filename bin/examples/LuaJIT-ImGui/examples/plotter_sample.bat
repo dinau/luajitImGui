@@ -1,2 +1,2 @@
 @echo off
-call r.bat plotter_sample.lua
+..\..\..\luajit.exe plotter_sample.lua

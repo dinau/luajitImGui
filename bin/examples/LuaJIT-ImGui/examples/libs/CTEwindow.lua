@@ -1,49 +1,6 @@
 local ig
 local ffi = require"ffi"
-------------------- LuaCombo
-local function LuaCombo(label,strs,action)
-    action = action or function() end
-    strs = strs or {"none"}
-    local combo = {}
-	local combowidth = 0
-    local strings 
-    combo.currItem = ffi.new("int[?]",1)
-    local Items, anchors
-    function combo:set(strs, ini)
-        anchors = {}
-        strings = strs
-        self.currItem[0] = ini or 0
-        Items = ffi.new("const char*[?]",#strs)
-        for i = 0,#strs-1  do
-            anchors[#anchors+1] = ffi.new("const char*",strs[i+1])
-            Items[i] = anchors[#anchors]
-        end
-        action(ffi.string(Items[self.currItem[0]]),self.currItem[0])
-    end
-    function combo:set_index(ind)
-        self.currItem[0] = ind or 0
-        action(ffi.string(Items[self.currItem[0]]),self.currItem[0])
-    end
-    combo:set(strs)
-	local function calcwidth()
-		for i = 1,#strings  do
-			combowidth = math.max(combowidth, ig.CalcTextSize(strings[i]).x)
-        end
-		combowidth = combowidth + ig.GetStyle().FramePadding.x * 2.0
-	end
-    function combo:draw()
-		if combowidth == 0 then calcwidth() end
-		ig.SetNextItemWidth(combowidth)
-        if ig.Combo(label,self.currItem,Items,#strings,-1) then
-            action(ffi.string(Items[self.currItem[0]]),self.currItem[0])
-        end
-    end
-    function combo:get()
-        return ffi.string(Items[self.currItem[0]]),self.currItem[0]
-    end
-    return combo
-end
---local Lang_combo = LuaCombo("Lang",{"CPP","Lua","HLSL","GLSL","C","SQL","AngelScript"},function(a,b) print(a,b) end)
+
 local langNames = {"None", "Cpp", "C", "Cs", "Python", "Lua", "Json", "Sql", "AngelScript", "Glsl", "Hlsl"}
 local function toint(x) return ffi.new("int",x) end
 local mLine = ffi.new("int[?]",1)
@@ -211,16 +168,16 @@ local function CTEwindow(file_name)
 	W.editor = editor
 	editor:SetText( strtext)
 
-	W.lang_combo = LuaCombo("Lang",langNames,
+	W.lang_combo = ig.LuaCombo("Lang",langNames,
 				function(name,ind) 
-					editor:SetLanguageDefinition(ind)
-				end)
+					editor:SetLanguageDefinition(ind-1)
+				end,{calcwidth=true})
 	if ext == "cpp" or ext == "hpp" then
-		W.lang_combo:set_index(1)
-	elseif ext == "c" or ext == "h" then
 		W.lang_combo:set_index(2)
+	elseif ext == "c" or ext == "h" then
+		W.lang_combo:set_index(3)
 	elseif ext == "lua" then
-		W.lang_combo:set_index(5)
+		W.lang_combo:set_index(6)
 	else
 		W.lang_combo:set_index(0)
 		print"unknown language"
