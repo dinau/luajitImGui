@@ -27,7 +27,7 @@ gen_bat:
 	@echo =
 	@echo === Generating Batch files ===
 	@echo =
-	./genbat.exe
+	../../bin/luajit genbat.lua
 
 define def_gen_bat
 	@echo @echo off >          $(EXAMPLES_DIR)/LuaJIT-ImGui/examples/$(1).bat

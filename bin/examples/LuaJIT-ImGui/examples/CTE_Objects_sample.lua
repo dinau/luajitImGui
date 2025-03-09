@@ -11,9 +11,9 @@ local editor = ig.TextEditor()
 editor:SetLanguageDefinition(ig.lib.Cpp)
 
 
-local fileN = [[../cimCTE/cimCTE.cpp]]
+--local fileN = [[../cimCTE/cimCTE.cpp]]
 --local fileN = [[C:\LuaGL\gitsources\anima\LuaJIT-ImGui\cimCTE\ImGuiColorTextEdit\TextEditor.cpp]]
--- local fileN = [[CTE_sample.lua]]
+local fileN = [[CTE_sample.lua]]
 local file,err = io.open(fileN,"r")
 assert(file,err)
 local strtext = file:read"*a"
@@ -42,7 +42,7 @@ function win:draw(ig)
 				end
 				ig.EndMenu();
 			end
-	
+
 			if (ig.BeginMenu("Edit"))
 			then
 				local ro = ffi.new("bool[?]",1,editor:IsReadOnlyEnabled());
@@ -78,7 +78,7 @@ function win:draw(ig)
 			end
 
 			if (ig.BeginMenu("View")) then
-			
+
 				if (ig.MenuItem("Dark palette")) then
 					editor:SetPalette(ig.lib.Dark);
 				end
@@ -95,13 +95,13 @@ function win:draw(ig)
 			end
 			ig.EndMenuBar();
 		end
-		
+
 		ig.Text("%6d/%-6d %6d lines  | %s | %s | %s | %s", toint(mLine[0] + 1), toint(mColumn[0] + 1), toint(editor:GetLineCount()),
 		editor:IsOverwriteEnabled() and "Ovr" or "Ins",
 		editor:CanUndo() and "*" or " ",
 		langNames[tonumber(editor:GetLanguageDefinition())],
 		fileN)
-		
+
 		editor:Render("texteditor")
 	ig.End()
 

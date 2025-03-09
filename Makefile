@@ -7,7 +7,7 @@ CPU_CORE_BITS = 64bit
 # Visual studio 2019 C/C++
 #TC ?= msvc
 
-# Compile ok  Clang version 18.1.8 MinGW
+# Compile ok  Clang version 20.1.0 MinGW-ucrt
 # Install ex.: pacman -S mingw-w64-ucrt-x86_64-llvm-openmp
 TC ?= clang
 
@@ -87,13 +87,22 @@ tools_build:
 
 LUAJIT_DIR = anima/LuaJIT/LuaJIT
 
-make_luajitw: patch luajitw rpatch
+make_luajitw: patch luajitw rpatch demo_patch
 
 patch:
 	-patch --unified --forward -d $(LUAJIT_DIR)  src/luajit.c  ../../../dll/make_luajitw.patch
 
+# Reverse patch
 rpatch:
 	-patch --unified --reverse -d $(LUAJIT_DIR)  src/luajit.c  ../../../dll/make_luajitw.patch
+
+DEMO_PATCH_DIR = bin/examples/LuaJIT-ImGui/examples
+DEMO_PATCH = demos.diff
+demo_patch:
+	-patch  -u --forward   $(DEMO_PATCH_DIR)/CTE_Objects_sample.lua $(DEMO_PATCH)
+	-patch  -u --forward   $(DEMO_PATCH_DIR)/CTE_sample.lua         $(DEMO_PATCH)
+	-patch  -u --forward   $(DEMO_PATCH_DIR)/CTE_windows.lua        $(DEMO_PATCH)
+	-rm $(DEMO_PATCH_DIR)/*.rej $(DEMO_PATCH_DIR)/*.orig
 
 luajitw:
 	$(MAKE) -C $(LUAJIT_DIR) clean

@@ -42,27 +42,27 @@ local fbs = gui.FileBrowser(nil,{key="saver",check_existence=true},
 		local doc = opendocs[curr_opendoc]
 		doc:Save(fname)
 	end)
-	
+
 --add two editors
-addEditor(gui.pathut.abspath([[../cimgui/imgui/imgui.cpp]]))
+addEditor(gui.pathut.abspath("dock.lua"))
 addEditor(gui.pathut.abspath("CTE_sample.lua"))
 
 function win:draw(ig)
     --ig.ShowDemoWindow()
-    
+
     local openfilepopup = false
 	local savefilepopup = false
 	local doclosefile = false
-	
+
 	local viewport = ig.GetMainViewport();
 
     --Submit a window filling the entire viewport
     ig.SetNextWindowPos(viewport.WorkPos);
     ig.SetNextWindowSize(viewport.WorkSize);
     ig.SetNextWindowViewport(viewport.ID);
-	
+
 	local host_window_flags = bit.bor( ig.lib.ImGuiWindowFlags_NoTitleBar , ig.lib.ImGuiWindowFlags_NoCollapse, ig.lib.ImGuiWindowFlags_NoResize , ig.lib.ImGuiWindowFlags_NoMove , ig.lib.ImGuiWindowFlags_NoDocking, ig.lib.ImGuiWindowFlags_NoBringToFrontOnFocus, ig.lib.ImGuiWindowFlags_NoNavFocus,ig.lib.ImGuiWindowFlags_MenuBar)
-	
+
     ig.Begin("Documents",nil, host_window_flags) --ig.lib.ImGuiWindowFlags_MenuBar)
         if (ig.BeginMenuBar()) then
             if (ig.BeginMenu("File")) then
@@ -96,7 +96,7 @@ function win:draw(ig)
                 v:Render()
                 ig.EndTabItem();
             end
-			if not opened[0] then 
+			if not opened[0] then
 				curr_opendoc = i
 				doclosefile = true
 				break
@@ -105,7 +105,7 @@ function win:draw(ig)
         ig.EndTabBar();
     end
 	local doit = false
-	if doclosefile then 
+	if doclosefile then
 		doit = CheckCloseEditor(curr_opendoc)
 	end
 	if confirm_close.draw(doit) then
@@ -113,7 +113,7 @@ function win:draw(ig)
 	end
 
     ig.End()
-	
+
 end
 
 win:start()

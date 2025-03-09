@@ -1,0 +1,185 @@
+ bin/examples/LuaJIT-ImGui/examples/CTE_Objects_sample.lua | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/bin/examples/LuaJIT-ImGui/examples/CTE_Objects_sample.lua b/bin/examples/LuaJIT-ImGui/examples/CTE_Objects_sample.lua
+index 2fccc88..2a280cb 100644
+--- a/bin/examples/LuaJIT-ImGui/examples/CTE_Objects_sample.lua
++++ b/bin/examples/LuaJIT-ImGui/examples/CTE_Objects_sample.lua
+@@ -11,9 +11,9 @@ local editor = ig.TextEditor()
+ editor:SetLanguageDefinition(ig.lib.Cpp)
+ 
+ 
+-local fileN = [[../cimCTE/cimCTE.cpp]]
++--local fileN = [[../cimCTE/cimCTE.cpp]]
+ --local fileN = [[C:\LuaGL\gitsources\anima\LuaJIT-ImGui\cimCTE\ImGuiColorTextEdit\TextEditor.cpp]]
+--- local fileN = [[CTE_sample.lua]]
++local fileN = [[CTE_sample.lua]]
+ local file,err = io.open(fileN,"r")
+ assert(file,err)
+ local strtext = file:read"*a"
+@@ -42,7 +42,7 @@ function win:draw(ig)
+ 				end
+ 				ig.EndMenu();
+ 			end
+-	
++
+ 			if (ig.BeginMenu("Edit"))
+ 			then
+ 				local ro = ffi.new("bool[?]",1,editor:IsReadOnlyEnabled());
+@@ -78,7 +78,7 @@ function win:draw(ig)
+ 			end
+ 
+ 			if (ig.BeginMenu("View")) then
+-			
++
+ 				if (ig.MenuItem("Dark palette")) then
+ 					editor:SetPalette(ig.lib.Dark);
+ 				end
+@@ -95,16 +95,16 @@ function win:draw(ig)
+ 			end
+ 			ig.EndMenuBar();
+ 		end
+-		
++
+ 		ig.Text("%6d/%-6d %6d lines  | %s | %s | %s | %s", toint(mLine[0] + 1), toint(mColumn[0] + 1), toint(editor:GetLineCount()),
+ 		editor:IsOverwriteEnabled() and "Ovr" or "Ins",
+ 		editor:CanUndo() and "*" or " ",
+ 		langNames[tonumber(editor:GetLanguageDefinition())],
+ 		fileN)
+-		
++
+ 		editor:Render("texteditor")
+ 	ig.End()
+ 
+ end
+ 
+-win:start()
+\ No newline at end of file
++win:start()
+ bin/examples/LuaJIT-ImGui/examples/CTE_sample.lua | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/bin/examples/LuaJIT-ImGui/examples/CTE_sample.lua b/bin/examples/LuaJIT-ImGui/examples/CTE_sample.lua
+index 74e7b67..92bfdf2 100644
+--- a/bin/examples/LuaJIT-ImGui/examples/CTE_sample.lua
++++ b/bin/examples/LuaJIT-ImGui/examples/CTE_sample.lua
+@@ -12,9 +12,9 @@ local editor = lib.TextEditor_TextEditor()
+ lib.TextEditor_SetLanguageDefinition(editor,lib.Cpp);
+ 
+ 
+-local fileN = [[../cimCTE/cimCTE.cpp]]
++--local fileN = [[../cimCTE/cimCTE.cpp]]
+ --local fileN = [[C:\LuaGL\gitsources\anima\LuaJIT-ImGui\cimCTE\ImGuiColorTextEdit\TextEditor.cpp]]
+--- local fileN = [[CTE_sample.lua]]
++local fileN = [[CTE_sample.lua]]
+ local file,err = io.open(fileN,"r")
+ assert(file,err)
+ local strtext = file:read"*a"
+@@ -43,7 +43,7 @@ function win:draw(ig)
+ 				end
+ 				ig.EndMenu();
+ 			end
+-	
++
+ 			if (ig.BeginMenu("Edit"))
+ 			then
+ 				local ro = ffi.new("bool[?]",1,ig.lib.TextEditor_IsReadOnlyEnabled(editor));
+@@ -79,7 +79,7 @@ function win:draw(ig)
+ 			end
+ 
+ 			if (ig.BeginMenu("View")) then
+-			
++
+ 				if (ig.MenuItem("Dark palette")) then
+ 					ig.lib.TextEditor_SetPalette(editor,ig.lib.Dark);
+ 				end
+@@ -96,15 +96,15 @@ function win:draw(ig)
+ 			end
+ 			ig.EndMenuBar();
+ 		end
+-		
++
+ 		ig.Text("%6d/%-6d %6d lines  | %s | %s | %s | %s", toint(mLine[0] + 1), toint(mColumn[0] + 1), toint(ig.lib.TextEditor_GetLineCount(editor)),
+ 		ig.lib.TextEditor_IsOverwriteEnabled(editor) and "Ovr" or "Ins",
+ 		ig.lib.TextEditor_CanUndo(editor) and "*" or " ",
+ 		langNames[ig.lib.TextEditor_GetLanguageDefinition(editor)],fileN)
+-		
++
+ 		ig.lib.TextEditor_Render(editor, "texteditor",false,ig.ImVec2(),false)
+ 	ig.End()
+ 
+ end
+ 
+-win:start()
+\ No newline at end of file
++win:start()
+ bin/examples/LuaJIT-ImGui/examples/CTE_windows.lua | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/bin/examples/LuaJIT-ImGui/examples/CTE_windows.lua b/bin/examples/LuaJIT-ImGui/examples/CTE_windows.lua
+index bc30509..a1d9ba7 100644
+--- a/bin/examples/LuaJIT-ImGui/examples/CTE_windows.lua
++++ b/bin/examples/LuaJIT-ImGui/examples/CTE_windows.lua
+@@ -42,27 +42,27 @@ local fbs = gui.FileBrowser(nil,{key="saver",check_existence=true},
+ 		local doc = opendocs[curr_opendoc]
+ 		doc:Save(fname)
+ 	end)
+-	
++
+ --add two editors
+-addEditor(gui.pathut.abspath([[../cimgui/imgui/imgui.cpp]]))
++addEditor(gui.pathut.abspath("dock.lua"))
+ addEditor(gui.pathut.abspath("CTE_sample.lua"))
+ 
+ function win:draw(ig)
+     --ig.ShowDemoWindow()
+-    
++
+     local openfilepopup = false
+ 	local savefilepopup = false
+ 	local doclosefile = false
+-	
++
+ 	local viewport = ig.GetMainViewport();
+ 
+     --Submit a window filling the entire viewport
+     ig.SetNextWindowPos(viewport.WorkPos);
+     ig.SetNextWindowSize(viewport.WorkSize);
+     ig.SetNextWindowViewport(viewport.ID);
+-	
++
+ 	local host_window_flags = bit.bor( ig.lib.ImGuiWindowFlags_NoTitleBar , ig.lib.ImGuiWindowFlags_NoCollapse, ig.lib.ImGuiWindowFlags_NoResize , ig.lib.ImGuiWindowFlags_NoMove , ig.lib.ImGuiWindowFlags_NoDocking, ig.lib.ImGuiWindowFlags_NoBringToFrontOnFocus, ig.lib.ImGuiWindowFlags_NoNavFocus,ig.lib.ImGuiWindowFlags_MenuBar)
+-	
++
+     ig.Begin("Documents",nil, host_window_flags) --ig.lib.ImGuiWindowFlags_MenuBar)
+         if (ig.BeginMenuBar()) then
+             if (ig.BeginMenu("File")) then
+@@ -96,7 +96,7 @@ function win:draw(ig)
+                 v:Render()
+                 ig.EndTabItem();
+             end
+-			if not opened[0] then 
++			if not opened[0] then
+ 				curr_opendoc = i
+ 				doclosefile = true
+ 				break
+@@ -105,7 +105,7 @@ function win:draw(ig)
+         ig.EndTabBar();
+     end
+ 	local doit = false
+-	if doclosefile then 
++	if doclosefile then
+ 		doit = CheckCloseEditor(curr_opendoc)
+ 	end
+ 	if confirm_close.draw(doit) then
+@@ -113,7 +113,7 @@ function win:draw(ig)
+ 	end
+ 
+     ig.End()
+-	
++
+ end
+ 
+-win:start()
+\ No newline at end of file
++win:start()

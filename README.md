@@ -113,18 +113,29 @@ in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) fold
 ![imnodes_graph_sample](examples/img/imnodes_graph_sample.png)
 
 
-##### [delaunay_particles.lua](bin/examples/delaunay_particles.lua)
+#### Other samples
 
-This sample is attached by [anima](https://github.com/sonoro1234/anima) project. You can execute this sample,
+---
 
-```sh
-pwd
-luajitImGui-1.91.0.0
-cd bin/examples
-../luajit.exe delaunay_particles.lua
-```
+These samples are attached by [anima](https://github.com/sonoro1234/anima) project. You can execute samples with \*.bat files.
 
+##### [delaunay_particles.lua](bin/examples/delaunay_particles.lua)  
 ![delaunay_particles](examples/img/delaunay_particles.png)
+
+##### [bacteria.lua](bin/examples/shadertoy/bacteria.lua)  
+![alt](examples/img/bacteria.png)
+
+##### [house.lua](bin/examples/modeling/house/house.lua)  
+![alt](examples/img/house.png)
+
+##### [corazon.lua](bin/examples/modeling/heart/corazon.lua)  
+![alt](examples/img/corazon.png)
+
+##### [CTE_windows.lua](bin/examples/LuaJIT-ImGui/examples/CTE_windows.lua)  
+![alt](examples/img/CTE_Windows.png)
+
+##### [conpute_shader.lua](bin/examples/compute_shader/compute_shader.lua)  
+![alt](examples/img/compute_shader.png)
 
 #### Download Zip binary
 

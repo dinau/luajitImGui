@@ -12,9 +12,9 @@ local editor = lib.TextEditor_TextEditor()
 lib.TextEditor_SetLanguageDefinition(editor,lib.Cpp);
 
 
-local fileN = [[../cimCTE/cimCTE.cpp]]
+--local fileN = [[../cimCTE/cimCTE.cpp]]
 --local fileN = [[C:\LuaGL\gitsources\anima\LuaJIT-ImGui\cimCTE\ImGuiColorTextEdit\TextEditor.cpp]]
--- local fileN = [[CTE_sample.lua]]
+local fileN = [[CTE_sample.lua]]
 local file,err = io.open(fileN,"r")
 assert(file,err)
 local strtext = file:read"*a"
@@ -43,7 +43,7 @@ function win:draw(ig)
 				end
 				ig.EndMenu();
 			end
-	
+
 			if (ig.BeginMenu("Edit"))
 			then
 				local ro = ffi.new("bool[?]",1,ig.lib.TextEditor_IsReadOnlyEnabled(editor));
@@ -79,7 +79,7 @@ function win:draw(ig)
 			end
 
 			if (ig.BeginMenu("View")) then
-			
+
 				if (ig.MenuItem("Dark palette")) then
 					ig.lib.TextEditor_SetPalette(editor,ig.lib.Dark);
 				end
