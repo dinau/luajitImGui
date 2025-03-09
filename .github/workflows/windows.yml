@@ -18,9 +18,9 @@ jobs:
         update: true
         install: >-
           make
-          mingw-w64-ucrt-x86_64-{clang,cmake,llvm-openmp}
           patch
     - shell: msys2 {0}
-        run: |
-          uname -a
-          make
+      run: |
+        uname -a
+        pacman -S mingw-w64-ucrt-x86_64-{clang,cmake,llvm-openmp}
+        make
