@@ -3,7 +3,7 @@
 # Compilation
 #  $ nim c -d:release -d:strip genbat.nim
 
-import std/[dirs, paths, re, strutils, strformat, os]
+import std/[dirs, paths, pegs, strutils, strformat, os]
 
 const EXAMPLES_DIR_TOP = "../../bin/examples".Path
 
@@ -12,10 +12,10 @@ for file in walkDirRec("."):
   let (dirParent, _, ext) = file.splitFile
   if ext == ".lua":
     for line in lines(file):
-      if line.contains(re"win:start") or
-         line.contains(re"shouldClose\(") or
-         line.contains(re"pollEvent\(") or
-         line.contains(re"GL:start"):
+      if line.contains(peg"'win:start'") or
+         line.contains(peg"'shouldClose\('") or
+         line.contains(peg"'pollEvent\('") or
+         line.contains(peg"'GL:start'"):
         let luaName = extractFilename(file)
         let batName = extractFilename(file).changeFileExt("bat")
         let sLuaJitExePath = (".." & DirSep).repeat(1 + dirParent.count( Dirsep)) & "luajit.exe"

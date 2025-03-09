@@ -170,7 +170,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
    Install at least on MSys2/MinGW console,
 
    ```sh
-   pacman -S mingw-w64-ucrt-x86_64-{cmake,gcc,clang,llvm-openmp} patch make
+   pacman -S mingw-w64-ucrt-x86_64-{cmake,gcc,clang,llvm-openmp} patch make git
   ```
 
 - Build **on MSys2 console**,
