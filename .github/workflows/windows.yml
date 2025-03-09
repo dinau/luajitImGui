@@ -22,5 +22,5 @@ jobs:
     - shell: msys2 {0}
       run: |
         uname -a
-        pacman -S mingw-w64-x86_64-{clang,cmake,llvm-openmp}
+        pacman --noconfirm -S mingw-w64-x86_64-{clang,cmake,llvm-openmp}
         make
