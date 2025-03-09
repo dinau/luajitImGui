@@ -8,20 +8,18 @@ on:
 
 jobs:
   win_nightly:
-
     runs-on: windows-latest
-
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - uses: msys2/setup-msys2@v2
       with:
-            update: true
-            install: >-
-              make
-              mingw-w64-ucrt-x86_64-{clang,cmake,llvm-openmp}
-              patch
+        update: true
+        install: >-
+          make
+          mingw-w64-ucrt-x86_64-{clang,cmake,llvm-openmp}
+          patch
     - shell: msys2 {0}
         run: |
           uname -a
