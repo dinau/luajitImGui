@@ -19,6 +19,7 @@ jobs:
         install: >-
           make
           patch
+          git
     - shell: msys2 {0}
       run: |
         uname -a
