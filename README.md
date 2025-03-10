@@ -4,6 +4,7 @@
 - [LuaJITImGui](#luajitimgui)
   - [ImGui / CImGui Version](#imgui--cimgui-version)
   - [Examples](#examples)
+    - [implot3d_sample.lua](#implot3d_samplelua)
     - [glfw_opengl3_simple](#glfw_opengl3_simple)
     - [glfw_opengl3](#glfw_opengl3)
     - [glfw_opengl3_implot](#glfw_opengl3_implot)
@@ -11,7 +12,13 @@
     - [sdl2_opengl3](#sdl2_opengl3)
     - [ImGuizmo_sample.lua](#imguizmo_samplelua)
     - [imnodes_graph_sample.lua](#imnodes_graph_samplelua)
+  - [Other samples](#other-samples)
     - [delaunay_particles.lua](#delaunay_particleslua)
+    - [bacteria.lua](#bacterialua)
+    - [house.lua](#houselua)
+    - [corazon.lua](#corazonlua)
+    - [CTE_windows.lua](#cte_windowslua)
+    - [conpute_shader.lua](#conpute_shaderlua)
   - [Download Zip binary](#download-zip-binary)
   - [Running examples](#running-examples)
   - [Other examples](#other-examples)
@@ -19,7 +26,7 @@
   - [My tools version](#my-tools-version)
   - [History](#history)
   - [Similar project ImGui / CImGui](#similar-project-imgui--cimgui)
-  - [SDL Game tutorial Platfromer](#sdl-game-tutorial-platfromer)
+  - [SDL game tutorial Platfromer](#sdl-game-tutorial-platfromer)
   - [Other link2](#other-link2)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -143,9 +150,10 @@ These samples are attached by [anima](https://github.com/sonoro1234/anima) proje
 
 - WindowsOS 64bit  
 - Latest  
-[luajitImGui-1.91.8.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.0.zip) 2025/03  
+[luajitImGui-1.91.8.1.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.1.zip) 2025/03  
 
 - Old  
+[luajitImGui-1.91.8.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.0.zip) 2025/03  
 [luajitImGui-1.91.6.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.6.0.zip) 2025/01  
 [luajitImGui-1.91.4.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.4.0.zip) 2024/10  
 [luajitImGui-1.91.2.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.91.2.0.zip) 2024/10  
