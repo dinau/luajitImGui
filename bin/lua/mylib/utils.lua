@@ -176,4 +176,20 @@ function M.saveImage(glext, filename, formato, width, height, xPos, yPos)
   image:Destroy()
 end
 
+---------------
+--- setTooltip
+---------------
+function M.setTooltip(ig, str, delay, color)
+  delay = delay or ig.ImguiHoveredFlags_DelayNormal
+  if ig.IsItemHovered(delay) then
+    if ig.BeginTooltip() then
+      color = color or ig.ImVec4(1.0, 1.0, 1.0, 1.0)
+      ig.PushStyleColor(ig.lib.ImGuiCol_Text, color)
+      ig.Text(str)
+      ig.PopStyleColor(1)
+      ig.EndTooltip()
+    end
+  end
+end
+
 return M

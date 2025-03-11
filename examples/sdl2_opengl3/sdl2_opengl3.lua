@@ -195,10 +195,7 @@ while (not done) do
     --ig.SameLine(0.0,-1.0)
     -- Show tooltip help
     svName = SaveImageName .. "_" .. counter .. utils.imageExt[SaveFormat]
-    if ig.IsItemHovered() and ig.BeginTooltip() then
-      ig.Text(string.format("Save to \"%s\"", svName))
-      ig.EndTooltip()
-    end
+    utils.setTooltip(ig, string.format("Save to \"%s\"", svName), ig.ImguiHoveredFlags_DelayNormal, ig.ImVec4(0.0, 1.0, 0.0, 1.0))
     -- End Save button of screen image
 
     -- Icon font test

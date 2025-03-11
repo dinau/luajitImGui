@@ -6,6 +6,7 @@
   - [Examples](#examples)
     - [implot3d_sample.lua](#implot3d_samplelua)
     - [glfw_opengl3_simple](#glfw_opengl3_simple)
+    - [iconFontViewer](#iconfontviewer)
     - [glfw_opengl3](#glfw_opengl3)
     - [glfw_opengl3_implot](#glfw_opengl3_implot)
     - [glfw_opengl3_jp](#glfw_opengl3_jp)
@@ -18,7 +19,7 @@
     - [house.lua](#houselua)
     - [corazon.lua](#corazonlua)
     - [CTE_windows.lua](#cte_windowslua)
-    - [conpute_shader.lua](#conpute_shaderlua)
+    - [compute_shader.lua](#compute_shaderlua)
   - [Download Zip binary](#download-zip-binary)
   - [Running examples](#running-examples)
   - [Other examples](#other-examples)
@@ -72,36 +73,40 @@ This sample is attached by [anima](https://github.com/sonoro1234/anima) project.
 [implot3d_sample.bat](bin/examples/LuaJIT-ImGui/examples/implot3d_sample.bat)
 in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) folder.
 
-![implot3d_sample](examples/img/cimplot3d.gif)
+![alt](examples/img/cimplot3d.gif)
 
 ##### [glfw_opengl3_simple](examples/glfw_opengl3_simple/glfw_opengl3_simple.lua)  
 
-![glfw_opengl3_simple](examples/img/glfw_opengl3_simple.png)
+![alt](examples/img/glfw_opengl3_simple.png)
+
+##### [iconFontViewer](examples/iconFontViewer/iconFontViewer.lua)  
+
+![alt](examples/img/iconFontViewer.png)
 
 ##### [glfw_opengl3](examples/glfw_opengl3/glfw_opengl3.lua)  
 
 This can load and save image file with magnifying glass. 
 
-![glfw_opengl3](examples/img/glfw_opengl3.png)
+![alt](examples/img/glfw_opengl3.png)
 
 ##### [glfw_opengl3_implot](examples/glfw_opengl3_implot/glfw_opengl3_implot.lua)  
 
 With magnifying glass.
 
-![glfw_opengl3_implot](examples/img/glfw_opengl3_implot.png)  
+![alt](examples/img/glfw_opengl3_implot.png)  
 See more example: [implot_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot_sample.lua)
 
 ##### [glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)  
 
 Showing font of local language with magnifying glass.
 
-![glfw_opengl3_jp](examples/img/glfw_opengl3_jp.png)
+![alt](examples/img/glfw_opengl3_jp.png)
 
 ##### [sdl2_opengl3](examples/sdl2_opengl3/sdl2_opengl3.lua)  
 
 With magnifying glass.
 
-![sdl2_opengl3](examples/img/sdl2_opengl3.png)
+![alt](examples/img/sdl2_opengl3.png)
 
 ##### [ImGuizmo_sample.lua](bin/examples/LuaJIT-ImGui/examples/ImGuizmo_sample.lua)
 
@@ -109,7 +114,7 @@ This sample is attached by [anima](https://github.com/sonoro1234/anima) project.
 [ImGuizmo_sample.bat](bin/examples/LuaJIT-ImGui/examples/ImGuizmo_sample.bat)
 in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) folder.
 
-![ImGuizmo_sample](examples/img/ImGuizmo_sample.png)
+![alt](examples/img/ImGuizmo_sample.png)
 
 ##### [imnodes_graph_sample.lua](bin/examples/LuaJIT-ImGui/examples/imnodes_graph_sample.lua)
 
@@ -117,7 +122,7 @@ This sample is attached by [anima](https://github.com/sonoro1234/anima) project.
 [imnodes_graph_sample.bat](bin/examples/LuaJIT-ImGui/examples/imnodes_graph_sample.bat)
 in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) folder.
 
-![imnodes_graph_sample](examples/img/imnodes_graph_sample.png)
+![alt](examples/img/imnodes_graph_sample.png)
 
 
 #### Other samples
@@ -127,21 +132,27 @@ in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) fold
 These samples are attached by [anima](https://github.com/sonoro1234/anima) project. You can execute samples with \*.bat files.
 
 ##### [delaunay_particles.lua](bin/examples/delaunay_particles.lua)  
-![delaunay_particles](examples/img/delaunay_particles.png)
+
+![alt](examples/img/delaunay_particles.png)
 
 ##### [bacteria.lua](bin/examples/shadertoy/bacteria.lua)  
+
 ![alt](examples/img/bacteria.png)
 
 ##### [house.lua](bin/examples/modeling/house/house.lua)  
+
 ![alt](examples/img/house.png)
 
 ##### [corazon.lua](bin/examples/modeling/heart/corazon.lua)  
+
 ![alt](examples/img/corazon.png)
 
 ##### [CTE_windows.lua](bin/examples/LuaJIT-ImGui/examples/CTE_windows.lua)  
+
 ![alt](examples/img/CTE_Windows.png)
 
-##### [conpute_shader.lua](bin/examples/compute_shader/compute_shader.lua)  
+##### [compute_shader.lua](bin/examples/compute_shader/compute_shader.lua)  
+
 ![alt](examples/img/compute_shader.png)
 
 #### Download Zip binary
@@ -150,9 +161,10 @@ These samples are attached by [anima](https://github.com/sonoro1234/anima) proje
 
 - WindowsOS 64bit  
 - Latest  
-[luajitImGui-1.91.8.1.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.1.zip) 2025/03  
+[luajitImGui-1.91.8.2.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.2.zip) 2025/03  
 
 - Old  
+[luajitImGui-1.91.8.1.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.1.zip) 2025/03  
 [luajitImGui-1.91.8.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.0.zip) 2025/03  
 [luajitImGui-1.91.6.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.6.0.zip) 2025/01  
 [luajitImGui-1.91.4.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.4.0.zip) 2024/10  
@@ -222,7 +234,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 - WindowsOS 64bit versions
    | Date    | ImGui / CImGui | LuaJITImGui | Commemt |
    | ---     | -----------    | ---         | ---     |
-   | 2025/03 | v1.91.8        | v1.91.8.0   |         |
+   | 2025/03 | v1.91.8        | v1.91.8.2   |         |
    | 2025/01 | v1.91.6        | v1.91.6.0   |         |
    | 2024/10 | v1.91.4        | v1.91.4.0   |         |
    | 2024/10 | v1.91.2        | v1.91.2.0   |         |

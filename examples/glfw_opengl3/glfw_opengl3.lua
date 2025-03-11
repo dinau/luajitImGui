@@ -9,6 +9,7 @@ local gl, glc, glu, glext = gllib.libraries()
 require"mylib.loadimage"
 require"mylib.setupFonts"
 require"mylib.zoomglass"
+local utils = require"mylib.utils"
 local IFA   = require"mylib.fonticon.IconsFontAwesome6"
 
 --- Global var: app
@@ -104,18 +105,6 @@ end
 
 ig.StyleColorsClassic()
 
----------------
---- setTooltip
----------------
-function setTooltip(str)
-  if ig.IsItemHovered(ig.ImguiHoveredFlags_DelayNormal) then
-    if ig.BeginTooltip() then
-      ig.Text(str)
-      ig.EndTooltip()
-    end
-  end
-end
-
 --------------
 --- main loop
 --------------
@@ -185,7 +174,7 @@ while not window:shouldClose() do
     -- Show tooltip help
     local imgSaveFormatStr = imageFormatTbl[cmbItemIndex]
     svName = SaveImageName .. "_" .. counter .. utils.imageExt[imgSaveFormatStr]
-    setTooltip(string.format("Save to \"%s\"", svName))
+    utils.setTooltip(ig, string.format("Save to \"%s\"", svName), ig.ImguiHoveredFlags_DelayNormal, ig.ImVec4(0.0, 1.0, 0.0, 1.0))
     -- End Save button of window image
     ig.SameLine(0.0,-1.0)
 
@@ -204,7 +193,7 @@ while not window:shouldClose() do
       App.image.imageSaveFormatIndex = cmbItemIndex
       ig.EndCombo()
     end
-    setTooltip("Select image format")
+    utils.setTooltip(ig, "Select image format", ig.ImguiHoveredFlags_DelayNormal, ig.ImVec4(1.0, 1.0, 0.0, 1.0))
 
     -- Icon font test
     ig.SeparatorText(IFA.ICON_FA_WRENCH .. " Icon font test ")
