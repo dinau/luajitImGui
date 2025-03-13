@@ -91,9 +91,9 @@ This can load and save image file with magnifying glass.
 
 ##### [glfw_opengl3_implot](examples/glfw_opengl3_implot/glfw_opengl3_implot.lua)  
 
-With magnifying glass.
+With \[[ImPlot3D](https://github.com/brenocq/implot3d)\] [demo written in LuaJIT lang](examples/glfw_opengl3_implot/implotWindow.lua).
 
-![alt](examples/img/glfw_opengl3_implot.png)  
+![alt](examples/img/glfw_opengl3_implot.gif)  
 See more example: [implot_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot_sample.lua)
 
 ##### [glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)  
@@ -133,7 +133,7 @@ These samples are attached by [anima](https://github.com/sonoro1234/anima) proje
 
 ##### [delaunay_particles.lua](bin/examples/delaunay_particles.lua)  
 
-![alt](examples/img/delaunay_particles.png)
+![alt](examples/img/delaunay_particles.gif)
 
 ##### [bacteria.lua](bin/examples/shadertoy/bacteria.lua)  
 
@@ -161,9 +161,10 @@ These samples are attached by [anima](https://github.com/sonoro1234/anima) proje
 
 - WindowsOS 64bit  
 - Latest  
-[luajitImGui-1.91.8.2.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.2.zip) 2025/03  
+[luajitImGui-1.91.8.3.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.3.zip) 2025/03  
 
 - Old  
+[luajitImGui-1.91.8.2.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.2.zip) 2025/03  
 [luajitImGui-1.91.8.1.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.1.zip) 2025/03  
 [luajitImGui-1.91.8.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.0.zip) 2025/03  
 [luajitImGui-1.91.6.0.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.6.0.zip) 2025/01  

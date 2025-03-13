@@ -1,16 +1,15 @@
 local ffi   = require"ffi"
-local ig    = require"imgui.glfw"
 
 --------------
 --- zoomGlass
 --------------
-function zoomGlass(textureID, itemWidth, itemPosTop, itemPosEnd, title)
+function zoomGlass(ig, textureID, itemWidth, itemPosTop, itemPosEnd, title)
 --   # itemPosTop and itemPosEnd are absolute position in main window.
    if ig.BeginItemTooltip() then
      local itemHeight = itemPosEnd.y - itemPosTop.y
      local  my_tex_w = itemWidth
      local  my_tex_h = itemHeight
-     local wkSize = ig.GetMainViewport().WorkSize
+     --local wkSize = ig.GetMainViewport().WorkSize
 --     #igText("lbp: (%.2f, %.2f)", pio.MousePos.x, pio.MousePos.y)
      local  pio = ig.GetIO()
      local  region_sz = 32.0

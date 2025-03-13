@@ -27,7 +27,6 @@ function setupFonts(pio)
   --maximal range allowed with ImWchar16
   --local ranges = ffi.new("ImWchar[3]",{0x0001,0xFFFF,0})
   local sActiveFontTitle = ""
-  local sActiveFontName = ""
   local fontTbl = {
                    {fontName="meiryo.ttc",  point=14.5, fontNo=0, title="メイリオ"}     -- Windows7, 8
                   ,{fontName="YuGothM.ttc", point=11.5, fontNo=0, title="ゆうゴシック"} -- Windows10, 11
@@ -38,7 +37,7 @@ function setupFonts(pio)
   for _, fInfo in ipairs(fontTbl) do
     sActiveFontName = os.getenv("windir") .. "/fonts/" .. fInfo.fontName
     if utils.fileExists(sActiveFontName) then
-      ranges = fontsAtlas:GetGlyphRangesJapanese()
+      local ranges = fontsAtlas:GetGlyphRangesJapanese()
       config.FontNo = fInfo.fontNo
       theFONT = fontsAtlas:AddFontFromFileTTF(sActiveFontName ,point2px(fInfo.point) ,config ,ranges)
       if (theFONT ~= nil) then

@@ -1,5 +1,4 @@
 local ffi   = require"ffi"
-local utils = require"mylib.utils"
 --- SDL2/etc
 local sdl   = require"sdl2_ffi"
 local gllib = require"gl"
@@ -8,7 +7,8 @@ local gl, glc, glu, glext = gllib.libraries()
 local ig    = require"imgui.sdl"
 require"mylib.loadimage"
 require"mylib.setupFonts"
-require"./zoomglass"
+require"mylib.zoomglass"
+local utils = require"mylib.utils"
 local IFA   = require"mylib.fonticon.IconsFontAwesome6"
 
 --- Global var: app
@@ -25,7 +25,6 @@ local fReqImageCapture = false
 
 --- Image / Icon folder
 local ImgDir = "img/"
-local IconDir = "res/img/"
 
 -- Load inifile
 LoadIni()
@@ -37,7 +36,7 @@ end
 
 local versions = {{4, 6}, {4, 5}, {4, 4}, {4, 3}, {4, 2}, {4, 1}, {4, 0}, {3, 3}}
 local window = 0
-for i,ver in pairs(versions) do
+for _, ver in pairs(versions) do
   sdl.gL_SetAttribute(sdl.GL_CONTEXT_FLAGS, sdl.GL_CONTEXT_FORWARD_COMPATIBLE_FLAG)
   sdl.gL_SetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
   sdl.gL_SetAttribute(sdl.GL_DOUBLEBUFFER, 1)
@@ -71,11 +70,6 @@ sdl.gL_SetSwapInterval(1); -- Enable vsync
 local ig_impl = ig.Imgui_Impl_SDL_opengl3()
 ig_impl:Init(window, gl_context)
 
--------------------------
---- Load title bar icon
--------------------------
-local  IconName = IconDir .. "lua.png"
-
 ---------------
 --- Load image
 ---------------
@@ -95,7 +89,7 @@ local pio = ig.GetIO()
 --------------
 --- Load font
 --------------
-local  fExistMultibytesFonts, sActiveFontName, sActiveFontTitle = setupFonts(pio)
+local  _, sActiveFontName, _ = setupFonts(pio)
 
 -- Set window title
 local sTitle
@@ -161,6 +155,7 @@ while (not done) do
     ig.ColorEdit3("Change background", clearColor)
     -- File open dialog
     if ig.Button("Open file") then
+      print("Button clicked")
     end
     ig.SameLine(0.0,-1.0)
     -- Show tooltip help
@@ -195,7 +190,7 @@ while (not done) do
     --ig.SameLine(0.0,-1.0)
     -- Show tooltip help
     svName = SaveImageName .. "_" .. counter .. utils.imageExt[SaveFormat]
-    utils.setTooltip(ig, string.format("Save to \"%s\"", svName), ig.ImguiHoveredFlags_DelayNormal, ig.ImVec4(0.0, 1.0, 0.0, 1.0))
+    utils.setTooltip(ig, string.format("Save to \"%s\"", svName), ig.lib.ImGuiHoveredFlags_DelayNormal, ig.ImVec4(0.0, 1.0, 0.0, 1.0))
     -- End Save button of screen image
 
     -- Icon font test
@@ -219,8 +214,8 @@ while (not done) do
     ig.Image(ffi.cast("ImTextureID",pic1.texture[0]), pic1.size)
     local imageBoxPosEnd = ig.GetCursorScreenPos() -- Get absolute pos.
     --
-    if ig.IsItemHovered(ig.ImGuiHoveredFlags_DelayNone) then
-      zoomGlass(pic1.texture, pic1.width, imageBoxPosTop, imageBoxPosEnd, IFA.ICON_FA_MAGNIFYING_GLASS .. "  4 x")
+    if ig.IsItemHovered(ig.lib.ImGuiHoveredFlags_DelayNone) then
+      zoomGlass(ig, pic1.texture, pic1.width, imageBoxPosTop, imageBoxPosEnd, IFA.ICON_FA_MAGNIFYING_GLASS .. "  4 x")
     end
     ig.End()
   end
@@ -246,8 +241,12 @@ while (not done) do
 end
 
 -- Save Window info
+local posx = ffi.new("int[1]")
+local posy = ffi.new("int[1]")
+sdl.getWindowPosition(window, posx, posy)
 local info = {}
-info.x, info.y = window:getPos()
+info.x = posx[0]
+info.y = posy[0]
 local wsize = ig.GetMainViewport().WorkSize
 info.w = wsize.x
 info.h = wsize.y
