@@ -20,6 +20,7 @@
     - [corazon.lua](#corazonlua)
     - [CTE_windows.lua](#cte_windowslua)
     - [compute_shader.lua](#compute_shaderlua)
+    - [julia.lua](#julialua)
   - [Download Zip binary](#download-zip-binary)
   - [Running examples](#running-examples)
   - [Other examples](#other-examples)
@@ -154,6 +155,10 @@ These samples are attached by [anima](https://github.com/sonoro1234/anima) proje
 ##### [compute_shader.lua](bin/examples/compute_shader/compute_shader.lua)  
 
 ![alt](examples/img/compute_shader.png)
+
+##### [julia.lua](https://github.com/dinau/luajitImGui/blob/main/bin/examples/juliaSet/julia.lua)
+
+![alt](https://github.com/dinau/luajitImGui/blob/main/examples/img/julia.png?raw=true)
 
 #### Download Zip binary
 
