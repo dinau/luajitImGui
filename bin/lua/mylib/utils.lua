@@ -183,7 +183,8 @@ function M.setTooltip(ig, str, delay, color)
   delay = delay or ig.lib.ImGuiHoveredFlags_DelayNormal
   if ig.IsItemHovered(delay) then
     if ig.BeginTooltip() then
-      color = color or ig.ImVec4(1.0, 1.0, 1.0, 1.0)
+      color = color or ig.ImVec4(0.0, 1.0, 0.0, 1.0) -- green
+      str = str or ""
       ig.PushStyleColor(ig.lib.ImGuiCol_Text, color)
       ig.Text(str)
       ig.PopStyleColor(1)

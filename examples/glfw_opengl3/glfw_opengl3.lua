@@ -174,15 +174,15 @@ function gui_main(win)
       ig.End()
     end
 
+    --
+    win:render()
+
     -- Save window image to file
     if fReqImageCapture then
       fReqImageCapture = false
       local wkSize = ig.GetMainViewport().WorkSize
       utils.saveImage(glext, svName, imageFormatTbl[cmbItemIndex], wkSize.x , wkSize.y)
     end
-    --
-
-    win:render()
   end -- end while loop
 end
 

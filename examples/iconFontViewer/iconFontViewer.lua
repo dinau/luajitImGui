@@ -30,6 +30,8 @@ local gui_main = function (win)
   local yellow = ig.ImVec4(1.0, 1.0, 0.0, 1.0)
   local green  = ig.ImVec4(0.0, 1.0, 0.0, 1.0)
 
+  local filterAry = {}
+
   --------------
   --- main loop
   --------------
@@ -43,7 +45,7 @@ local gui_main = function (win)
     -- Show icons in ListBox
     ig.Begin("Icon font viewer")
       ig.SeparatorText((IFA.ICON_FA_FONT_AWESOME .. " Icon font view: " .. ift.len .. " icons"))
-      ig.Text("No.[%4s]", tostring(item_current));     -- TODO ?
+      ig.Text("No.[%4s]", tostring(item_current - 1));     -- TODO ?
       ig.SameLine(0,-1.0)
       ffi.copy(sBuf, ift.iconFontsTbl[item_current])
       if ig.Button(IFA.ICON_FA_COPY .. " Copy to", ig.ImVec2(0, 0)) then
@@ -60,6 +62,7 @@ local gui_main = function (win)
       local listBoxWidth = 360  -- The value must be 2^
       ig.SetNextItemWidth(listBoxWidth)
       ig.InputText("##input1", sBuf, sBufLen)
+      ig.Separator()
 
       -- Show icons in ListBox
       ig.BeginChild("child2")
@@ -106,6 +109,7 @@ local gui_main = function (win)
             ig.Text("%s", ift.iconFontsTbl2[ix][1])
             if ig.IsItemHovered() then
                item_highlighted_idx = ix
+               item_current =  ix
             end
             --ig.Button(icon, ig.ImVec2(0, 0))
             --
@@ -129,6 +133,29 @@ local gui_main = function (win)
       ig.EndChild() -- end BeginChild
     ig.End()        -- end Begin
 
+    -- Text filter window
+    ig.Begin("Icon Font filter", nil, 0)
+      ig.Text("(Copy)")
+      if ig.IsItemHovered() then
+        local sRes = filterAry[1]:match(".+(ICON.+)")
+        if sRes ~= nil then
+          ig.SetClipboardText(sRes)
+        end
+      end
+      filterAry = {}
+      utils.setTooltip(ig, "Copied first line to clipboard !") -- Show tooltip help
+      ig.SameLine()
+      filter = ig.ImGuiTextFilter.__new()
+      filter:Draw("Filter")
+      tbl = ift.iconFontsTbl
+      for i=1,ift.len do
+        pstr = tbl[i]
+        if filter:PassFilter(pstr) then
+          ig.Text("[%04s]  %s", tostring(i - 1), tbl[i])
+          table.insert(filterAry, tbl[i])
+        end
+      end
+    ig.End()
     --
     win:render()
   end -- end while loop
