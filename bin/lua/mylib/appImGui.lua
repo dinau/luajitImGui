@@ -103,8 +103,8 @@ function M.createImGui(w, h, title, titleBarIcon, docking, fImPlot)
 
   window.ig_impl:Init(window.handle, true)
 
-  ig.lib.ImGui_ImplOpenGL3_DestroyFontsTexture()
-  ig.lib.ImGui_ImplOpenGL3_CreateFontsTexture()
+  --ig.lib.ImGui_ImplOpenGL3_DestroyFontsTexture()
+  --ig.lib.ImGui_ImplOpenGL3_CreateFontsTexture()
 
   -------------------------
   --- Load title bar icon

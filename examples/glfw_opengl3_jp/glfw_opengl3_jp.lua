@@ -176,7 +176,10 @@ function gui_main(win)
     -- Show image Window
     do ig.Begin("イメージ・ウインドウ")
       local imageBoxPosTop = ig.GetCursorScreenPos() -- Get absolute pos.
-      ig.Image(ffi.cast("ImTextureID",pic1.texture[0]), pic1.size)
+      local texRef = ffi.new("ImTextureRef")
+      texRef._TexData = nil
+      texRef._TexID = pic1.texture[0]
+      ig.Image(texRef, pic1.size)
       local imageBoxPosEnd = ig.GetCursorScreenPos() -- Get absolute pos.
       --
       if ig.IsItemHovered(ig.lib.ImGuiHoveredFlags_DelayNone) then

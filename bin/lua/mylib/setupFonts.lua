@@ -37,9 +37,9 @@ function setupFonts(pio)
   for _, fInfo in ipairs(fontTbl) do
     sActiveFontName = os.getenv("windir") .. "/fonts/" .. fInfo.fontName
     if utils.fileExists(sActiveFontName) then
-      local ranges = fontsAtlas:GetGlyphRangesJapanese()
+      --local ranges = fontsAtlas:GetGlyphRangesJapanese()
       config.FontNo = fInfo.fontNo
-      theFONT = fontsAtlas:AddFontFromFileTTF(sActiveFontName ,point2px(fInfo.point) ,config ,ranges)
+      theFONT = fontsAtlas:AddFontFromFileTTF(sActiveFontName ,point2px(fInfo.point) ,nil ,nil)
       if (theFONT ~= nil) then
         pio.FontDefault = theFONT -- OK, set as first font
         sActiveFontTitle = fInfo.title
@@ -57,7 +57,7 @@ function setupFonts(pio)
   local iconFontPath = path.chain(path.animapath() ,"..","mylib","fonticon","fa6" ,"fa-solid-900.ttf")
   if utils.fileExists(iconFontPath) then
     config.MergeMode = true
-    fontsAtlas:AddFontFromFileTTF(iconFontPath ,point2px(11) ,config ,ranges_icon_fonts)
+    fontsAtlas:AddFontFromFileTTF(iconFontPath ,point2px(11) ,config ,nil)
     print("Loaded Icon font: ", iconFontPath)
   else
     print("Error!: Can't find Icon fonts: " , iconFontPath)

@@ -4,7 +4,7 @@ local win = igwin:SDL(800,400, "cimnodes_r",{vsync=true})
 --local win = igwin:GLFW(800,400, "cimnodes_r",{vsync=true})
 local ig = win.ig
 local ffi = require"ffi"
-local serializer = require"serializer"
+local serializer = require"libs.serializer"
 
 local function Connection()
     local link = {

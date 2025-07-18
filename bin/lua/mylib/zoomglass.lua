@@ -33,7 +33,10 @@ function zoomGlass(ig, textureID, itemWidth, itemPosTop, itemPosEnd, title)
      if title ~= nil then
        ig.Text("%s", title)
      end
-     ig.Image(ffi.cast("ImTextureID",textureID[0]), ig.ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1, tint_col, border_col)
+      local texRef = ffi.new("ImTextureRef")
+      texRef._TexData = nil
+      texRef._TexID = textureID[0]
+     ig.Image(texRef, ig.ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1, tint_col, border_col)
      ig.EndTooltip()
    end
 end

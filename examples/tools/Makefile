@@ -15,9 +15,11 @@ EXAMPLE_DIRS := glfw_opengl3 \
 							  sdl2_opengl3
 
 
-.PHONY: gen_bat show_cc
+.PHONY: gen_bat gen_exe
 
-all:  gen_bat
+all:  gen_bat gen_exe
+
+gen_exe:
 	@echo =
 	@echo === $(TC) === Generating Launcher files ===
 	@echo =

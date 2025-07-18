@@ -56,23 +56,25 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
    1. Included newer [Font Awesome](https://fontawesome.com/search?m=free&o=r) Icon fonts.
    1. Added `*.bat` files to easily execute [example programs](bin/examples/LuaJIT-ImGui/examples). 
    1. Added `luajitw.exe` to hide console window on background.
-   1. Added [simple examples](examples/) like [ImGuin](https://github.com/dinau/imguin) / [ImGuinZ](https://github.com/dinau/imguinz)  project.
+   1. Added [simple examples](examples/) like [ImGuin](https://github.com/dinau/imguin_examples) / [ImGuinZ](https://github.com/dinau/imguinz)  project.
 - Support OS: Windows10 or later
 
 #### ImGui / CImGui Version
 
 ---
 
-- v1.91.8dock (2025/03)
+[^note]: This sample is attached by [anima](https://github.com/sonoro1234/anima) project. You can execute this sample using
+\*.bat in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) folder.
+
+- v1.92.1dock (2025/07)
 
 #### Examples
 
 ---
+
 ##### [implot3d_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot3d_sample.lua)
 
-This sample is attached by [anima](https://github.com/sonoro1234/anima) project. You can execute this sample using
-[implot3d_sample.bat](bin/examples/LuaJIT-ImGui/examples/implot3d_sample.bat)
-in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) folder.
+Note [^note]
 
 ![alt](examples/img/cimplot3d.gif)
 
@@ -92,7 +94,7 @@ This can load and save image file with magnifying glass.
 
 ##### [glfw_opengl3_implot](examples/glfw_opengl3_implot/glfw_opengl3_implot.lua)  
 
-With \[[ImPlot3D](https://github.com/brenocq/implot3d)\] [demo written in LuaJIT lang](examples/glfw_opengl3_implot/implotWindow.lua).
+With [ImPlot3D](https://github.com/brenocq/implot3d) demo written in LuaJIT script [implotWindow.lua](examples/glfw_opengl3_implot/implotWindow.lua).
 
 ![alt](examples/img/glfw_opengl3_implot.gif)  
 See more example: [implot_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot_sample.lua)
@@ -111,26 +113,23 @@ With magnifying glass.
 
 ##### [ImGuizmo_sample.lua](bin/examples/LuaJIT-ImGui/examples/ImGuizmo_sample.lua)
 
-This sample is attached by [anima](https://github.com/sonoro1234/anima) project. You can execute this sample using
-[ImGuizmo_sample.bat](bin/examples/LuaJIT-ImGui/examples/ImGuizmo_sample.bat)
-in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) folder.
+Note [^note]
 
 ![alt](examples/img/ImGuizmo_sample.png)
 
 ##### [imnodes_graph_sample.lua](bin/examples/LuaJIT-ImGui/examples/imnodes_graph_sample.lua)
 
-This sample is attached by [anima](https://github.com/sonoro1234/anima) project. You can execute this sample using
-[imnodes_graph_sample.bat](bin/examples/LuaJIT-ImGui/examples/imnodes_graph_sample.bat)
-in [bin/examples/LuaJIT-ImGui/examples](bin/examples/LuaJIT-ImGui/examples) folder.
+Note [^note]
 
 ![alt](examples/img/imnodes_graph_sample.png)
 
+[^note2]: These samples are attached by [anima](https://github.com/sonoro1234/anima) project. You can execute samples with \*.bat files.
 
 #### Other samples
 
 ---
 
-These samples are attached by [anima](https://github.com/sonoro1234/anima) project. You can execute samples with \*.bat files.
+Note [^note2]
 
 ##### [delaunay_particles.lua](bin/examples/delaunay_particles.lua)  
 
@@ -166,9 +165,10 @@ These samples are attached by [anima](https://github.com/sonoro1234/anima) proje
 
 - WindowsOS 64bit  
 - Latest  
-[luajitImGui-1.91.8.4.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.4.zip) 2025/03  
+[luajitImGui-1.92.1.0.zip](https://github.com/dinau/luajitImGui/archive/refs/tags/1.92.1.0.zip) 2025/07  
 
 - Old  
+[luajitImGui-1.91.8.4.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.4.zip) 2025/03  
 [luajitImGui-1.91.8.3.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.3.zip) 2025/03  
 [luajitImGui-1.91.8.2.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.2.zip) 2025/03  
 [luajitImGui-1.91.8.1.zip](https://bitbucket.org/dinau/storage/downloads/luajitImGui-1.91.8.1.zip) 2025/03  
@@ -214,7 +214,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 - Build **on MSys2 console**,
 
    ```sh
-   git clone --recurse-submodules https://github.com/dinau/luajitImGui
+   git clone --depth 1 --recurse-submodules https://github.com/dinau/luajitImGui
    cd luajitImGui
    make clean
    make
@@ -226,11 +226,11 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 
 ---
 
-- Clang 20.1.0 (Current compiler)
+- Clang 20.1.8 (Current compiler)
    - Libraries: OpenMP 
-- Gcc.exe (Rev1, Built by MSYS2 project) 14.2.0)
+- Gcc.exe (Rev1, Built by MSYS2 project) 15.1.0)
 - (Microsoft Visual Studio 2022 C/C++)
-- CMake version 3.31.6
+- CMake version 3.30.3
 - Git version 2.46.0.windows.1
 - Make: GNU Make 4.4.1
 
@@ -241,6 +241,7 @@ Refer to nice exmaples: [bin/examples](bin/examples)
 - WindowsOS 64bit versions
    | Date    | ImGui / CImGui | LuaJITImGui | Commemt |
    | ---     | -----------    | ---         | ---     |
+   | 2025/07 | v1.92.1        | v1.92.1.0   |         |
    | 2025/03 | v1.91.8        | v1.91.8.4   |         |
    | 2025/01 | v1.91.6        | v1.91.6.0   |         |
    | 2024/10 | v1.91.4        | v1.91.4.0   |         |

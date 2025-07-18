@@ -100,6 +100,7 @@ local floor = math.floor
 local format = string.format
 --thousand puntuation
 local function thousands(n)
+	n = tonumber(n) -- in case uint64_t
 	local a = floor(n/1000)
 	local b = n - a*1000
 	if a==0 then return tostring(b) end

@@ -7,6 +7,7 @@ local sdl = require"sdl2_ffi"
 local gllib = require"gl"
 gllib.set_loader(sdl)
 local gl, glc, glu, glext = gllib.libraries()
+
 local ig = require"imgui.sdl"
 
 if (sdl.init(sdl.INIT_VIDEO+sdl.INIT_TIMER) ~= 0) then
@@ -24,19 +25,19 @@ end
     sdl.gL_SetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 2);
     local current = ffi.new("SDL_DisplayMode[1]")
     sdl.getCurrentDisplayMode(0, current);
-    local window = sdl.createWindow("ImGui SDL2+OpenGL3 example", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, 700, 500, sdl.WINDOW_OPENGL+sdl.WINDOW_RESIZABLE);
+    local window = sdl.createWindow("ImGui SDL2+OpenGL3 example", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, 700, 500, sdl.WINDOW_OPENGL+sdl.WINDOW_RESIZABLE); 
     local gl_context = sdl.gL_CreateContext(window);
     sdl.gL_SetSwapInterval(1); -- Enable vsync
-
+    
     local ig_Impl = ig.Imgui_Impl_SDL_opengl3()
-
+    
     ig_Impl:Init(window, gl_context)
 
     local igio = ig.GetIO()
-
+    
     local done = false;
     while (not done) do
-        --SDL_Event
+        --SDL_Event 
         local event = ffi.new"SDL_Event"
         while (sdl.pollEvent(event) ~=0) do
             ig.lib.ImGui_ImplSDL2_ProcessEvent(event);
@@ -53,20 +54,21 @@ end
         gl.glClear(glc.GL_COLOR_BUFFER_BIT)
 
         ig_Impl:NewFrame()
-
-
+        
+        
         if ig.Button"Hello" then
             print"Hello World!!"
         end
         ig.ShowDemoWindow(showdemo)
-
+        
         ig_Impl:Render()
         sdl.gL_SwapWindow(window);
     end
-
+    
     -- Cleanup
     ig_Impl:destroy()
 
     sdl.gL_DeleteContext(gl_context);
     sdl.destroyWindow(window);
     sdl.quit();
+

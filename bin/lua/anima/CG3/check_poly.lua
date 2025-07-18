@@ -57,6 +57,7 @@ local function check_point_repetition(poly)
 	check_self_consec_repetition(poly)
 	if poly.holes then
 	for nh,hole in ipairs(poly.holes) do
+		check_self_consec_repetition(hole)
 		local repe = check2poly_repetition(poly,hole)
 		if repe then return true end
 		for nh2=nh+1,#poly.holes do
@@ -337,9 +338,9 @@ local function check_crossings(poly,crossings)
 	if poly.holes then
 	for nh,hole in ipairs(poly.holes) do
 		local  cross = check_self_crossings(hole)
-		if #cross > 0 then print(nh,"hole self crossings",#cross) end
+		if #cross > 0 then print("hole",nh,"hole self crossings",#cross) end
 		local cross = check2poly_crossings(poly,hole)
-		if #cross > 0 then print(nh,"poly-hole crossings",#cross) end
+		if #cross > 0 then print("hole",nh,"poly-hole crossings",#cross) end
 		for nh2=nh+1,#poly.holes do
 			local cross = check2poly_crossings(hole,poly.holes[nh2])
 			if #cross > 0 then print(nh,nh2,"hole-hole crossings",#cross) end
@@ -361,11 +362,12 @@ local function check_polyset_crossings(polyset,crossings)
 	return crossings
 end
 
-local function CHECKPOLY(poly)
+local function CHECKPOLY(poly, doerror)
 	local has = check_point_repetition(poly)
 	if has then print"CHECKPOLY point repetition" end
 	local cross = check_crossings(poly)
 	if #cross > 0 then print("CHECKPOLY self crossings",#cross) end
+	if doerror then if has or #cross >0 then error"CHECKPOLY" end end
 	return cross
 end
 
@@ -376,11 +378,17 @@ local function check_collinear(poly)
 	for i=1,numpt do
 		local ang,conv,s,cose = CG.Angle(poly[mod(i-1,numpt)],poly[i],poly[mod(i+1,numpt)])
 		if s==0 then  
+			-- local ang2,conv2,s2,cose2 = CG.Angle(poly[mod(i+1,numpt)],poly[i],poly[mod(i-1,numpt)])
+			-- if s2~=0 then
+				-- print("rev colin",s,s2,poly[mod(i-1,numpt)],poly[i],poly[mod(i+1,numpt)])
+				-- print(ang,conv,s,cose)
+				-- print(ang2,conv2,s2,cose2)
+			-- end
 			if cose<0 then
-				print("collinear on",i)
+				print("collinear1 on",i)
 				error"collinear"
 			elseif poly[mod(i-1,numpt)]==poly[mod(i+1,numpt)] then --cose>0 and repeated
-				print("collinear on",i)
+				print("collinear2 on",i)
 				error"collinear"
 			end
 		end

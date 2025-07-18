@@ -24,8 +24,10 @@ BUILD_OPT += -DCMAKE_BUILD_TYPE=Release
 #BUILD_OPT  += -DANIMA_BUILD_FREETYPE=no
 #BUILD_OPT += -DANIMA_BUILD_SDL3=no
 #BUILD_OPT += -DANIMA_BUILD_SNDFILE=no
-#BUILD_OPT += -DANIMA_BUILD_RTAUDIO=no
 #BUILD_OPT += -DANIMA_BUILD_IM=no
+BUILD_OPT += -DANIMA_BUILD_RTAUDIO=yes
+#BUILD_OPT += -DANIMA_BUILD_RTMIDI=yes
+#BUILD_OPT += -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 # Fixed SDL3 compilation error
 BUILD_OPT += -DSDL_OPENGLES=no
@@ -43,10 +45,12 @@ ifeq ($(TC),msvc)
 	#BUILD_INSTALL_CMD =  (msbuild.exe /m  build/anima.sln)
 else
 	BUILD_OPT += -G"MSYS Makefiles"
+	BUILD_INSTALL_CMD = ( make install )
+	#BUILD_OPT += -G"Ninja"
+	#BUILD_INSTALL_CMD = ( ninja install )
  	#BUILD_OPT += -DCMAKE_CXX_STANDARD=11
 	BUILD_OPT += -DCMAKE_C_FLAGS_RELEASE="-O2"
 	BUILD_OPT += -DCMAKE_CXX_FLAGS_RELEASE="-O2"
-	BUILD_INSTALL_CMD = ( make install )
 	ifeq ($(TC),clang)
 		BUILD_OPT += -C ../clang.cmake
 	endif

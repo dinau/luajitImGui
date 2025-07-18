@@ -4,7 +4,7 @@ local igwin = require"imgui.window"
 local win = igwin:GLFW(800,400, "compute graph",{vsync=false})
 local ig = win.ig
 local ffi = require"ffi"
-local serializer = require"serializer"
+local serializer = require"libs.serializer"
 
 local function DFS(G,v)
     G.nodes_explored[v] = true

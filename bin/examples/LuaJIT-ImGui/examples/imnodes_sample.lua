@@ -5,7 +5,7 @@ local win = igwin:GLFW(800,400, "widgets",{vsync=true})
 
 local ig = win.ig
 local ffi = require"ffi"
-local serializer = require"serializer"
+local serializer = require"libs.serializer"
 
 local function Link()
     local link = {id=0,start_attr=ffi.new("int[?]",1),end_attr=ffi.new("int[?]",1)}

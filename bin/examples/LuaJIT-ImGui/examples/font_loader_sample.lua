@@ -1,6 +1,6 @@
 ﻿local igwin = require"imgui.window"
---local win = igwin:SDL(800,400, "font loader")
-local win = igwin:GLFW(800,600, "font loader")
+--local win = igwin:SDL(1080,800, "font loader")
+local win = igwin:GLFW(1080,800, "font loader")
 local ffi = require"ffi"
 
 local use_freetype = ffi.new("bool[?]",1)
@@ -40,7 +40,7 @@ local ITcb = ffi.cast("ImGuiInputTextCallback", function(data)
   return 0
 end)
 
-local has_freetype = pcall(function() return win.ig.lib.ImGuiFreeType_BuildFontAtlas end) or pcall(function() return win.ig.lib.ImGuiFreeType_GetBuilderForFreeType end)
+local has_freetype =  pcall(function() return win.ig.lib.ImGuiFreeType_GetFontLoader end)
 print("has_freetype",has_freetype)
 
 --this will run outside of imgui NewFrame-Render
@@ -50,16 +50,15 @@ local function ChangeFont(font,fontsize,merge)
 	local FontsAt = ig.GetIO().Fonts
 	------destroy old
 	FontsAt:Clear()
-	
 	------reconstruct
 	--load default
 	local fnt_cfg_def
 	if merge then
 		local fnt_cfg_def = ig.ImFontConfig()
-		fnt_cfg_def.SizePixels = fontsize
-		fnt_cfg_def.PixelSnapH = true
-		fnt_cfg_def.OversampleH = 1
-		fnt_cfg_def.OversampleV = 1
+		--fnt_cfg_def.SizePixels = fontsize
+		--fnt_cfg_def.PixelSnapH = true
+		--fnt_cfg_def.OversampleH = 1
+		--fnt_cfg_def.OversampleV = 1
 		--to make it monospace
 		--fnt_cfg_def.GlyphMinAdvanceX = fontsize 
 		--fnt_cfg_def.GlyphMaxAdvanceX = fontsize 
@@ -70,46 +69,29 @@ local function ChangeFont(font,fontsize,merge)
 	local fnt_cfg = ig.ImFontConfig()
 	--use merge to see results without changing font
 	fnt_cfg.MergeMode = merge
-	fnt_cfg.PixelSnapH = true
-	fnt_cfg.OversampleH = 1
-	fnt_cfg.OversampleV = 1
-	fnt_cfg.SizePixels = fontsize
+	--fnt_cfg.PixelSnapH = true
+	--fnt_cfg.OversampleH = 1
+	--fnt_cfg.OversampleV = 1
+	--fnt_cfg.SizePixels = fontsize
 	--to make it monospace
 	--fnt_cfg.GlyphMinAdvanceX = fontsize -- 13.0
 	--fnt_cfg.GlyphMaxAdvanceX = fontsize --13.0
 
-
-	
-	if ffi.string(ig.GetVersion()) >= "1.81" then
-		fnt_cfg.FontBuilderFlags = use_freetype[0] and ffi.C.ImGuiFreeTypeBuilderFlags_MonoHinting or 0
-	else
-		fnt_cfg.RasterizerFlags = use_freetype[0] and ffi.C.MonoHinting or 0
-	end
+	--fnt_cfg.FontLoaderFlags = use_freetype[0] and ffi.C.ImGuiFreeTypeLoaderFlags_MonoHinting or 0
+	fnt_cfg.FontLoaderFlags = use_freetype[0] and bit.bor(fnt_cfg.FontLoaderFlags, ffi.C.ImGuiFreeTypeLoaderFlags_LoadColor) or fnt_cfg.FontLoaderFlags
 	
 	--maximal range allowed with ImWchar32
-	local ranges = ffi.new("ImWchar[3]",{0x0001,0x10FFFF,0})
-
-	local theFONT= FontsAt:AddFontFromFileTTF(font, 0, fnt_cfg,ranges)
-	if (theFONT == nil) then return false end
-	
+	--local ranges = ffi.new("ImWchar[3]",{0x0001,0x10FFFF,0})
+	if font then
+		local theFONT= FontsAt:AddFontFromFileTTF(font, 0, fnt_cfg)--,ranges)
+		if (theFONT == nil) then return false end
+	end
 	if use_freetype[0] then
-		FontsAt.FontBuilderIO = ig.ImGuiFreeType_GetBuilderForFreeType();
+		FontsAt:SetFontLoader(ig.ImGuiFreeType_GetFontLoader())
 	else
-		FontsAt.FontBuilderIO = ig.ImFontAtlasGetBuilderForStbTruetype()
+		FontsAt:SetFontLoader(ig.ImFontAtlasGetFontLoaderForStbTruetype())
 	end
-	
-	--[[
-	--regenerate 
-	if has_freetype then
-		ig.ImGuiFreeType_BuildFontAtlas(FontsAt,ffi.C.MonoHinting)
-	else
-		--FontsAt:Build() --or will be called by ImGui
-	end
-	--]]
-	ig.lib.ImGui_ImplOpenGL3_DestroyFontsTexture()
-	ig.lib.ImGui_ImplOpenGL3_CreateFontsTexture()
-	--set as default
-	--ig.GetIO().FontDefault = theFONT
+
 	return true
 end
 
@@ -142,7 +124,8 @@ local function FontChanger(file,size,merge)
 			local Fonts = win.ig.GetIO().Fonts.Fonts
 			local last = Fonts.Size-1
 			local font = Fonts.Data[last]
-			fontcps = GetVisibleCP(font)
+			local fontbaked = font:GetFontBaked(size)
+			fontcps = GetVisibleCP(fontbaked)
 			--win.ig.PushFont(font)
 			-- local maxx = 0
 			-- for i=1,#fontcps do
@@ -181,30 +164,35 @@ function win:draw(ig)
 	if ig.Begin"Fonts" then
 		if has_freetype then
 			if ig.Checkbox("use freetype",use_freetype) then
-				if font_file then
+				--if font_file then
 					win.preimgui = FontChanger(font_file,fontsize[0],merge_mode[0])
-				end
+				--end
 			end
 			ig.SameLine()
 		end
 		ig.Checkbox("MergeMode",merge_mode)
+		ig.Text(ig.GetIO().Fonts.FontLoader.Name)
 		if ig.Button("Load") then
 			fB.open()
 		end
 		ig.SetNextItemWidth(200)
-		ig.DragFloat("fontsize",fontsize,nil,5,20)
+		if ig.DragFloat("fontsize",fontsize,nil,5,20) then
+			--ig.GetStyle().FontSizeBase = fontsize[0]
+			ig.GetStyle()._NextFrameFontSizeBase = fontsize[0];
+		end
 		ig.SetNextItemWidth(200)
 		ig.DragFloat("font scale",fontscale,0.05,0.1,2)
-		ig.GetIO().FontGlobalScale = fontscale[0]
+		ig.GetStyle().FontScaleMain = fontscale[0]
 		fB.draw()
+
 	
 		local Fonts = ig.GetIO().Fonts.Fonts
+		font1 = Fonts.Data[Fonts.Size-1]
 		if fontcps then
-			font1 = Fonts.Data[Fonts.Size-1]
 			ig.Text(font1:GetDebugName());
 			ig.SameLine();ig.Text(#fontcps.." visible glyphs")
-			if not txsizex then
-				ig.PushFont(font1)
+			--if not txsizex then
+				ig.PushFont(font1, 0)--fontscale[0] * ig.GetStyle().FontSizeBase)--0)
 				local maxx = 0
 				for i=1,#fontcps do
 					local chsiz = ig.CalcTextSize(codepoint_to_utf8(fontcps[i]))
@@ -212,8 +200,8 @@ function win:draw(ig)
 				end
 				txsizex = maxx
 				ig.PopFont()
-			end
-			ig.PushFont(font1)
+			--end
+			ig.PushFont(font1, 0)--fontscale[0] * ig.GetStyle().FontSizeBase)--0)
 			if ig.BeginChild("glyphs",ig.ImVec2(0,ig.GetFrameHeightWithSpacing() * 12),true, ig.lib.ImGuiWindowFlags_HorizontalScrollbar) then
 				--local txsize = ig.CalcTextSize(codepoint_to_utf8(fontcps[1]))
 				local txsizex2 = (txsizex + ig.GetStyle().ItemSpacing.x)
@@ -233,11 +221,16 @@ function win:draw(ig)
 						for N=line*cols+1,line*cols+cols do
 							if N <=#fontcps then
 								local cp = fontcps[N]
-								local glyph = font1:FindGlyphNoFallback(cp);
+								local fontbaked = ig.GetFontBaked() --font1:GetFontBaked()
+								local glyph = fontbaked:FindGlyphNoFallback(cp);
 								if glyph~=nil and glyph.Visible == 1 then 
+									
 									if ig.Button(codepoint_to_utf8(cp),ig.ImVec2(txsizex2,txsizex2)) then
 										AddCP(font1:GetDebugName(),cp)
+										local st = codepoint_to_utf8(cp)
+										print("add",cp,string.byte(st, 1, #st))
 									end
+									if ig.IsItemHovered() then ig.SetTooltip("cp: %d",ffi.new("int",cp)) end
 									if not ((N)%cols == 0) then ig.SameLine() end
 								end
 							end
@@ -253,7 +246,7 @@ function win:draw(ig)
 			if ig.BeginChild("picked_gliphs",ig.ImVec2(0, -1),true) then
 				ig.Columns(4)
 				for i,v in ipairs(cps) do
-					ig.PushFont(font1)
+					ig.PushFont(font1, 0)--fontscale[0] * ig.GetStyle().FontSizeBase)--0)
 					ig.Text(v.utf8)
 					ig.PopFont()
 					ig.NextColumn()
@@ -276,7 +269,8 @@ function win:draw(ig)
 	end
 	ig.End()
 	ig.Begin("test_font")
-	ig.PushFont(font1)
+	if font1 then ig.Text(font1:GetDebugName()) end
+	ig.PushFont(font1, 0)--fontsize[0])--fontscale[0] * ig.GetStyle().FontSizeBase)--0)
 	ig.InputTextMultiline("test_i",tttest,#test_text,ig.ImVec2(-ig.FLT_MIN,ig.GetTextLineHeight() * 11))
 	ig.PopFont()
 	ig.End()

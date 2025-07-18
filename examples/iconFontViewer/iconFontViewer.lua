@@ -24,7 +24,7 @@ local gui_main = function (win)
   local item_current = 1
   local sBufLen    = 100
   local sBuf = ffi.new("char[?]", sBufLen)
-  local wsZoom  = ffi.new("float[1]",2.5)
+  local wsZoom  = ffi.new("float[1]", 45)
   local item_highlighted_idx = 1
   -- Colors
   local yellow = ig.ImVec4(1.0, 1.0, 0.0, 1.0)
@@ -91,7 +91,7 @@ local gui_main = function (win)
     -- Show icons in Table
     ig.Begin("Icon Font Viewer2", nil, 0)
       ig.Text("%s", " Zoom x"); ig.SameLine(0,-1.0)
-      ig.SliderFloat("##Zoom1", wsZoom, 0.8, 5.0, "%.1f", 0)
+      ig.SliderFloat("##Zoom1", wsZoom, 30.0, 90.0, "%.1f", 0)
       ig.Separator()
       ig.BeginChild("child2")
       local wsNormal = 1.0
@@ -105,7 +105,8 @@ local gui_main = function (win)
           for column = 0, col - 1 do
             local ix = (row  * col) + column + 1
             ig.TableSetColumnIndex(column)
-            ig.SetWindowFontScale(wsZoom[0])
+            --ig.SetWindowFontScale(wsZoom[0])
+            ig.PushFont(nil, wsZoom[0])
             ig.Text("%s", ift.iconFontsTbl2[ix][1])
             if ig.IsItemHovered() then
                item_highlighted_idx = ix
@@ -113,9 +114,10 @@ local gui_main = function (win)
             end
             --ig.Button(icon, ig.ImVec2(0, 0))
             --
+            ig.PopFont()
             local iconFontLabel = ift.iconFontsTbl2[ix][2]
             utils.setTooltip(ig, iconFontLabel, ig.lib.ImGuiHoveredFlags_DelayNormal, yellow)
-            ig.SetWindowFontScale(wsNormal)
+            --ig.SetWindowFontScale(wsNormal)
             --
             ig.PushID(ix)
             if ig.BeginPopupContextItem("Contex Menu", 1) then

@@ -2,7 +2,13 @@ local ft = require"freetype"
 local ffi = require"ffi"
 local CG3 = require"anima.CG3"
 local vec2 = mat.vec2
-local printD = print --function() end
+local DEBUG = false
+local printD
+if DEBUG then
+  printD = print
+else
+  printD = function() end
+end
 local function Vec(a, b)
 	return vec2(a, b)
 end 
@@ -93,17 +99,19 @@ local function decompose(outline,polyset)
 	poldec = polyset
 	outline:decompose(funcs)
 end
-local function face_char_outline_to_polyset(face,fosize,ch,polyset,steps,outlinef)
+
+local function face_glyph_outline_to_polyset(face,fosize,glyph_index,steps,outlinef)
 	steps = steps or 10
 	face:set_char_size( fosize)
 	local invsize = 1/(fosize)
-	face:load_char(ch, ft.C.FT_LOAD_NO_BITMAP)
+	
+	face:load_glyph(glyph_index, ft.C.FT_LOAD_NO_BITMAP)
 	local glyph = face.glyph
-	local glyph_index = face:char_index(ch )--glyph.glyph_index
-	print(ch,glyph_index,face:glyph_name(glyph_index,nil,64))
+	
 	local outline = glyph.outline
 	--print("flags",bit.band(outline.flags, ft.C.FT_OUTLINE_REVERSE_FILL),outline.flags)
-	--print("orientation",outline:orientation(),ft.C.FT_ORIENTATION_POSTSCRIPT)
+	printD("orientation",outline:orientation(),ft.C.FT_ORIENTATION_POSTSCRIPT)
+	local polyset = {}
 	if outlinef then
 		decompose(outline, polyset)
 		for i,pol in ipairs(polyset) do
@@ -111,14 +119,14 @@ local function face_char_outline_to_polyset(face,fosize,ch,polyset,steps,outline
 				pol[j] = v*invsize
 			end
 		end
-		return Vec(glyph.advance.x, glyph.advance.y,0)*invsize
+		return Vec(glyph.advance.x, glyph.advance.y,0)*invsize, outline:orientation(), polyset
 	end
 	
 	--outline:check()
-	--print("outline: contours",outline.n_contours,",points:", outline.n_points)
-	--for i=0,outline.n_points-1 do
-		--print(i,outline.points[i].x,outline.points[i].y,bit.band(outline.tags[i],0x03))
-	--end
+	-- print("outline: contours",outline.n_contours,",points:", outline.n_points)
+	-- for i=0,outline.n_points-1 do
+		-- print(i,outline.points[i].x,outline.points[i].y,outline.tags[i],bit.band(outline.tags[i],0x04))
+	-- end
 	--print"-------contours-----------"
 	local lasti = 0
 	for i=0,outline.n_contours-1 do
@@ -198,9 +206,13 @@ local function face_char_outline_to_polyset(face,fosize,ch,polyset,steps,outline
 		file:close()
 	--]]
 	
-	return Vec(glyph.advance.x, glyph.advance.y,0)*invsize, outline:orientation()
+	return Vec(glyph.advance.x, glyph.advance.y,0)*invsize, outline:orientation(),polyset
 end
-
+local function face_char_outline_to_polyset(face,fosize,ch,steps,outlinef)
+	local glyph_index = face:char_index(ch )
+	printD("------face_char_outline_to_polyset",ch,glyph_index,face:glyph_name(glyph_index,nil,64))
+	return face_glyph_outline_to_polyset(face,fosize,glyph_index,steps,outlinef)
+end
 function M.GetStrPolys(face,str,fosize)
 	local chars = {}
 	local previndex
@@ -210,8 +222,7 @@ function M.GetStrPolys(face,str,fosize)
 		local ch = str:sub(i,i)
 		print("ch",i,ch)
 		local glyph_index = face:char_index(  string.byte(ch) )
-		local polyset ={}
-		local advance = face_char_outline_to_polyset(face, fosize, string.byte(ch),polyset)
+		local advance,ori,polyset = face_char_outline_to_polyset(face, fosize, string.byte(ch))
 		if previndex and has_kerning then
 			local delta = face:kerning( previndex, glyph_index, ft.C.FT_KERNING_UNSCALED)--, delta)
 			print("delta----------------",delta.x,delta.y)
@@ -224,12 +235,57 @@ function M.GetStrPolys(face,str,fosize)
 end
 --glyph must exist
 function M.GetCodePoint(face,cp,fosize,steps, outlinef)
+	--printD("GetCodePoint",cp)
 	local glyph_index = face:char_index(cp )
 	assert(glyph_index ~= 0)
-	local polyset ={}
-	local advance, orientation = face_char_outline_to_polyset(face, fosize,cp,polyset,steps,outlinef)
+	local advance, orientation, polyset = face_char_outline_to_polyset(face, fosize,cp,steps,outlinef)
 	local empty = #polyset == 0 and true
 	return {polyset = polyset, advance = advance, glyph_index = glyph_index, cp = cp, name = face:glyph_name(glyph_index),empty = empty, orientation = orientation}
+end
+
+function M.GetCodePointColor(face, cp, fosize, steps, outlinef)
+	local glyph_index = face:char_index(cp )
+	local layer_glyph_index = ffi.new("FT_UInt[1]")
+	local layer_color_index = ffi.new("FT_UInt[1]")
+	local iterator = ffi.new("FT_LayerIterator[1]")
+	iterator[0].p = nil
+	local have_layers = ft.C.FT_Get_Color_Glyph_Layer( face, glyph_index, layer_glyph_index, layer_color_index, iterator );
+	printD("Color","have_layers",have_layers, glyph_index)
+	if have_layers > 0 then
+		local polyset, advance, orientation = {}
+		local layers = {}
+		--get palette
+		local palette_data = ffi.new"FT_Palette_Data[1]"
+		local ret = ft.C.FT_Palette_Data_Get(face, palette_data)
+		assert(ret==0)
+		printD("palette_data",palette_data[0].num_palettes, palette_data[0].num_palette_entries)
+		local palette = ffi.new"FT_Color*[1]"
+		local ret = ft.C.FT_Palette_Select( face, 0, palette ); --take first palette
+		assert(ret==0)
+		repeat
+			local color
+			printD(layer_glyph_index[0], layer_color_index[0])
+			if layer_color_index[0] == 0xFFFF then
+				printD("text_foreground_color")
+				color={255,255,255,255}
+			else
+				color = palette[0][layer_color_index[0]]
+				printD("color", color, color.blue, color.green, color.red, color.alpha)
+			end
+			local adv, ori, polysetM = face_glyph_outline_to_polyset(face, fosize,layer_glyph_index[0],steps,outlinef)
+			printD("#polysetM", #polysetM)
+			--for i,p in ipairs(polysetM) do table.insert(polyset, p) end
+			table.insert(layers, {polyset=polysetM, color={color.red/255, color.green/255, color.blue/255, color.alpha/255}})
+			advance, orientation = adv, ori
+			printD(adv,ori)
+		until ft.C.FT_Get_Color_Glyph_Layer( face, glyph_index, layer_glyph_index, layer_color_index, iterator ) == 0
+		local empty = false --#polyset == 0 and true
+		return {layers=layers, advance = advance, glyph_index = glyph_index, cp = cp, name = face:glyph_name(glyph_index),empty = empty, orientation = orientation}
+	else
+		local advance, orientation, polyset = face_char_outline_to_polyset(face, fosize,cp,steps,outlinef)
+		local empty = #polyset == 0 and true
+		return {layers ={{polyset = polyset,color={1,1,1,1}}}, advance = advance, glyph_index = glyph_index, cp = cp, name = face:glyph_name(glyph_index),empty = empty, orientation = orientation}
+	end
 end
 
 
@@ -243,43 +299,52 @@ local algo = require"anima.algorithm.algorithm"
 local CHK = require"anima.CG3.check_poly"
 --repair , reverse and set as holes when inverse direction
 function M.repair_char1(ch)
+	for ii,layer in ipairs(ch.layers) do
 	local polyset2 = {}
-	local polyset = ch.polyset
+	local polyset = layer.polyset
 	local holes = {}
 	for i=1,#polyset do
 		printD("--doing repair1",i,"from",#polyset,#polyset[i],"points")
 		if #polyset[i] < 3 then goto continue end
-		local remr,remc = CG3.degenerate_poly_repair(polyset[i],false)
+		local remr,remc = CG3.degenerate_poly_repair(polyset[i],DEBUG)
+		--CHK.CHECKCOLIN(polyset[i])
 		if remr > 0 or remc >0 then printD("degenerate repairs",remr,remc) end
-		if #polyset[i] < 3 then goto continue end
+		if #polyset[i] < 3 then printD("discard poly with less than 3 points");goto continue end
 		local polys = CHK.check_repair_self_crossings(polyset[i])
+		--local polys = {polyset[i]}
 		if #polys > 1 then
 			print("--------------repair self crossings:")
 			print(#polys,"polys returned")
 			for j=1,#polys do
 				printD(j,#polys[j])
-				local remr,remc = CG3.degenerate_poly_repair(polys[j],false)
-				if remr > 0 or remc >0 then printD("degenerate repairs after repir cross",remr,remc) end
+				local remr,remc = CG3.degenerate_poly_repair(polys[j],DEBUG)
+				if remr > 0 or remc >0 then printD("degenerate repairs after repair cross",remr,remc) end
 				-- local cross = CHK.check_self_crossings(polys[j])
 				-- if #cross > 0  then print("bad repairing",j) end
-				CHK.CHECKPOLY(polys[j])
+				CHK.CHECKPOLY(polys[j],true)
+				CHK.CHECKCOLIN(polys[j])
 				table.insert(polyset2, polys[j])	
 			end
 		else
-			local remr,remc = CG3.degenerate_poly_repair(polys[1],false)
+			local remr,remc = CG3.degenerate_poly_repair(polys[1],DEBUG)
 			if remr > 0 or remc >0 then printD("degenerate repairs after repair cross returns 1",remr,remc) end
-			CHK.CHECKPOLY(polys[1])
+			CHK.CHECKPOLY(polys[1],true)
+			CHK.CHECKCOLIN(polys[1])
 			table.insert(polyset2, polys[1])
 		end
 		
 		::continue::
 	end
-	ch.polyset = polyset2
+	printD("end repair1, num polys", #polyset2)
+	layer.polyset = polyset2
+	end
 end
-function M.repair_char2(ch)	
+function M.repair_char2(ch)
+	for ii,layer in ipairs(ch.layers) do
 	local polyset2 = {}
-	local polyset = ch.polyset
+	local polyset = layer.polyset
 	if ch.orientation == 1 then --FT_ORIENTATION_POSTSCRIPT
+		printD"reversing orientation"
 		for i,pol in ipairs(polyset) do
 			reverse(pol)
 		end
@@ -290,17 +355,25 @@ function M.repair_char2(ch)
 			local sA = CG3.signed_area(polyset[i])
 			printD("signed area",i,sA,"npoints",#polyset[i])
 			--discard 0 area
-			--if math.abs(sA) > 1e-12 then
-			if math.abs(sA) > 0 then
+			if math.abs(sA) > (M.min_area or 0) then --1e-12 then
+			--if math.abs(sA) > 0 then
 			polyset[i].sA = math.abs(sA)
 			if sA < 0 then
+
 				polyset2[#polyset2+1] = reverse(polyset[i])
+				CG3.degenerate_poly_repair(polyset2[#polyset2],DEBUG)
+				CHK.CHECKPOLY(polyset2[#polyset2],true)
+				--CHK.CHECKCOLIN(polyset2[#polyset2])
 			else --is hole
 				if M.mode == "polys" then
 					polyset2[#polyset2+1] = reverse(polyset[i])
+					CG3.degenerate_poly_repair(polyset2[#polyset2],DEBUG)
+					CHK.CHECKPOLY(polyset2[#polyset2],true)
 				else
 					polyset[i].sA = sA
 					table.insert(holes,reverse(polyset[i]))
+					CG3.degenerate_poly_repair(holes[#holes],DEBUG)
+					CHK.CHECKPOLY(holes[#holes],true)
 				end
 			end
 			end
@@ -396,11 +469,13 @@ function M.repair_char2(ch)
 		end
 	--end
 	--ch.polyset = {polyset2[5]}
-	printD("end repair2",#polyset2)
+	
 	for i,p in ipairs(polyset2) do
-		printD(i,p.holes and #p.holes or 0)
+		printD("poly",i,"holes",p.holes and #p.holes or 0)
 	end
-	ch.polyset = polyset2
+	printD("end repair2 num polys:",#polyset2)
+	layer.polyset = polyset2
+	end
 	--prtable(polyset2)
 end
 -- function M.repair_chars(chars)
@@ -422,23 +497,32 @@ function M.char_to_trmeshes(ch)
 			table.remove(ch.polyset[i].holes,1)
 		end
 
-		local cross = CHK.CHECKPOLY(ch.polyset[i])
-		if #cross > 0 then print("char_to_mesh: poly",i,"has crossings",#cross); end
-		CHK.CHECKCOLIN(ch.polyset[i])
+		-- local cross = CHK.CHECKPOLY(ch.polyset[i],true)
+		-- if #cross > 0 then print("char_to_mesh: poly",i,"has crossings",#cross); end
+		-- CHK.CHECKCOLIN(ch.polyset[i])
 		
 		printD("--doing EarClip:")
+		
+		--fontawesome-webfont.ttf: 20+ cross
 		-- ch.polyset[i] = CG3.InsertHoles2(ch.polyset[i],false)
 		-- ch.polyset[i].holes = {}
 		-- local trs,ok,rest,restind = CG3.EarClipSimple(ch.polyset[i]) -- insert1 >7 , insert2 > 10
 		-- local ptsr = ch.polyset[i]
+		
+		--fontawesome-webfont.ttf: 1 cross
 		local ptsr,trs,ok,rest,restind = CG3.EarClipSimple2(ch.polyset[i], true) --7 con false, 2con true,7 true insert2,7 false insert2
+		
+		--fontawesome-webfont.ttf: 3 cross
 		--local ptsr,trs,ok,rest,restind = CG3.EarClipFIST(ch.polyset[i])
 		
-		--ch.polyset[i] = CG3.lexicografic_sort_ind(ch.polyset[i])
-		--local ptsr,trs,ok,rest,restind = ff.EarClipFIST2(ch.polyset[i])
+		--fontawesome-webfont.ttf: 4 cross
+		-- ch.polyset[i] = CG3.lexicografic_sort_ind(ch.polyset[i])
+		-- local ptsr,trs,ok,rest,restind = ff.EarClipFIST2(ch.polyset[i])
+		
 		--assert(ok,ch.cp)
 		if not ok then
 			print("--------------------------bad EarClip-----------------------------------------")
+			--error"Earclip"
 			--table.insert(Rests,mesh.mesh{points=rest})
 			ch.cross = true
 		end
@@ -532,22 +616,37 @@ function M.new_face(filename,ranges,size,steps,outlinef)
 	T.allcps = {}
 	for i,range in ipairs(T.ranges) do
 		for j=range[1],range[2] do
-			--print("--------------getting cp",j,string.char(j))
 			if T.visrng[j] then
-			local ch = M.GetCodePoint(T.face, j, T.size , T.steps, outlinef)
+			print("--------------getting cp",j)--,string.char(j))
+			local ch = M.GetCodePointColor(T.face, j, T.size , T.steps, outlinef)
+			--M.GetCodePointColor(T.face, j)
 			--if not ch.name:match"ches" then ch.empty = true end --filter by name
+			printD("-----------ch.empty",ch.empty,j)
 			if not ch.empty then
 				M.repair_char1(ch)
 				M.repair_char2(ch)
-				--print(#ch.polyset, "polys after repair")
+			
+				for ii,layer in ipairs(ch.layers) do
+					local cc = CHK.check_polyset_crossings(layer.polyset)
+				end
+				--assert(#cc==0, "check_polyset_crossings")
+
+				--printD(#ch.polyset, "polys after repair")
 				table.insert(T.allcps,ch)
 				if M.mode == "polys" then
-					local meshes = M.char_to_meshes(ch)
-					ch.meshes = meshes
+					for ii,layer in ipairs(ch.layers) do
+						local meshes = M.char_to_meshes(layer)
+						layer.meshes = meshes
+					end
 					T.chars[j] = ch --{ch=ch,meshes=meshes}
 				else
-					local meshes,rests = M.char_to_trmeshes(ch)
-					ch.meshes, ch.rests = meshes, rests
+					local cross
+					for ii,layer in ipairs(ch.layers) do
+						local meshes,rests = M.char_to_trmeshes(layer)
+						cross = cross or layer.cross
+						layer.meshes, layer.rests = meshes, rests
+					end
+					ch.cross = cross
 					T.chars[j] = ch --{ch=ch,mesh=mesh,rests=rests}
 				end
 				--else print("bad cp",j)
@@ -562,17 +661,21 @@ function M.new_face(filename,ranges,size,steps,outlinef)
 		if not M.program then M.initgl() end
 		for k,v in pairs(self.chars) do
 			if M.mode == "polys" then
-				v.vaos = {}
-				for i,m in ipairs(v.meshes) do
-					v.vaos[i] = m:vao(M.program)
+				for ii, layer in ipairs(v.layers) do
+				layer.vaos = {}
+				for i,m in ipairs(layer.meshes) do
+					layer.vaos[i] = m:vao(M.program)
+				end
 				end
 			else
 				--if v.mesh then v.vao = v.mesh:vao(M.program) end
-				v.restsvaos = {}
-				v.vaos = {}
-				for i,m in ipairs(v.meshes) do
-					v.vaos[i] = m:vao(M.program)
-					v.restsvaos[i] = v.rests[i]:vao(M.program)
+				for ii, layer in ipairs(v.layers) do
+				layer.restsvaos = {}
+				layer.vaos = {}
+				for i,m in ipairs(layer.meshes) do
+					layer.vaos[i] = m:vao(M.program)
+					layer.restsvaos[i] = layer.rests[i]:vao(M.program)
+				end
 				end
 			end
 		end
@@ -586,27 +689,34 @@ function M.new_face(filename,ranges,size,steps,outlinef)
 		M.program:use()
 		M.program.unif.MVP:set(camera:MVP().gl)
 		M.program.unif.MO:set(MO.gl)
+		--prtable("--------chars",self.chars)
 		local cha = self.chars[cp] --or self.chars[63]
 		--assert(cha)
 		if not cha then
 			local k,v = next(self.chars)
 			cha  = v
 		end
+		if not cha then return end
 		if M.mode == "polys" then
-			for i,v in ipairs(cha.vaos) do
+			for ii, layer in ipairs(cha.layers) do
+			M.program.unif.color:set{layer.color[1],layer.color[2],layer.color[3]}
+			for i,v in ipairs(layer.vaos) do
 				if numpoly == 0 or numpoly == i then
-				M.program.unif.color:set{color.HSV2RGB((i-1)/#cha.vaos,1,1)}
+				--M.program.unif.color:set{color.HSV2RGB((i-1)/#layer.vaos,1,1)}
 				v:draw(glc.GL_LINE_LOOP)
 				gl.glPointSize(3)
-				M.program.unif.color:set{1,1,1}
+				--M.program.unif.color:set{1,1,1}
 				v:draw(glc.GL_POINTS,1,math.min(math.max(0,math.floor(NM.ini)),v.count))
 				gl.glPointSize(1)
 				end
 			end
+			end
 		else
-			for i,vao in ipairs(cha.vaos) do
+			for ii, layer in ipairs(cha.layers) do
+			for i,vao in ipairs(layer.vaos) do
 				if numpoly == 0 or numpoly == i then
-				M.program.unif.color:set{1,1,1}
+				--M.program.unif.color:set{1,1,1}
+				M.program.unif.color:set{layer.color[1],layer.color[2],layer.color[3]}
 				--if cha.vao then cha.vao:draw(glc.GL_LINE_LOOP) end 
 				if NM.mesh then
 					if NM.lines then
@@ -622,7 +732,7 @@ function M.new_face(filename,ranges,size,steps,outlinef)
 					if vao then vao:draw_elm() end
 				end
 				M.program.unif.color:set{1,0,0}
-				local r = cha.restsvaos[i]
+				local r = layer.restsvaos[i]
 				r:draw(glc.GL_LINE_LOOP)
 				
 				-- gl.glPointSize(6)
@@ -630,6 +740,7 @@ function M.new_face(filename,ranges,size,steps,outlinef)
 				-- if cha.vao then cha.vao:draw(glc.GL_POINTS) end
 				-- gl.glPointSize(1)
 				end
+			end
 			end
 		end
 	end

@@ -44,6 +44,7 @@ enum
  SF_FORMAT_OGG = 0x200000,
  SF_FORMAT_MPC2K = 0x210000,
  SF_FORMAT_RF64 = 0x220000,
+ SF_FORMAT_MPEG = 0x230000,
  SF_FORMAT_PCM_S8 = 0x0001,
  SF_FORMAT_PCM_16 = 0x0002,
  SF_FORMAT_PCM_24 = 0x0003,
@@ -75,6 +76,9 @@ enum
  SF_FORMAT_ALAC_20 = 0x0071,
  SF_FORMAT_ALAC_24 = 0x0072,
  SF_FORMAT_ALAC_32 = 0x0073,
+ SF_FORMAT_MPEG_LAYER_I = 0x0080,
+ SF_FORMAT_MPEG_LAYER_II = 0x0081,
+ SF_FORMAT_MPEG_LAYER_III = 0x0082,
  SF_ENDIAN_FILE = 0x00000000,
  SF_ENDIAN_LITTLE = 0x10000000,
  SF_ENDIAN_BIG = 0x20000000,
@@ -134,8 +138,11 @@ enum
  SFC_RF64_AUTO_DOWNGRADE = 0x1210,
  SFC_SET_VBR_ENCODING_QUALITY = 0x1300,
  SFC_SET_COMPRESSION_LEVEL = 0x1301,
-    SFC_SET_OGG_PAGE_LATENCY_MS = 0x1302,
-    SFC_SET_OGG_PAGE_LATENCY = 0x1303,
+ SFC_SET_OGG_PAGE_LATENCY_MS = 0x1302,
+ SFC_SET_OGG_PAGE_LATENCY = 0x1303,
+ SFC_GET_OGG_STREAM_SERIALNO = 0x1306,
+ SFC_GET_BITRATE_MODE = 0x1304,
+ SFC_SET_BITRATE_MODE = 0x1305,
  SFC_SET_CART_INFO = 0x1400,
  SFC_GET_CART_INFO = 0x1401,
  SFC_SET_ORIGINAL_SAMPLERATE = 0x1500,
@@ -204,7 +211,12 @@ enum
  SF_CHANNEL_MAP_AMBISONIC_B_Z,
  SF_CHANNEL_MAP_MAX
 } ;
-typedef struct SNDFILE_tag SNDFILE ;
+enum
+{ SF_BITRATE_MODE_CONSTANT = 0,
+ SF_BITRATE_MODE_AVERAGE,
+ SF_BITRATE_MODE_VARIABLE
+} ;
+typedef struct sf_private_tag SNDFILE ;
 typedef int64_t sf_count_t ;
 struct SF_INFO
 { sf_count_t frames ;
@@ -336,6 +348,7 @@ sf_count_t sf_read_double (SNDFILE *sndfile, double *ptr, sf_count_t items) ;
 sf_count_t sf_write_double (SNDFILE *sndfile, const double *ptr, sf_count_t items) ;
 int sf_close (SNDFILE *sndfile) ;
 void sf_write_sync (SNDFILE *sndfile) ;
+SNDFILE* sf_wchar_open (const wchar_t *wpath, int mode, SF_INFO *sfinfo) ;
 struct SF_CHUNK_INFO
 { char id [64] ;
  unsigned id_size ;
@@ -388,6 +401,9 @@ formats[112] = "SF_FORMAT_ALAC_16"
 formats[113] = "SF_FORMAT_ALAC_20"
 formats[114] = "SF_FORMAT_ALAC_24"
 formats[115] = "SF_FORMAT_ALAC_32"
+formats[128] = "SF_FORMAT_MPEG_LAYER_I"
+formats[129] = "SF_FORMAT_MPEG_LAYER_II"
+formats[130] = "SF_FORMAT_MPEG_LAYER_III"
 formats[65535] = "SF_FORMAT_SUBMASK"
 formats[65536] = "SF_FORMAT_WAV"
 formats[131072] = "SF_FORMAT_AIFF"
@@ -414,6 +430,7 @@ formats[1638400] = "SF_FORMAT_WVE"
 formats[2097152] = "SF_FORMAT_OGG"
 formats[2162688] = "SF_FORMAT_MPC2K"
 formats[2228224] = "SF_FORMAT_RF64"
+formats[2293760] = "SF_FORMAT_MPEG"
 formats[268369920] = "SF_FORMAT_TYPEMASK"
 formats[805306368] = "SF_FORMAT_ENDMASK"
 -------------samplerate conversion
@@ -790,11 +807,14 @@ function M.format_subtype(n)
 end
 
 function M.format_subtypes(parent)
+    local sfinfo = ffi.new"SF_INFO[1]"
+    sfinfo[0].channels = 1 
     local count = M.format_subtype_count()
     local ret = {}
     for i=0,count-1 do
         local finfo = M.format_subtype(i)
-        if (not parent) or bit.bor(parent,finfo.format) then
+        sfinfo[0].format = bit.bor(bit.band(parent or 0, lib.SF_FORMAT_TYPEMASK), finfo.format)
+        if(lib.sf_format_check(sfinfo)~=0) then
             table.insert(ret,{format_en=formats[finfo.format], format=finfo.format,name=ffi_string(finfo.name)})
         end
     end
