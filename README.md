@@ -72,54 +72,86 @@ Differencies from [anima](https://github.com/sonoro1234/anima) project are as fo
 
 ---
 
-##### [implot3d_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot3d_sample.lua)
+##### implot3d_sample
 
-Note [^note]
+---
+
+[implot3d_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot3d_sample.lua) [^note]
 
 ![alt](examples/img/cimplot3d.gif)
 
-##### [glfw_opengl3_simple](examples/glfw_opengl3_simple/glfw_opengl3_simple.lua)  
+##### glfw_opengl3_simple
+
+---
+
+[glfw_opengl3_simple](examples/glfw_opengl3_simple/glfw_opengl3_simple.lua)  
 
 ![alt](examples/img/glfw_opengl3_simple.png)
 
-##### [iconFontViewer](examples/iconFontViewer/iconFontViewer.lua)  
+##### iconFontViewer
+
+---
+
+[iconFontViewer](examples/iconFontViewer/iconFontViewer.lua)  
+
+Incremantal search 
 
 ![alt](examples/img/iconFontViewer.png)
 
-##### [glfw_opengl3](examples/glfw_opengl3/glfw_opengl3.lua)  
+##### glfw_opengl3
 
-This can load and save image file with magnifying glass. 
+---
+
+[glfw_opengl3](examples/glfw_opengl3/glfw_opengl3.lua)  
+
+- Loading and saving image file
+- Magnifying glass.
 
 ![alt](examples/img/glfw_opengl3.png)
 
-##### [glfw_opengl3_implot](examples/glfw_opengl3_implot/glfw_opengl3_implot.lua)  
+##### glfw_opengl3_implot
 
+---
+
+[glfw_opengl3_implot](examples/glfw_opengl3_implot/glfw_opengl3_implot.lua)  
 With [ImPlot3D](https://github.com/brenocq/implot3d) demo written in LuaJIT script [implotWindow.lua](examples/glfw_opengl3_implot/implotWindow.lua).
 
 ![alt](examples/img/glfw_opengl3_implot.gif)  
 See more example: [implot_sample.lua](bin/examples/LuaJIT-ImGui/examples/implot_sample.lua)
 
-##### [glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)  
+##### glfw_opengl3_jp
 
-Showing font of local language with magnifying glass.
+---
+
+[glfw_opengl3_jp](examples/glfw_opengl3_jp/glfw_opengl3_jp.lua)  
+1. Showing fonts of local language (C**J**K)
+1. Magnifying glass
 
 ![alt](examples/img/glfw_opengl3_jp.png)
 
-##### [sdl2_opengl3](examples/sdl2_opengl3/sdl2_opengl3.lua)  
+##### sdl2_opengl3
+
+---
+
+[sdl2_opengl3](examples/sdl2_opengl3/sdl2_opengl3.lua)  
 
 With magnifying glass.
 
 ![alt](examples/img/sdl2_opengl3.png)
 
-##### [ImGuizmo_sample.lua](bin/examples/LuaJIT-ImGui/examples/ImGuizmo_sample.lua)
+##### ImGuizmo_sample.lua
 
-Note [^note]
+---
+
+[ImGuizmo_sample.lua](bin/examples/LuaJIT-ImGui/examples/ImGuizmo_sample.lua) [^note]
 
 ![alt](examples/img/ImGuizmo_sample.png)
 
-##### [imnodes_graph_sample.lua](bin/examples/LuaJIT-ImGui/examples/imnodes_graph_sample.lua)
+##### imnodes_graph_sample.lua
 
-Note [^note]
+---
+
+[imnodes_graph_sample.lua](bin/examples/LuaJIT-ImGui/examples/imnodes_graph_sample.lua) [^note]
 
 ![alt](examples/img/imnodes_graph_sample.png)
 
@@ -131,32 +163,53 @@ Note [^note]
 
 Note [^note2]
 
-##### [delaunay_particles.lua](bin/examples/delaunay_particles.lua)  
+##### delaunay_particles
 
+---
+
+[delaunay_particles.lua](bin/examples/delaunay_particles.lua)  
 ![alt](examples/img/delaunay_particles.gif)
 
-##### [bacteria.lua](bin/examples/shadertoy/bacteria.lua)  
+##### bacteria.lua
 
+---
+
+[bacteria.lua](bin/examples/shadertoy/bacteria.lua)  
 ![alt](examples/img/bacteria.png)
 
-##### [house.lua](bin/examples/modeling/house/house.lua)  
+##### house.lua
 
+---
+
+[house.lua](bin/examples/modeling/house/house.lua)  
 ![alt](examples/img/house.png)
 
-##### [corazon.lua](bin/examples/modeling/heart/corazon.lua)  
+##### corazon.lua
 
+---
+
+[corazon.lua](bin/examples/modeling/heart/corazon.lua)  
 ![alt](examples/img/corazon.png)
 
-##### [CTE_windows.lua](bin/examples/LuaJIT-ImGui/examples/CTE_windows.lua)  
+##### CTE_windows.lua
 
+---
+
+[CTE_windows.lua](bin/examples/LuaJIT-ImGui/examples/CTE_windows.lua)  
 ![alt](examples/img/CTE_Windows.png)
 
-##### [compute_shader.lua](bin/examples/compute_shader/compute_shader.lua)  
+##### compute_shader.lua
 
+---
+
+[compute_shader.lua](bin/examples/compute_shader/compute_shader.lua)  
 ![alt](examples/img/compute_shader.png)
 
-##### [julia.lua](https://github.com/dinau/luajitImGui/blob/main/bin/examples/juliaSet/julia.lua)
+##### julia.lua
 
+---
+
+[julia.lua](https://github.com/dinau/luajitImGui/blob/main/bin/examples/juliaSet/julia.lua)  
 ![alt](https://github.com/dinau/luajitImGui/blob/main/examples/img/julia.png?raw=true)
 
 #### Download Zip binary
